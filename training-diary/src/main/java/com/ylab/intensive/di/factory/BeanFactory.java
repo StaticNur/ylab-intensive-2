@@ -49,8 +49,8 @@ public class BeanFactory {
 
         for (Field field : Arrays.stream(implementationClass.getDeclaredFields()).filter(field -> field.isAnnotationPresent(Inject.class)).toList()) {
             field.setAccessible(true);
-            if (field.getType().equals(Scanner.class)) {
-                field.set(bean, new Scanner(System.in));
+            if (!field.getType().isInterface()) {
+                field.set(bean, field.getType().getDeclaredConstructor().newInstance());
             } else {
                 field.set(bean, applicationContext.getBean(field.getType()));
             }
