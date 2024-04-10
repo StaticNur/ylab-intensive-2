@@ -1,5 +1,8 @@
 package com.ylab.intensive.model.enums;
 
+import lombok.Getter;
+
+@Getter
 public enum Endpoints {
     REGISTRATION(1),
     LOGIN(2),
@@ -18,10 +21,6 @@ public enum Endpoints {
 
     Endpoints(int value) {
         this.value = value;
-    }
-
-    public int getValue() {
-        return value;
     }
 
     public static Endpoints fromValue(String value) {
