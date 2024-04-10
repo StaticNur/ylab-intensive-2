@@ -5,8 +5,12 @@ import com.ylab.intensive.controller.UserController;
 import com.ylab.intensive.di.annatation.Inject;
 import com.ylab.intensive.in.InputData;
 import com.ylab.intensive.in.OutputData;
+import com.ylab.intensive.model.User;
+import com.ylab.intensive.model.dto.UserDto;
 import com.ylab.intensive.model.enums.Endpoints;
 import com.ylab.intensive.model.security.Session;
+
+import java.util.Optional;
 
 import static com.ylab.intensive.ui.ConsoleText.*;
 
@@ -45,7 +49,10 @@ public class ApplicationRunner {
             case REGISTRATION -> userController.registration();
             case LOGIN -> userController.login();
             case EXIT -> {
-                outputData.output("Завершить приложения");
+                outputData.output("Приложение успешно завершилось. \n" +
+                                  "Благодарим вас за использование нашего консольного приложения. \n" +
+                                  "Если у вас есть какие-либо вопросы, не стесняйтесь обращаться к нам https://t.me/orifov_nur. \n" +
+                                  "Удачи!");
                 return false;
             }
             default -> outputData.errOutput(UNKNOWN_COMMAND);
@@ -55,7 +62,8 @@ public class ApplicationRunner {
     }
 
     private boolean processAuthenticatedUser() {
-        outputData.output(AUTHORIZED_USER, session.getAttribute("authorizedUser"));
+        UserDto user = (UserDto) session.getAttribute("authorizedUser");
+        outputData.output(AUTHORIZED_USER, user.getEmail() + " "+ user.getRole());
         outputData.output(MENU_AUTH);
         Endpoints selectedOption = getInputAndMapToEndpoint();
 
@@ -71,7 +79,6 @@ public class ApplicationRunner {
             case AUDIT -> userController.showAuditLog();
             case EXIT -> {
                 userController.logout();
-                //return false;
             }
             default -> outputData.errOutput(UNKNOWN_COMMAND);
         }

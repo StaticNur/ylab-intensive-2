@@ -1,15 +1,13 @@
 package com.ylab.intensive.dao.impl;
 
 import com.ylab.intensive.dao.WorkoutDao;
-import com.ylab.intensive.dto.WorkoutDto;
-import com.ylab.intensive.model.User;
+import com.ylab.intensive.model.dto.WorkoutDto;
 import com.ylab.intensive.model.Workout;
 
 import java.time.Duration;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 public class WorkoutDaoImpl implements WorkoutDao {

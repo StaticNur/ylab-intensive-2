@@ -1,8 +1,7 @@
 package com.ylab.intensive.controller;
 
 import com.ylab.intensive.di.annatation.Inject;
-import com.ylab.intensive.dto.UserDto;
-import com.ylab.intensive.exception.RegisterException;
+import com.ylab.intensive.model.dto.UserDto;
 import com.ylab.intensive.in.InputData;
 import com.ylab.intensive.in.OutputData;
 import com.ylab.intensive.service.UserManagementService;
@@ -34,7 +33,6 @@ public class UserController {
             if (userDto.isEmpty()) {
                 outputData.errOutput("Не правильный логин или пароль!");
             } else {
-                userManagementService.saveAction("Пользователь " + userDto.get().getEmail() + " авторизовался");
                 outputData.output("Пользователь успешно авторизовался: " + userDto.get().getEmail() + " " + userDto.get().getRole());
             }
         });
@@ -48,7 +46,6 @@ public class UserController {
             if (userDto.isEmpty()) {
                 outputData.errOutput("Не удалось изменить права пользователя! Это действие может выполнить админ.");
             }
-            userManagementService.saveAction("Пользователь изменил роль на: " + userDto.get().getRole());
             outputData.output("Роль пользователя была успешно изменена на: " + userDto.get().getRole());
         });
     }
@@ -59,7 +56,6 @@ public class UserController {
 
     public void logout() {
         outputData.output("Вы успешно разлогинились!");
-        userManagementService.saveAction("Пользователь разлогинился");
         userManagementService.logout();
     }
 
@@ -84,6 +80,6 @@ public class UserController {
 
     private boolean repeatOperation() {
         outputData.output("Повторить? 1-да, 2-нет");
-        return inputData.input().toString().equals("1");
+        return inputData.input().toString().trim().equals("1");
     }
 }

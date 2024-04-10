@@ -1,6 +1,6 @@
 package com.ylab.intensive.dao;
 
-import com.ylab.intensive.dto.WorkoutDto;
+import com.ylab.intensive.model.dto.WorkoutDto;
 import com.ylab.intensive.model.Workout;
 
 import java.time.Duration;

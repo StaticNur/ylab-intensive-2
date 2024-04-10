@@ -2,7 +2,7 @@ package com.ylab.intensive.service.impl;
 
 import com.ylab.intensive.dao.UserDao;
 import com.ylab.intensive.di.annatation.Inject;
-import com.ylab.intensive.dto.UserDto;
+import com.ylab.intensive.model.dto.UserDto;
 import com.ylab.intensive.exception.ChangeUserPermissionsException;
 import com.ylab.intensive.exception.RegisterException;
 import com.ylab.intensive.model.User;
@@ -42,8 +42,10 @@ public class UserManagementServiceImpl implements UserManagementService {
         if (user.isPresent()) {
             String userPassword = user.get().getPassword();
             if (userPassword.equals(password)) {
-                authorizedUser.setAttribute("authorizedUser", user);
+                authorizedUser.setAttribute("authorizedUser", entityToDto(user.get()));
                 workoutService.setAuthorizedWorkoutDB(user.get().getWorkout());
+
+                saveAction("Пользователь " + email + " авторизовался");
 
                 return Optional.of(entityToDto(user.get()));
             }
@@ -53,15 +55,20 @@ public class UserManagementServiceImpl implements UserManagementService {
 
     @Override
     public void logout() {
+        saveAction("Пользователь разлогинился");
         authorizedUser.clearSession();
     }
 
     @Override
     public Optional<UserDto> changeUserPermissions(String email, String roleStr) {
         Role role = getRole(roleStr);
-        if(role.equals(Role.ADMIN)){
+        UserDto userFromAttribute = (UserDto) authorizedUser.getAttribute("authorizedUser");
+
+        if (userFromAttribute.getRole().equals(Role.ADMIN)) {
             Optional<User> user = userDao.updateUserRole(email, role);
             if (user.isPresent()) {
+                saveAction("Пользователь изменил роль на: " + role);
+
                 return Optional.of(entityToDto(user.get()));
             }
         }
@@ -70,19 +77,19 @@ public class UserManagementServiceImpl implements UserManagementService {
 
     @Override
     public List<String> getAudit() {
-        Optional<User> objectUser = (Optional<User>) authorizedUser.getAttribute("authorizedUser");
-        Optional<User> user = userDao.findByEmail(objectUser.get().getEmail());
+        UserDto userFromAttribute = (UserDto) authorizedUser.getAttribute("authorizedUser");
+        Optional<User> user = userDao.findByEmail(userFromAttribute.getEmail());
 
         return user.map(User::getAction).orElse(Collections.emptyList());
     }
 
     @Override
     public void saveAction(String action) {
-        Optional<User> user = (Optional<User>) authorizedUser.getAttribute("authorizedUser");
-        user.ifPresent(u -> userDao.saveAction(u.getEmail(), action));
+        UserDto userFromAttribute = (UserDto) authorizedUser.getAttribute("authorizedUser");
+        userDao.saveAction(userFromAttribute.getEmail(), action);
     }
 
-    private Role getRole(String roleStr){
+    private Role getRole(String roleStr) {
         Role role;
         try {
             role = Role.valueOf(roleStr);
@@ -91,19 +98,11 @@ public class UserManagementServiceImpl implements UserManagementService {
         }
         return role;
     }
+
     private UserDto entityToDto(User user) {
         UserDto userDto = new UserDto();
         userDto.setEmail(user.getEmail());
-        userDto.setPassword(user.getPassword());
         userDto.setRole(user.getRole());
         return userDto;
-    }
-
-    private User dtoToEntity(UserDto userDto) {
-        User user = new User();
-        user.setEmail(userDto.getEmail());
-        user.setPassword(userDto.getPassword());
-        user.setRole(userDto.getRole());
-        return user;
     }
 }

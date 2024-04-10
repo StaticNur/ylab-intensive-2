@@ -1,4 +1,4 @@
-package com.ylab.intensive.dto;
+package com.ylab.intensive.model.dto;
 
 import com.ylab.intensive.model.enums.Role;
 import lombok.AllArgsConstructor;
@@ -10,6 +10,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class UserDto {
     private String email;
-    private String password;
     private Role role;
 }
