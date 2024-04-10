@@ -1,4 +1,4 @@
-package com.ylab.intensive.security;
+package com.ylab.intensive.model.security;
 
 import java.util.HashMap;
 import java.util.Map;

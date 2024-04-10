@@ -1,7 +1,7 @@
 package com.ylab.intensive.in;
 
 /**
- * The type Console output data.
+ * The type Console output date.
  */
 public class ConsoleOutputData implements OutputData {
     @Override

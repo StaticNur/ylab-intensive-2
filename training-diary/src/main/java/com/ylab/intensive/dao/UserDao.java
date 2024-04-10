@@ -10,7 +10,7 @@ public interface UserDao {
 
     Optional<User> findByEmail(String email);
 
-    int size();
+    int getSize();
     Optional<User> updateUserRole(String email, Role newRole);
     void saveAction(String email, String action);
 }

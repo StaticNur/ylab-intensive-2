@@ -46,7 +46,7 @@ public class UserController {
             String role = readInput("роль: ");
             Optional<UserDto> userDto = userManagementService.changeUserPermissions(email, role);
             if (userDto.isEmpty()) {
-                outputData.errOutput("Не удалось изменить права пользователя!");
+                outputData.errOutput("Не удалось изменить права пользователя! Это действие может выполнить админ.");
             }
             userManagementService.saveAction("Пользователь изменил роль на: " + userDto.get().getRole());
             outputData.output("Роль пользователя была успешно изменена на: " + userDto.get().getRole());
@@ -70,8 +70,8 @@ public class UserController {
             try {
                 action.run();
                 processIsRun = false;
-            } catch (RegisterException e) {
-                outputData.errOutput(e);
+            } catch (RuntimeException e) {
+                outputData.errOutput(e.getMessage());
                 processIsRun = repeatOperation();
             }
         }

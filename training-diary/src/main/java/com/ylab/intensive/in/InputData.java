@@ -1,7 +1,7 @@
 package com.ylab.intensive.in;
 
 /**
- * The interface Input data.
+ * The interface Input date.
  */
 public interface InputData {
 

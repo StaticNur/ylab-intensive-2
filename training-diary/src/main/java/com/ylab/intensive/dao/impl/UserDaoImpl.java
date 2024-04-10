@@ -24,7 +24,7 @@ public class UserDaoImpl implements UserDao {
     }
 
     @Override
-    public int size() {
+    public int getSize() {
         return userDB.size();
     }
 

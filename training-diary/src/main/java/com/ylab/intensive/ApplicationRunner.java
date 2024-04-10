@@ -6,7 +6,7 @@ import com.ylab.intensive.di.annatation.Inject;
 import com.ylab.intensive.in.InputData;
 import com.ylab.intensive.in.OutputData;
 import com.ylab.intensive.model.enums.Endpoints;
-import com.ylab.intensive.security.Session;
+import com.ylab.intensive.model.security.Session;
 
 import static com.ylab.intensive.ui.ConsoleText.*;
 
@@ -61,7 +61,7 @@ public class ApplicationRunner {
 
         switch (selectedOption) {
             case ADD_TYPE_WORKOUT -> trainingController.addTrainingType();
-            case ADD_TRAINING -> trainingController.createWorkout();
+            case ADD_TRAINING -> trainingController.addWorkout();
             case ADD_ADDITIONAL_INFORMATION -> trainingController.addWorkoutInfo();
             case VIEW_TRAININGS -> trainingController.showWorkoutHistory();
             case EDIT_TRAINING -> trainingController.editWorkout();

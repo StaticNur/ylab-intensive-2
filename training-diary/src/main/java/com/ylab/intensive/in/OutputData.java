@@ -1,14 +1,14 @@
 package com.ylab.intensive.in;
 
 /**
- * The interface Output data.
+ * The interface Output date.
  */
 public interface OutputData {
 
     /**
      * Output.
      *
-     * @param data the data
+     * @param data the date
      */
     void output(Object data);
 
@@ -17,7 +17,7 @@ public interface OutputData {
     /**
      * Err output.
      *
-     * @param data the data
+     * @param data the date
      */
     void errOutput(Object data);
 }

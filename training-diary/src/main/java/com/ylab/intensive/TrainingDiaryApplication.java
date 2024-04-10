@@ -45,7 +45,7 @@ public class TrainingDiaryApplication {
         System.out.print("\u001B[1;31m Пользователь с таким id не найден. Либо у этого пользователя нет действий \n\u001B[0m");
         System.out.println("\u001B[42;5;18m\u001B[1;30m Результат запроса (логи): ");
         System.out.print("\n\u001B[0m");
-        System.err.println("data.toString()");
+        System.err.println("date.toString()");
 
         System.out.println("\u001B[43;5;18m\u001B[1;30m Введите user_id для просмотра действий пользователя ");
         System.out.print(" Пример2: 34\n\u001B[0m");

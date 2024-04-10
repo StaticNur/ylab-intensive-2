@@ -1,4 +1,4 @@
-package com.ylab.intensive.model;
+package com.ylab.intensive.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -12,8 +12,7 @@ import java.util.Set;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Workout {
-    int id;
+public class WorkoutDto {
     LocalDate date;
     Set<String> type;
     Duration duration;
