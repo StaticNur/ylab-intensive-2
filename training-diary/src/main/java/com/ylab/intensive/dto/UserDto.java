@@ -1,21 +1,15 @@
-package com.ylab.intensive.model;
-
+package com.ylab.intensive.dto;
 
 import com.ylab.intensive.model.enums.Role;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class User {
-    private int id;
+public class UserDto {
     private String email;
     private String password;
-    private List<Workout> workout;
-    private List<String> action;
     private Role role;
 }
