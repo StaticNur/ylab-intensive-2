@@ -25,6 +25,6 @@ public class JavaConfiguration implements Configuration {
      */
     @Override
     public Map<Class, Class> getInterfaceToImplementation() {
-        return Collections.EMPTY_MAP;
+        return Collections.emptyMap();
     }
 }

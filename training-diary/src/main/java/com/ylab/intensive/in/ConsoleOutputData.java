@@ -8,6 +8,7 @@ public class ConsoleOutputData implements OutputData {
     public void output(Object data) {
         System.out.println(data.toString());
     }
+
     public void output(Object data1, Object data2) {
         System.out.printf(data1.toString(), data2.toString());
     }

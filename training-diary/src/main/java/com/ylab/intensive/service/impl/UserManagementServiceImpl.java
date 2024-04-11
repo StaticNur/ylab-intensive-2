@@ -16,6 +16,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Implementation of the UserManagementService interface providing methods for managing user-related operations.
+ */
 public class UserManagementServiceImpl implements UserManagementService {
     @Inject
     private UserDao userDao;

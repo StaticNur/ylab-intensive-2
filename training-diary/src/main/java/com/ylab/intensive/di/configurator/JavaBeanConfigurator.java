@@ -16,7 +16,7 @@ public class JavaBeanConfigurator implements BeanConfigurator {
     /**
      * Constructs a new JavaBeanConfigurator with the specified package to scan and interface to implementation mappings.
      *
-     * @param packageToScan            the package to scan for implementations
+     * @param packageToScan             the package to scan for implementations
      * @param interfaceToImplementation the map containing interface to implementation mappings
      */
     public JavaBeanConfigurator(String packageToScan, Map<Class, Class> interfaceToImplementation) {

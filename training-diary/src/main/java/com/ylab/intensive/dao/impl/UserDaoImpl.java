@@ -8,7 +8,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Implementation of the UserDao interface.
+ * This class provides methods to interact with user data in the database.
+ */
 public class UserDaoImpl implements UserDao {
+    /**
+     * The list that represents the user database.
+     */
     private final List<User> userDB = new ArrayList<>();
 
     @Override

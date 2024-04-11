@@ -10,7 +10,6 @@ import lombok.SneakyThrows;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
-import java.util.Scanner;
 
 /**
  * Factory class for creating beans and handling dependency injection.
@@ -47,7 +46,8 @@ public class BeanFactory {
         }
         T bean = implementationClass.getDeclaredConstructor().newInstance();
 
-        for (Field field : Arrays.stream(implementationClass.getDeclaredFields()).filter(field -> field.isAnnotationPresent(Inject.class)).toList()) {
+        for (Field field : Arrays.stream(implementationClass.getDeclaredFields())
+                .filter(field -> field.isAnnotationPresent(Inject.class)).toList()) {
             field.setAccessible(true);
             field.set(bean, applicationContext.getBean(field.getType()));
         }

@@ -5,15 +5,15 @@ import com.ylab.intensive.controller.UserController;
 import com.ylab.intensive.di.annatation.Inject;
 import com.ylab.intensive.in.InputData;
 import com.ylab.intensive.in.OutputData;
-import com.ylab.intensive.model.User;
 import com.ylab.intensive.model.dto.UserDto;
 import com.ylab.intensive.model.enums.Endpoints;
 import com.ylab.intensive.model.security.Session;
 
-import java.util.Optional;
-
 import static com.ylab.intensive.ui.ConsoleText.*;
 
+/**
+ * It handles user interaction and controls the flow of the program.
+ */
 public class ApplicationRunner {
     @Inject
     private InputData inputData;
@@ -26,6 +26,9 @@ public class ApplicationRunner {
     @Inject
     private Session session;
 
+    /**
+     * Runs the main loop.
+     */
     public void run() {
         outputData.output(WELCOME);
         boolean processIsRun = true;
@@ -41,6 +44,12 @@ public class ApplicationRunner {
         inputData.closeInput();
     }
 
+    /**
+     * Handles the actions for an unauthenticated user.
+     * Displays the menu options and performs the selected action.
+     *
+     * @return true if the process should continue, false if the application should exit
+     */
     private boolean processUnauthenticatedUser() {
         outputData.output(MENU_NOT_AUTH);
         Endpoints selectedOption = getInputAndMapToEndpoint();
@@ -61,9 +70,15 @@ public class ApplicationRunner {
         return true;
     }
 
+    /**
+     * Handles the actions for an authenticated user.
+     * Displays the menu options and performs the selected action.
+     *
+     * @return true if the process should continue, false if the application should exit
+     */
     private boolean processAuthenticatedUser() {
         UserDto user = (UserDto) session.getAttribute("authorizedUser");
-        outputData.output(AUTHORIZED_USER, user.getEmail() + " "+ user.getRole());
+        outputData.output(AUTHORIZED_USER, user.getEmail() + " " + user.getRole());
         outputData.output(MENU_AUTH);
         Endpoints selectedOption = getInputAndMapToEndpoint();
 
@@ -86,6 +101,11 @@ public class ApplicationRunner {
         return true;
     }
 
+    /**
+     * Reads user input and maps it to an Endpoint enum value.
+     *
+     * @return The Endpoint enum value representing the user's input
+     */
     private Endpoints getInputAndMapToEndpoint() {
         String action = inputData.input().toString();
         return Endpoints.fromValue(action);

@@ -10,9 +10,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Implementation of the WorkoutDao interface.
+ * This class provides methods to interact with workout data in the database.
+ */
 public class WorkoutDaoImpl implements WorkoutDao {
+    /**
+     * The list that represents the workout database.
+     */
     private List<Workout> workoutDB;
-    public void init(List<Workout> workoutDB){
+
+    public void init(List<Workout> workoutDB) {
         this.workoutDB = workoutDB;
     }
 

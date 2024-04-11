@@ -9,6 +9,9 @@ import java.time.LocalDate;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Data transfer object (DTO) representing a workout.
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

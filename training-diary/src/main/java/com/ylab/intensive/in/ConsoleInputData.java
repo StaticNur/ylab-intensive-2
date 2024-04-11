@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 
 /**
- * The type Console input date.
+ * Implementation of the InputData interface for reading data from the console.
  */
 public class ConsoleInputData implements InputData {
 

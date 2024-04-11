@@ -8,6 +8,10 @@ import com.ylab.intensive.service.UserManagementService;
 
 import java.util.Optional;
 
+/**
+ * The UserController class handles user-related operations such as registration,
+ * login, permissions management, audit logging, and logout.
+ */
 public class UserController {
     @Inject
     private InputData inputData;
@@ -16,6 +20,9 @@ public class UserController {
     @Inject
     private UserManagementService userManagementService;
 
+    /**
+     * Registers a new user.
+     */
     public void registration() {
         userOperation("Регистрация", () -> {
             String email = readInput("логин: ");
@@ -25,6 +32,9 @@ public class UserController {
         });
     }
 
+    /**
+     * Logs in a user.
+     */
     public void login() {
         userOperation("Авторизоваться", () -> {
             String email = readInput("логин: ");
@@ -38,6 +48,9 @@ public class UserController {
         });
     }
 
+    /**
+     * Changes user permissions.
+     */
     public void changeUserPermissions() {
         userOperation("Изменение разрешений пользователя", () -> {
             String email = readInput("логин: ");
@@ -50,15 +63,29 @@ public class UserController {
         });
     }
 
+    /**
+     * Shows the audit log.
+     */
     public void showAuditLog() {
         outputData.output(userManagementService.getAudit());
     }
 
+    /**
+     * Logs out the current user.
+     */
     public void logout() {
         outputData.output("Вы успешно разлогинились!");
         userManagementService.logout();
     }
 
+    // Private helper methods
+
+    /**
+     * Executes a user operation.
+     *
+     * @param operation The operation to perform
+     * @param action    The action to execute
+     */
     private void userOperation(String operation, Runnable action) {
         boolean processIsRun = true;
         while (processIsRun) {
@@ -73,11 +100,22 @@ public class UserController {
         }
     }
 
+    /**
+     * Reads user input.
+     *
+     * @param prompt The prompt to display to the user
+     * @return The user input
+     */
     private String readInput(String prompt) {
         outputData.output(prompt);
         return inputData.input().toString().trim();
     }
 
+    /**
+     * Asks the user if they want to repeat the operation.
+     *
+     * @return true if the operation should be repeated, false otherwise
+     */
     private boolean repeatOperation() {
         outputData.output("Повторить? 1-да, 2-нет");
         return inputData.input().toString().trim().equals("1");

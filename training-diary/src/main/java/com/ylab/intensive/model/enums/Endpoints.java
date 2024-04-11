@@ -2,6 +2,9 @@ package com.ylab.intensive.model.enums;
 
 import lombok.Getter;
 
+/**
+ * Enumeration of endpoints representing different actions in the application menu.
+ */
 @Getter
 public enum Endpoints {
     REGISTRATION(1),
@@ -17,12 +20,24 @@ public enum Endpoints {
     AUDIT(11),
     EXIT(12);
 
-    private final int value;
+    private final int value; // The integer value associated with the endpoint
 
+    /**
+     * Constructs an endpoint with the specified integer value.
+     *
+     * @param value The integer value of the endpoint
+     */
     Endpoints(int value) {
         this.value = value;
     }
 
+    /**
+     * Returns the endpoint corresponding to the given value.
+     *
+     * @param value The value of the endpoint
+     * @return The endpoint corresponding to the given value
+     * @throws IllegalArgumentException if the provided value is invalid
+     */
     public static Endpoints fromValue(String value) {
         try {
             for (Endpoints option : Endpoints.values()) {
@@ -31,7 +46,7 @@ public enum Endpoints {
                 }
             }
             throw new Exception("Invalid menu option value: " + value);
-        }catch (Exception e){
+        } catch (Exception e) {
             throw new IllegalArgumentException("Invalid menu option value: " + value);
         }
     }

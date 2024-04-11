@@ -16,6 +16,9 @@ import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Implementation of the WorkoutService interface providing methods for managing workout-related operations.
+ */
 public class WorkoutServiceImpl implements WorkoutService {
     @Inject
     private WorkoutDao workoutDao;
@@ -119,7 +122,7 @@ public class WorkoutServiceImpl implements WorkoutService {
     @Override
     public void updateAdditionalInfo(WorkoutDto workoutDto, String title, String info) {
         String s = workoutDto.getInfo().get(title);
-        if (s.isEmpty()) {
+        if (s == null || s.isEmpty()) {
             throw new WorkoutInfoException("Такой заголовок в доп. инфо. нет!");
         }
         workoutDao.updateWorkoutInfo(workoutDto, title, info);

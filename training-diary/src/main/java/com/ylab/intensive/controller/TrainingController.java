@@ -9,6 +9,9 @@ import com.ylab.intensive.service.WorkoutService;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * The Training Controller class handles user interactions related to workouts management.
+ */
 public class TrainingController {
     @Inject
     private InputData inputData;
@@ -17,6 +20,9 @@ public class TrainingController {
     @Inject
     private WorkoutService workoutService;
 
+    /**
+     * Adds a new training type.
+     */
     public void addTrainingType() {
         String date = getUserInput("Введите дату тренировки (dd-MM-yyyy):");
         String type = getUserInput("Введите тип тренировки:");
@@ -28,6 +34,9 @@ public class TrainingController {
         }
     }
 
+    /**
+     * Adds a new workout.
+     */
     public void addWorkout() {
         String date = getUserInput("Введите дату тренировки (dd-MM-yyyy):");
         String type = getUserInput("Введите тип тренировки:");
@@ -41,6 +50,9 @@ public class TrainingController {
         }
     }
 
+    /**
+     * Adds additional information to a workout.
+     */
     public void addWorkoutInfo() {
         String date = getUserInput("Введите дату тренировки (dd-MM-yyyy):");
         String title = getUserInput("Введите заголовок для добавления дополнительной информации (например: пройденное расстояние):");
@@ -53,6 +65,9 @@ public class TrainingController {
         }
     }
 
+    /**
+     * Shows the workout history.
+     */
     public void showWorkoutHistory() {
         List<WorkoutDto> workouts = workoutService.getAllWorkouts();
         if (workouts.isEmpty()) {
@@ -62,6 +77,9 @@ public class TrainingController {
         }
     }
 
+    /**
+     * Edits a workout.
+     */
     public void editWorkout() {
         String date = getUserInput("Введите дату тренировки, которую хотите редактировать (dd-MM-yyyy):");
         try {
@@ -89,32 +107,9 @@ public class TrainingController {
         }
     }
 
-    private void editType(WorkoutDto workoutDto) {
-        String oldType = getUserInput("Введите текущий тип тренировки:");
-        String newType = getUserInput("Введите новый тип тренировки:");
-        workoutService.updateType(workoutDto, oldType, newType);
-        outputData.output("Тип тренировки успешно изменен!");
-    }
-
-    private void editDuration(WorkoutDto workoutDto) {
-        String newDuration = getUserInput("Введите новую длительность тренировки:");
-        workoutService.updateDuration(workoutDto, newDuration);
-        outputData.output("Длительность тренировки успешно изменена!");
-    }
-
-    private void editCalories(WorkoutDto workoutDto) {
-        String newCalories = getUserInput("Введите новое количество потраченных калорий:");
-        workoutService.updateCalories(workoutDto, newCalories);
-        outputData.output("Количество потраченных калорий успешно изменено!");
-    }
-
-    private void editAdditionalInfo(WorkoutDto workoutDto) {
-        String title = getUserInput("Введите заголовок дополнительной информации:");
-        String info = getUserInput("Введите новые данные для этого заголовка (например: 11,6 км):");
-        workoutService.updateAdditionalInfo(workoutDto, title, info);
-        outputData.output("Дополнительная информация успешно изменена!");
-    }
-
+    /**
+     * Deletes a workout.
+     */
     public void deleteWorkout() {
         String date = getUserInput("Введите дату тренировки, которую хотите удалить (dd-MM-yyyy):");
         try {
@@ -124,6 +119,9 @@ public class TrainingController {
         }
     }
 
+    /**
+     * Shows workout statistics.
+     */
     public void showWorkoutStatistics() {
         outputData.output("Показать статистики по тренировкам в определенном диапазоне:");
         String begin = getUserInput("Введите дату начала (dd-MM-yyyy):");
@@ -136,11 +134,62 @@ public class TrainingController {
         }
     }
 
+    // Private helper methods
+
+    /**
+     * Edits the type of a workout.
+     */
+    private void editType(WorkoutDto workoutDto) {
+        String oldType = getUserInput("Введите текущий тип тренировки:");
+        String newType = getUserInput("Введите новый тип тренировки:");
+        workoutService.updateType(workoutDto, oldType, newType);
+        outputData.output("Тип тренировки успешно изменен!");
+    }
+
+    /**
+     * Edits the duration of a workout.
+     */
+    private void editDuration(WorkoutDto workoutDto) {
+        String newDuration = getUserInput("Введите новую длительность тренировки:");
+        workoutService.updateDuration(workoutDto, newDuration);
+        outputData.output("Длительность тренировки успешно изменена!");
+    }
+
+    /**
+     * Edits the calories of a workout.
+     */
+    private void editCalories(WorkoutDto workoutDto) {
+        String newCalories = getUserInput("Введите новое количество потраченных калорий:");
+        workoutService.updateCalories(workoutDto, newCalories);
+        outputData.output("Количество потраченных калорий успешно изменено!");
+    }
+
+    /**
+     * Edits the additional information of a workout.
+     */
+    private void editAdditionalInfo(WorkoutDto workoutDto) {
+        String title = getUserInput("Введите заголовок дополнительной информации:");
+        String info = getUserInput("Введите новые данные для этого заголовка (например: 11,6 км):");
+        workoutService.updateAdditionalInfo(workoutDto, title, info);
+        outputData.output("Дополнительная информация успешно изменена!");
+    }
+
+    /**
+     * Gets user input.
+     *
+     * @param message The message to display to the user
+     * @return The user input
+     */
     private String getUserInput(String message) {
         outputData.output(message);
         return inputData.input().toString();
     }
 
+    /**
+     * Handles exceptions.
+     *
+     * @param e The exception
+     */
     private void handleException(Exception e) {
         outputData.errOutput(e.getMessage());
     }

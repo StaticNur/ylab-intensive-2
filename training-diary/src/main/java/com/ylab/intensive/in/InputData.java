@@ -6,14 +6,14 @@ package com.ylab.intensive.in;
 public interface InputData {
 
     /**
-     * Input object.
+     * Reads input from the console.
      *
-     * @return the object
+     * @return The input string read from the console
      */
     Object input();
 
     /**
-     * Close input.
+     * Closes the input stream.
      */
     void closeInput();
 }
