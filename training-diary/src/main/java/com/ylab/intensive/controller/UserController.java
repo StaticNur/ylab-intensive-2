@@ -1,11 +1,16 @@
 package com.ylab.intensive.controller;
 
 import com.ylab.intensive.di.annatation.Inject;
+import com.ylab.intensive.model.User;
 import com.ylab.intensive.model.dto.UserDto;
 import com.ylab.intensive.in.InputData;
 import com.ylab.intensive.in.OutputData;
+import com.ylab.intensive.model.dto.WorkoutDto;
 import com.ylab.intensive.service.UserManagementService;
+import com.ylab.intensive.service.WorkoutService;
+import com.ylab.intensive.ui.AnsiColor;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -19,15 +24,19 @@ public class UserController {
     private OutputData outputData;
     @Inject
     private UserManagementService userManagementService;
+    @Inject
+    private WorkoutService workoutService;
+    @Inject
+    private AnsiColor color;
 
     /**
      * Registers a new user.
      */
     public void registration() {
-        userOperation("Регистрация", () -> {
-            String email = readInput("логин: ");
-            String password = readInput("пароль: ");
-            String role = readInput("Role (ADMIN / USER): ");
+        userOperation(color.yellowText(" Регистрация "), () -> {
+            String email = readInput(color.yellowBackground(" логин: "));
+            String password = readInput(color.yellowBackground(" пароль: "));
+            String role = readInput(color.yellowBackground(" Role (ADMIN / USER): "));
             userManagementService.registerUser(email, password, role);
         });
     }
@@ -36,14 +45,15 @@ public class UserController {
      * Logs in a user.
      */
     public void login() {
-        userOperation("Авторизоваться", () -> {
-            String email = readInput("логин: ");
-            String password = readInput("пароль: ");
-            Optional<UserDto> userDto = userManagementService.login(email, password);
-            if (userDto.isEmpty()) {
-                outputData.errOutput("Не правильный логин или пароль!");
+        userOperation(color.yellowText(" Авторизоваться "), () -> {
+            String email = readInput(color.yellowBackground(" логин: "));
+            String password = readInput(color.yellowBackground(" пароль: "));
+            Optional<User> user = userManagementService.login(email, password);
+            if (user.isEmpty()) {
+                outputData.errOutput(" Не правильный логин или пароль!");
             } else {
-                outputData.output("Пользователь успешно авторизовался: " + userDto.get().getEmail() + " " + userDto.get().getRole());
+                workoutService.setAuthorizedWorkoutDB(user.get().getWorkout());
+                outputData.output(color.greenBackground(" Пользователь успешно авторизовался: " + user.get().getEmail() + " " + user.get().getRole()));
             }
         });
     }
@@ -52,14 +62,14 @@ public class UserController {
      * Changes user permissions.
      */
     public void changeUserPermissions() {
-        userOperation("Изменение разрешений пользователя", () -> {
-            String email = readInput("логин: ");
-            String role = readInput("роль: ");
+        userOperation(color.yellowText("Изменение разрешений пользователя"), () -> {
+            String email = readInput(color.yellowBackground("логин: "));
+            String role = readInput(color.yellowBackground("роль: "));
             Optional<UserDto> userDto = userManagementService.changeUserPermissions(email, role);
             if (userDto.isEmpty()) {
                 outputData.errOutput("Не удалось изменить права пользователя! Это действие может выполнить админ.");
             }
-            outputData.output("Роль пользователя была успешно изменена на: " + userDto.get().getRole());
+            outputData.output(color.greenBackground("Роль пользователя была успешно изменена на: " + userDto.get().getRole()));
         });
     }
 
@@ -67,14 +77,19 @@ public class UserController {
      * Shows the audit log.
      */
     public void showAuditLog() {
-        outputData.output(userManagementService.getAudit());
+        List<String> listAudit = userManagementService.getAudit();
+        StringBuilder auditsForView = new StringBuilder();
+        for (String action : listAudit) {
+            auditsForView.append(action).append("\n");
+        }
+        outputData.output(color.greenBackground(auditsForView.toString()));
     }
 
     /**
      * Logs out the current user.
      */
     public void logout() {
-        outputData.output("Вы успешно разлогинились!");
+        outputData.output(color.greenBackground("Вы успешно разлогинились!"));
         userManagementService.logout();
     }
 
@@ -117,7 +132,7 @@ public class UserController {
      * @return true if the operation should be repeated, false otherwise
      */
     private boolean repeatOperation() {
-        outputData.output("Повторить? 1-да, 2-нет");
+        outputData.output(color.greyBackground("Повторить? 1-да, 2-нет"));
         return inputData.input().toString().trim().equals("1");
     }
 }

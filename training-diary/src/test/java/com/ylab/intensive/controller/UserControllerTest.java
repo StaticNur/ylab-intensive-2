@@ -3,9 +3,11 @@ package com.ylab.intensive.controller;
 
 import com.ylab.intensive.in.InputData;
 import com.ylab.intensive.in.OutputData;
+import com.ylab.intensive.model.User;
 import com.ylab.intensive.model.dto.UserDto;
 import com.ylab.intensive.model.enums.Role;
 import com.ylab.intensive.service.UserManagementService;
+import com.ylab.intensive.service.WorkoutService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,9 +35,11 @@ class UserControllerTest {
 
     @Mock
     private UserManagementService userManagementService;
-
+    @Mock
+    private WorkoutService workoutService;
     @InjectMocks
     private UserController userController;
+
 
     @Test
     @DisplayName("Test user registration")
@@ -50,8 +54,12 @@ class UserControllerTest {
     @Test
     @DisplayName("Test user login - success")
     void testLogin_Success() {
+        User user = new User();
+        user.setEmail("testEmail");
+        user.setRole(Role.USER);
         when(inputData.input()).thenReturn("testEmail", "testPassword");
-        when(userManagementService.login("testEmail", "testPassword")).thenReturn(Optional.of(new UserDto("testEmail", Role.USER)));
+        when(userManagementService.login("testEmail", "testPassword")).thenReturn(Optional.of(user));
+        doNothing().when(workoutService).setAuthorizedWorkoutDB(anyList());
 
         userController.login();
 

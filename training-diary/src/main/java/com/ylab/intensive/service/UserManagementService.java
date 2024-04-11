@@ -1,5 +1,6 @@
 package com.ylab.intensive.service;
 
+import com.ylab.intensive.model.User;
 import com.ylab.intensive.model.dto.UserDto;
 
 import java.util.List;
@@ -26,7 +27,7 @@ public interface UserManagementService {
      * @param password The password of the user
      * @return An optional containing the user information if login is successful, empty otherwise
      */
-    Optional<UserDto> login(String email, String password);
+    Optional<User> login(String email, String password);
 
     /**
      * Logs out the currently logged-in user.

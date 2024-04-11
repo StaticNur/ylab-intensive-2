@@ -8,6 +8,7 @@ import com.ylab.intensive.in.OutputData;
 import com.ylab.intensive.model.dto.UserDto;
 import com.ylab.intensive.model.enums.Endpoints;
 import com.ylab.intensive.model.security.Session;
+import com.ylab.intensive.ui.AnsiColor;
 
 import static com.ylab.intensive.ui.ConsoleText.*;
 
@@ -15,6 +16,8 @@ import static com.ylab.intensive.ui.ConsoleText.*;
  * It handles user interaction and controls the flow of the program.
  */
 public class ApplicationRunner {
+    @Inject
+    private AnsiColor ansiColor;
     @Inject
     private InputData inputData;
     @Inject
@@ -30,7 +33,7 @@ public class ApplicationRunner {
      * Runs the main loop.
      */
     public void run() {
-        outputData.output(WELCOME);
+        outputData.output(ansiColor.welcome(WELCOME));
         boolean processIsRun = true;
 
         while (processIsRun) {
@@ -51,20 +54,17 @@ public class ApplicationRunner {
      * @return true if the process should continue, false if the application should exit
      */
     private boolean processUnauthenticatedUser() {
-        outputData.output(MENU_NOT_AUTH);
+        outputData.output(ansiColor.greyBackground(MENU_NOT_AUTH));
         Endpoints selectedOption = getInputAndMapToEndpoint();
 
         switch (selectedOption) {
             case REGISTRATION -> userController.registration();
             case LOGIN -> userController.login();
             case EXIT -> {
-                outputData.output("Приложение успешно завершилось. \n" +
-                                  "Благодарим вас за использование нашего консольного приложения. \n" +
-                                  "Если у вас есть какие-либо вопросы, не стесняйтесь обращаться к нам https://t.me/orifov_nur. \n" +
-                                  "Удачи!");
+                outputData.output(ansiColor.greenText(GOODBYE));
                 return false;
             }
-            default -> outputData.errOutput(UNKNOWN_COMMAND);
+            default -> outputData.errOutput(ansiColor.redText(UNKNOWN_COMMAND));
         }
 
         return true;
@@ -78,8 +78,9 @@ public class ApplicationRunner {
      */
     private boolean processAuthenticatedUser() {
         UserDto user = (UserDto) session.getAttribute("authorizedUser");
-        outputData.output(AUTHORIZED_USER, user.getEmail() + " " + user.getRole());
-        outputData.output(MENU_AUTH);
+        String authUser = String.format(AUTHORIZED_USER, user.getEmail() + " " + user.getRole());
+        outputData.output(ansiColor.blueBackground(authUser));
+        outputData.output(ansiColor.greyBackground(MENU_AUTH));
         Endpoints selectedOption = getInputAndMapToEndpoint();
 
         switch (selectedOption) {
@@ -92,10 +93,8 @@ public class ApplicationRunner {
             case CHANGE_USER_RIGHTS -> userController.changeUserPermissions();
             case VIEW_STATISTICS -> trainingController.showWorkoutStatistics();
             case AUDIT -> userController.showAuditLog();
-            case EXIT -> {
-                userController.logout();
-            }
-            default -> outputData.errOutput(UNKNOWN_COMMAND);
+            case EXIT -> userController.logout();
+            default -> outputData.errOutput(ansiColor.redText(UNKNOWN_COMMAND));
         }
 
         return true;

@@ -46,8 +46,7 @@ public class BeanFactory {
         }
         T bean = implementationClass.getDeclaredConstructor().newInstance();
 
-        for (Field field : Arrays.stream(implementationClass.getDeclaredFields())
-                .filter(field -> field.isAnnotationPresent(Inject.class)).toList()) {
+        for (Field field : Arrays.stream(implementationClass.getDeclaredFields()).filter(field -> field.isAnnotationPresent(Inject.class)).toList()) {
             field.setAccessible(true);
             field.set(bean, applicationContext.getBean(field.getType()));
         }

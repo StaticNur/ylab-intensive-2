@@ -85,7 +85,7 @@ class UserManagementServiceImplTest {
         doNothing().when(userDao).saveAction(email, "Action 1");
         doNothing().when(workoutService).setAuthorizedWorkoutDB(user.getWorkout());
 
-        Optional<UserDto> loggedInUser = userManagementService.login(email, password);
+        Optional<User> loggedInUser = userManagementService.login(email, password);
 
         assertTrue(loggedInUser.isPresent());
         assertEquals(email, loggedInUser.get().getEmail());
@@ -103,7 +103,7 @@ class UserManagementServiceImplTest {
 
         when(userDao.findByEmail(email)).thenReturn(Optional.of(user));
 
-        Optional<UserDto> loggedInUser = userManagementService.login(email, incorrectPassword);
+        Optional<User> loggedInUser = userManagementService.login(email, incorrectPassword);
 
         assertFalse(loggedInUser.isPresent());
     }

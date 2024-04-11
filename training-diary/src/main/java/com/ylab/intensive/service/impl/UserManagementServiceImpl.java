@@ -9,7 +9,6 @@ import com.ylab.intensive.model.User;
 import com.ylab.intensive.model.enums.Role;
 import com.ylab.intensive.model.security.Session;
 import com.ylab.intensive.service.UserManagementService;
-import com.ylab.intensive.service.WorkoutService;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -22,8 +21,6 @@ import java.util.Optional;
 public class UserManagementServiceImpl implements UserManagementService {
     @Inject
     private UserDao userDao;
-    @Inject
-    private WorkoutService workoutService;
     @Inject
     private Session authorizedUser;
 
@@ -40,17 +37,16 @@ public class UserManagementServiceImpl implements UserManagementService {
     }
 
     @Override
-    public Optional<UserDto> login(String email, String password) {
+    public Optional<User> login(String email, String password) {
         Optional<User> user = userDao.findByEmail(email);
         if (user.isPresent()) {
             String userPassword = user.get().getPassword();
             if (userPassword.equals(password)) {
                 authorizedUser.setAttribute("authorizedUser", entityToDto(user.get()));
-                workoutService.setAuthorizedWorkoutDB(user.get().getWorkout());
 
                 saveAction("Пользователь " + email + " авторизовался");
 
-                return Optional.of(entityToDto(user.get()));
+                return Optional.of(user.get());
             }
         }
         return Optional.empty();

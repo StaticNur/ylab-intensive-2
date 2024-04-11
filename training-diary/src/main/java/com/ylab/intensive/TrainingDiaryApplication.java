@@ -4,6 +4,8 @@ import com.ylab.intensive.config.MigrationManager;
 import com.ylab.intensive.di.context.ApplicationContext;
 import com.ylab.intensive.di.factory.BeanFactory;
 
+import java.time.Duration;
+
 /**
  * The main entry point for the application.
  */
@@ -15,13 +17,16 @@ public class TrainingDiaryApplication {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        TrainingDiaryApplication application = new TrainingDiaryApplication();
+        Duration duration = Duration.parse("PT4H56M45S");
+        System.out.println(duration.toHours() + "ч. "+duration.toMinutesPart()+"м. "+duration.toSecondsPart()+"c. ");
+
+        /*TrainingDiaryApplication application = new TrainingDiaryApplication();
         ApplicationContext context = application.initAppContext();
         ApplicationRunner applicationRunner = context.getBean(ApplicationRunner.class);
 
         MigrationManager.migrate();
 
-        applicationRunner.run();
+        applicationRunner.run();*/
     }
 
     /**
@@ -38,15 +43,3 @@ public class TrainingDiaryApplication {
     }
 
 }
-
-/*System.out.print("\u001B[42;5;18m \u001B[1;30m Здравствуйте, добро пожаловать в консольное приложения! Следуйте указаниям из документации. \n\u001B[0m");
-
-
-        System.out.print("\u001B[1;31m Пользователь с таким id не найден. Либо у этого пользователя нет действий \n\u001B[0m");
-        System.out.println("\u001B[42;5;18m\u001B[1;30m Результат запроса (логи): ");
-        System.out.print("\n\u001B[0m");
-        System.err.println("date.toString()");
-
-        System.out.println("\u001B[43;5;18m\u001B[1;30m Введите user_id для просмотра действий пользователя ");
-        System.out.print(" Пример2: 34\n\u001B[0m");
-        System.err.print("Показания уже были поданы для данного месяца\n");*/
