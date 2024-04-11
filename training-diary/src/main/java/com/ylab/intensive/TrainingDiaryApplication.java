@@ -1,10 +1,9 @@
 package com.ylab.intensive;
 
-import com.ylab.intensive.config.MigrationManager;
+import com.ylab.intensive.controller.ApplicationRunner;
+import com.ylab.intensive.util.MigrationManager;
 import com.ylab.intensive.di.context.ApplicationContext;
 import com.ylab.intensive.di.factory.BeanFactory;
-
-import java.time.Duration;
 
 /**
  * The main entry point for the application.

@@ -1,4 +1,4 @@
-package com.ylab.intensive.model;
+package com.ylab.intensive.model.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

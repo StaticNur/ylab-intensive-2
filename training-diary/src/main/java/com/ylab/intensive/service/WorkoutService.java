@@ -3,7 +3,7 @@ package com.ylab.intensive.service;
 import com.ylab.intensive.model.dto.WorkoutDto;
 import com.ylab.intensive.exception.DateFormatException;
 import com.ylab.intensive.exception.WorkoutException;
-import com.ylab.intensive.model.Workout;
+import com.ylab.intensive.model.entity.Workout;
 
 import java.util.List;
 import java.util.Optional;

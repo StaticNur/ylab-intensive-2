@@ -1,7 +1,7 @@
 package com.ylab.intensive.dao;
 
 import com.ylab.intensive.model.dto.WorkoutDto;
-import com.ylab.intensive.model.Workout;
+import com.ylab.intensive.model.entity.Workout;
 
 import java.time.Duration;
 import java.time.LocalDate;

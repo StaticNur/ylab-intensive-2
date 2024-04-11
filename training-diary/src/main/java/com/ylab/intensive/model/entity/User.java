@@ -1,4 +1,4 @@
-package com.ylab.intensive.model;
+package com.ylab.intensive.model.entity;
 
 import com.ylab.intensive.model.enums.Role;
 import lombok.AllArgsConstructor;

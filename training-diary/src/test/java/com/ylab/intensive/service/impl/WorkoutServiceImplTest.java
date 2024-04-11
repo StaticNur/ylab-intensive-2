@@ -5,7 +5,7 @@ import com.ylab.intensive.exception.DateFormatException;
 import com.ylab.intensive.exception.NotFoundWorkoutException;
 import com.ylab.intensive.exception.TrainingTypeException;
 import com.ylab.intensive.exception.WorkoutException;
-import com.ylab.intensive.model.Workout;
+import com.ylab.intensive.model.entity.Workout;
 import com.ylab.intensive.model.dto.WorkoutDto;
 import com.ylab.intensive.model.security.Session;
 import com.ylab.intensive.service.UserManagementService;

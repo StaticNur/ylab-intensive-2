@@ -3,7 +3,7 @@ package com.ylab.intensive.service.impl;
 
 import com.ylab.intensive.dao.UserDao;
 import com.ylab.intensive.exception.RegisterException;
-import com.ylab.intensive.model.User;
+import com.ylab.intensive.model.entity.User;
 import com.ylab.intensive.model.dto.UserDto;
 import com.ylab.intensive.model.enums.Role;
 import com.ylab.intensive.model.security.Session;

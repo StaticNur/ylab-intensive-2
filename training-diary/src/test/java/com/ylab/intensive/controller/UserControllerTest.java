@@ -3,11 +3,12 @@ package com.ylab.intensive.controller;
 
 import com.ylab.intensive.in.InputData;
 import com.ylab.intensive.in.OutputData;
-import com.ylab.intensive.model.User;
+import com.ylab.intensive.model.entity.User;
 import com.ylab.intensive.model.dto.UserDto;
 import com.ylab.intensive.model.enums.Role;
 import com.ylab.intensive.service.UserManagementService;
 import com.ylab.intensive.service.WorkoutService;
+import com.ylab.intensive.ui.AnsiColor;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -37,6 +38,8 @@ class UserControllerTest {
     private UserManagementService userManagementService;
     @Mock
     private WorkoutService workoutService;
+    @Mock
+    private AnsiColor color;
     @InjectMocks
     private UserController userController;
 
@@ -60,6 +63,9 @@ class UserControllerTest {
         when(inputData.input()).thenReturn("testEmail", "testPassword");
         when(userManagementService.login("testEmail", "testPassword")).thenReturn(Optional.of(user));
         doNothing().when(workoutService).setAuthorizedWorkoutDB(anyList());
+        when(color.yellowText(anyString())).thenReturn("text");
+        when(color.yellowBackground(anyString())).thenReturn("text");
+        when(color.greenBackground(anyString())).thenReturn("Пользователь успешно авторизовался: testEmail USER");
 
         userController.login();
 
@@ -71,10 +77,13 @@ class UserControllerTest {
     void testLogin_Failure() {
         when(inputData.input()).thenReturn("testEmail", "testPassword");
         when(userManagementService.login("testEmail", "testPassword")).thenReturn(Optional.empty());
+        when(color.yellowText(anyString())).thenReturn("text");
+        when(color.yellowBackground(anyString())).thenReturn("text");
+        when(color.greenBackground(anyString())).thenReturn("text");
 
         userController.login();
 
-        verify(outputData).errOutput("Не правильный логин или пароль!");
+        verify(outputData).errOutput(" Не правильный логин или пароль!");
     }
 
     @Test
@@ -82,6 +91,9 @@ class UserControllerTest {
     void testChangeUserPermissions_Success() {
         when(inputData.input()).thenReturn("testEmail", "ADMIN");
         when(userManagementService.changeUserPermissions("testEmail", "ADMIN")).thenReturn(Optional.of(new UserDto("testEmail", Role.ADMIN)));
+        when(color.yellowText(anyString())).thenReturn("text");
+        when(color.yellowBackground(anyString())).thenReturn("text");
+        when(color.greenBackground(anyString())).thenReturn("Роль пользователя была успешно изменена на: ADMIN");
 
         userController.changeUserPermissions();
 
@@ -103,18 +115,21 @@ class UserControllerTest {
     @DisplayName("Test show audit log")
     void testShowAuditLog() {
         when(userManagementService.getAudit()).thenReturn(List.of("Audit log"));
+        when(color.greenBackground(anyString())).thenReturn("Audit log");
 
         userController.showAuditLog();
 
-        verify(outputData).output(List.of("Audit log"));
+        verify(outputData).output("Audit log");
     }
 
     @Test
     @DisplayName("Test user logout")
     void testLogout() {
+        when(color.greenBackground(anyString())).thenReturn(" Вы успешно разлогинились!");
+
         userController.logout();
 
-        verify(outputData).output("Вы успешно разлогинились!");
+        verify(outputData).output(" Вы успешно разлогинились!");
         verify(userManagementService).logout();
     }
 }

@@ -2,7 +2,7 @@ package com.ylab.intensive.dao.impl;
 
 import com.ylab.intensive.dao.WorkoutDao;
 import com.ylab.intensive.model.dto.WorkoutDto;
-import com.ylab.intensive.model.Workout;
+import com.ylab.intensive.model.entity.Workout;
 
 import java.time.Duration;
 import java.time.LocalDate;

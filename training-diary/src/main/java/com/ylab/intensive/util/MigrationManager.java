@@ -1,11 +1,9 @@
-package com.ylab.intensive.config;
+package com.ylab.intensive.util;
 
 import com.ylab.intensive.dao.UserDao;
-import com.ylab.intensive.dao.WorkoutDao;
-import com.ylab.intensive.dao.impl.UserDaoImpl;
 import com.ylab.intensive.di.annatation.Inject;
-import com.ylab.intensive.model.User;
-import com.ylab.intensive.model.Workout;
+import com.ylab.intensive.model.entity.User;
+import com.ylab.intensive.model.entity.Workout;
 import com.ylab.intensive.model.enums.Role;
 
 import java.time.Duration;

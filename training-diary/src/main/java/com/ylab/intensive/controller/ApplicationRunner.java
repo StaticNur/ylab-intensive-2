@@ -1,4 +1,4 @@
-package com.ylab.intensive;
+package com.ylab.intensive.controller;
 
 import com.ylab.intensive.controller.TrainingController;
 import com.ylab.intensive.controller.UserController;

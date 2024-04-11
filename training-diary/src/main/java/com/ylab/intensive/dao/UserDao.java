@@ -1,6 +1,6 @@
 package com.ylab.intensive.dao;
 
-import com.ylab.intensive.model.User;
+import com.ylab.intensive.model.entity.User;
 import com.ylab.intensive.model.enums.Role;
 
 import java.util.List;

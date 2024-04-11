@@ -4,7 +4,7 @@ import com.ylab.intensive.dao.WorkoutDao;
 import com.ylab.intensive.di.annatation.Inject;
 import com.ylab.intensive.model.dto.WorkoutDto;
 import com.ylab.intensive.exception.*;
-import com.ylab.intensive.model.Workout;
+import com.ylab.intensive.model.entity.Workout;
 import com.ylab.intensive.model.security.Session;
 import com.ylab.intensive.service.UserManagementService;
 import com.ylab.intensive.service.WorkoutService;

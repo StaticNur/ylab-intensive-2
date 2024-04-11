@@ -1,6 +1,6 @@
 package com.ylab.intensive.service;
 
-import com.ylab.intensive.model.User;
+import com.ylab.intensive.model.entity.User;
 import com.ylab.intensive.model.dto.UserDto;
 
 import java.util.List;

@@ -1,4 +1,6 @@
-package com.ylab.intensive.in;
+package com.ylab.intensive.in.impl;
+
+import com.ylab.intensive.in.InputData;
 
 import java.io.BufferedReader;
 import java.io.IOException;

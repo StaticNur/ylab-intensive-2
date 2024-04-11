@@ -20,6 +20,7 @@
 
     <lombok.version>1.18.32</lombok.version>
     <reflections.version>0.10.2</reflections.version>
+    <log4j.version>2.20.0</log4j.version>
   </properties>
 
   <dependencies>
@@ -71,6 +72,11 @@
       <groupId>org.reflections</groupId>
       <artifactId>reflections</artifactId>
       <version>${reflections.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-slf4j-impl</artifactId>
+      <version>${log4j.version}</version>
     </dependency>
   </dependencies>
 </project>

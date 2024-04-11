@@ -1,6 +1,6 @@
 package com.ylab.intensive.dao.impl;
 
-import com.ylab.intensive.model.User;
+import com.ylab.intensive.model.entity.User;
 import com.ylab.intensive.model.enums.Role;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

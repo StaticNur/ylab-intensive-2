@@ -1,6 +1,6 @@
 package com.ylab.intensive.dao.impl;
 
-import com.ylab.intensive.model.Workout;
+import com.ylab.intensive.model.entity.Workout;
 import com.ylab.intensive.model.dto.WorkoutDto;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

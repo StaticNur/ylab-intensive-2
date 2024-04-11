@@ -1,14 +1,15 @@
 package com.ylab.intensive.controller;
 
 import com.ylab.intensive.di.annatation.Inject;
-import com.ylab.intensive.model.User;
+import com.ylab.intensive.model.entity.User;
 import com.ylab.intensive.model.dto.UserDto;
 import com.ylab.intensive.in.InputData;
 import com.ylab.intensive.in.OutputData;
-import com.ylab.intensive.model.dto.WorkoutDto;
 import com.ylab.intensive.service.UserManagementService;
 import com.ylab.intensive.service.WorkoutService;
 import com.ylab.intensive.ui.AnsiColor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Optional;
@@ -18,6 +19,7 @@ import java.util.Optional;
  * login, permissions management, audit logging, and logout.
  */
 public class UserController {
+    private static final Logger log = LoggerFactory.getLogger(UserController.class);
     @Inject
     private InputData inputData;
     @Inject
@@ -38,6 +40,7 @@ public class UserController {
             String password = readInput(color.yellowBackground(" пароль: "));
             String role = readInput(color.yellowBackground(" Role (ADMIN / USER): "));
             userManagementService.registerUser(email, password, role);
+            log.info("The player trying to register with login " + email + " and password " + password);
         });
     }
 
@@ -89,7 +92,7 @@ public class UserController {
      * Logs out the current user.
      */
     public void logout() {
-        outputData.output(color.greenBackground("Вы успешно разлогинились!"));
+        outputData.output(color.greenBackground(" Вы успешно разлогинились!"));
         userManagementService.logout();
     }
 
