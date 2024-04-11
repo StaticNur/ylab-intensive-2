@@ -10,7 +10,7 @@
 
 
 ## Технологии
-- Java 21
+- Java 17
 - Lombok
 - JUnit 5
 - Reflection API
