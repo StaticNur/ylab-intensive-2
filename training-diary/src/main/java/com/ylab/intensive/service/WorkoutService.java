@@ -53,7 +53,7 @@ public interface WorkoutService {
      *
      * @return List of training DTOs.
      */
-    List<WorkoutDto> getAllWorkouts();
+    List<WorkoutDto> getAllUserWorkouts();
 
     /**
      * Retrieves the workout DTO by date.

@@ -6,6 +6,8 @@ import com.ylab.intensive.in.OutputData;
 import com.ylab.intensive.model.dto.WorkoutDto;
 import com.ylab.intensive.service.WorkoutService;
 import com.ylab.intensive.ui.AnsiColor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
 import java.util.List;
@@ -17,14 +19,39 @@ import static com.ylab.intensive.ui.ConsoleText.UNKNOWN_COMMAND;
  * The Training Controller class handles user interactions related to workouts management.
  */
 public class TrainingController {
+    /**
+     * Logger
+     */
+    private static final Logger log = LoggerFactory.getLogger(UserController.class);
+
+    /**
+     * Input Data.
+     * This class provides access to the input data entered by the user.
+     */
     @Inject
     private InputData inputData;
+
+    /**
+     * Output Data.
+     * This class allows outputting data to the user.
+     */
     @Inject
     private OutputData outputData;
+
+    /**
+     * Workout Service.
+     * This service provides functionality for working with workouts.
+     */
     @Inject
     private WorkoutService workoutService;
+
+    /**
+     * ANSI Color.
+     * This class provides color functionality for console output.
+     */
     @Inject
     private AnsiColor color;
+
 
     /**
      * Adds a new training type.
@@ -75,14 +102,14 @@ public class TrainingController {
      * Shows the workout history.
      */
     public void showWorkoutHistory() {
-        List<WorkoutDto> workouts = workoutService.getAllWorkouts();
+        List<WorkoutDto> workouts = workoutService.getAllUserWorkouts();
         if (workouts.isEmpty()) {
             outputData.errOutput("Вы еще не добавили тренировки!");
         } else {
             StringBuilder formattedWorkouts = new StringBuilder();
             for (WorkoutDto workout : workouts) {
                 Duration duration = workout.getDuration();
-                String viewDuration = duration.toHours() + "ч. "+duration.toMinutesPart()+"м. "+duration.toSecondsPart()+"c. ";
+                String viewDuration = duration.toHours() + "ч. " + duration.toMinutesPart() + "м. " + duration.toSecondsPart() + "c. ";
                 formattedWorkouts.append("date = ").append(workout.getDate()).append(", ");
                 formattedWorkouts.append("types = ").append(workout.getType()).append(", ");
                 formattedWorkouts.append("duration = ").append(viewDuration).append(", ");
@@ -144,7 +171,7 @@ public class TrainingController {
         String end = getUserInput(color.yellowBackground("Введите дату конца (dd-MM-yyyy):"));
         try {
             int workoutStatistics = workoutService.getWorkoutStatistics(begin, end);
-            outputData.output(color.greenBackground("Количество потраченных калорий в разрезе времени с "+begin+" по "+end+": " + workoutStatistics));
+            outputData.output(color.greenBackground("Количество потраченных калорий в разрезе времени с " + begin + " по " + end + ": " + workoutStatistics));
         } catch (RuntimeException e) {
             handleException(e);
         }
@@ -209,5 +236,6 @@ public class TrainingController {
     private void handleException(Exception e) {
         outputData.errOutput(e.getMessage());
     }
+
 }
 

@@ -5,12 +5,14 @@ import com.ylab.intensive.model.entity.User;
 import com.ylab.intensive.model.dto.UserDto;
 import com.ylab.intensive.in.InputData;
 import com.ylab.intensive.in.OutputData;
+import com.ylab.intensive.model.entity.Workout;
 import com.ylab.intensive.service.UserManagementService;
 import com.ylab.intensive.service.WorkoutService;
 import com.ylab.intensive.ui.AnsiColor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,17 +21,46 @@ import java.util.Optional;
  * login, permissions management, audit logging, and logout.
  */
 public class UserController {
+    /**
+     * Logger
+     */
     private static final Logger log = LoggerFactory.getLogger(UserController.class);
+
+    /**
+     * Input data.
+     * Provides access to the data entered by the user.
+     */
     @Inject
     private InputData inputData;
+
+    /**
+     * Output data.
+     * Allows outputting data to the user.
+     */
     @Inject
     private OutputData outputData;
+
+    /**
+     * User Management Service.
+     * Provides functionality for working with users.
+     */
     @Inject
     private UserManagementService userManagementService;
+
+    /**
+     * Workout Service.
+     * Provides functionality for working with workouts.
+     */
     @Inject
     private WorkoutService workoutService;
+
+    /**
+     * ANSI color.
+     * Allows setting the color for console output.
+     */
     @Inject
     private AnsiColor color;
+
 
     /**
      * Registers a new user.
@@ -94,6 +125,37 @@ public class UserController {
     public void logout() {
         outputData.output(color.greenBackground(" Вы успешно разлогинились!"));
         userManagementService.logout();
+    }
+
+    /**
+     * Shows all user workouts.
+     */
+    public void showAllUserWorkouts() {
+        List<User> userList = userManagementService.getAllUser();
+        if (userList.isEmpty()) {
+            outputData.errOutput("Для этого запроса нужны права администратора!");
+        } else {
+            for (User user : userList) {
+                outputData.output(color.greenBackground(user.getEmail() + " " + user.getRole()));
+                StringBuilder formattedWorkouts = new StringBuilder();
+
+                for (Workout workout : user.getWorkout()) {
+                    Duration duration = workout.getDuration();
+                    String viewDuration = duration.toHours() + "ч. " + duration.toMinutesPart() + "м. " + duration.toSecondsPart() + "c. ";
+                    formattedWorkouts.append("date = ").append(workout.getDate()).append(", ");
+                    formattedWorkouts.append("types = ").append(workout.getType()).append(", ");
+                    formattedWorkouts.append("duration = ").append(viewDuration).append(", ");
+                    formattedWorkouts.append("calorie = ").append(workout.getCalorie()).append(", ");
+                    formattedWorkouts.append("info = ").append(workout.getInfo()).append("\n");
+                }
+
+                if (user.getWorkout().isEmpty()) {
+                    outputData.output(color.greenBackground("Тренировок нет"));
+                } else {
+                    outputData.output(color.greenBackground(formattedWorkouts.toString()));
+                }
+            }
+        }
     }
 
     // Private helper methods

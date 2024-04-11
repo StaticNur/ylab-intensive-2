@@ -1,5 +1,16 @@
 package com.ylab.intensive.ui;
 
+/**
+ * AnsiColor Class.
+ * This class provides ANSI color codes for console output.
+ * It allows for adding color to text and background displayed in the console.
+ * <p>
+ * Usage:
+ * - Instantiate an AnsiColor object
+ * - Use the provided static methods to get ANSI color codes for different colors
+ * - Apply the color codes to the desired text using escape sequences
+ * - Output the text to the console
+ */
 public class AnsiColor {
     private static final String WELCOME = "\u001B[42;5;18m \u001B[1;30m ";
     private static final String GREY_BACKGROUND = "\u001B[48;5;8m";
@@ -22,9 +33,11 @@ public class AnsiColor {
     public String blueBackground(String text) {
         return BLUE_BACKGROUND + text + RESET;
     }
+
     public String yellowBackground(String text) {
         return YELLOW_BACKGROUND + text + RESET;
     }
+
     public String greenBackground(String text) {
         return GREEN_BACKGROUND + text + RESET;
     }

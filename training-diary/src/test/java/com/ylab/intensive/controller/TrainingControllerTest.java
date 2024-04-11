@@ -85,7 +85,7 @@ class TrainingControllerTest {
     void testShowWorkoutHistoryEmptyList() {
 
         List<WorkoutDto> emptyList = new ArrayList<>();
-        when(workoutService.getAllWorkouts()).thenReturn(emptyList);
+        when(workoutService.getAllUserWorkouts()).thenReturn(emptyList);
 
         trainingController.showWorkoutHistory();
 
@@ -100,7 +100,7 @@ class TrainingControllerTest {
         workoutDto.setDuration(Duration.parse("PT4H56M45S"));
         workouts.add(workoutDto);
 
-        when(workoutService.getAllWorkouts()).thenReturn(workouts);
+        when(workoutService.getAllUserWorkouts()).thenReturn(workouts);
         when(color.greenBackground(anyString())).thenReturn(workouts.toString());
 
         trainingController.showWorkoutHistory();

@@ -18,7 +18,8 @@ public enum Endpoints {
     CHANGE_USER_RIGHTS(9),
     VIEW_STATISTICS(10),
     AUDIT(11),
-    EXIT(12);
+    EXIT(12),
+    VIEW_All_TRAININGS(13);
 
     private final int value; // The integer value associated with the endpoint
 

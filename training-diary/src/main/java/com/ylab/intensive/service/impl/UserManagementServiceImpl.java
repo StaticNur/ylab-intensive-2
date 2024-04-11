@@ -5,24 +5,34 @@ import com.ylab.intensive.di.annatation.Inject;
 import com.ylab.intensive.model.dto.UserDto;
 import com.ylab.intensive.exception.ChangeUserPermissionsException;
 import com.ylab.intensive.exception.RegisterException;
+import com.ylab.intensive.model.dto.WorkoutDto;
 import com.ylab.intensive.model.entity.User;
+import com.ylab.intensive.model.entity.Workout;
 import com.ylab.intensive.model.enums.Role;
 import com.ylab.intensive.model.security.Session;
 import com.ylab.intensive.service.UserManagementService;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Implementation of the UserManagementService interface providing methods for managing user-related operations.
  */
 public class UserManagementServiceImpl implements UserManagementService {
+    /**
+     * User DAO.
+     * This DAO is responsible for data access operations related to users.
+     */
     @Inject
     private UserDao userDao;
+
+    /**
+     * Authorized User Session.
+     * This session represents the currently authorized user.
+     */
     @Inject
     private Session authorizedUser;
+
 
     @Override
     public boolean registerUser(String email, String password, String roleStr) {
@@ -87,6 +97,18 @@ public class UserManagementServiceImpl implements UserManagementService {
     public void saveAction(String action) {
         UserDto userFromAttribute = (UserDto) authorizedUser.getAttribute("authorizedUser");
         userDao.saveAction(userFromAttribute.getEmail(), action);
+    }
+
+    @Override
+    public List<User> getAllUser() {
+        UserDto userFromAttribute = (UserDto) authorizedUser.getAttribute("authorizedUser");
+
+        if (userFromAttribute.getRole().equals(Role.ADMIN)) {
+            userDao.saveAction(userFromAttribute.getEmail(), "Пользователь просмотрел все тренировки всех людей.");
+            return userDao.findAll();
+        }
+
+        return Collections.emptyList();
     }
 
     private Role getRole(String roleStr) {

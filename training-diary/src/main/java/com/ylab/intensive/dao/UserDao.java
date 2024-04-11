@@ -3,6 +3,7 @@ package com.ylab.intensive.dao;
 import com.ylab.intensive.model.entity.User;
 import com.ylab.intensive.model.enums.Role;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -10,12 +11,6 @@ import java.util.Optional;
  * The UserDao interface provides methods to interact with user data in the database.
  */
 public interface UserDao {
-    /**
-     * For MigrationManager!
-     *
-     * @return database
-     */
-    List<User> getUserDB();
     /**
      * Saves a user to the database.
      *
@@ -55,4 +50,11 @@ public interface UserDao {
      * @param action The action to save
      */
     void saveAction(String email, String action);
+
+    /**
+     * Finds all users in the database.
+     *
+     * @return A list of all workouts in the database
+     */
+    List<User> findAll();
 }

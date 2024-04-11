@@ -2,9 +2,11 @@ package com.ylab.intensive.service.impl;
 
 import com.ylab.intensive.dao.WorkoutDao;
 import com.ylab.intensive.di.annatation.Inject;
+import com.ylab.intensive.model.dto.UserDto;
 import com.ylab.intensive.model.dto.WorkoutDto;
 import com.ylab.intensive.exception.*;
 import com.ylab.intensive.model.entity.Workout;
+import com.ylab.intensive.model.enums.Role;
 import com.ylab.intensive.model.security.Session;
 import com.ylab.intensive.service.UserManagementService;
 import com.ylab.intensive.service.WorkoutService;
@@ -20,12 +22,27 @@ import java.util.stream.Collectors;
  * Implementation of the WorkoutService interface providing methods for managing workout-related operations.
  */
 public class WorkoutServiceImpl implements WorkoutService {
+    /**
+     * Workout DAO.
+     * This DAO is responsible for data access operations related to workouts.
+     */
     @Inject
     private WorkoutDao workoutDao;
+
+    /**
+     * User Management Service.
+     * This service provides functionality for managing user-related operations.
+     */
     @Inject
     private UserManagementService userManagementService;
+
+    /**
+     * Authorized User Session.
+     * This session represents the currently authorized user.
+     */
     @Inject
     private Session authorizedUser;
+
 
     public void setAuthorizedWorkoutDB(List<Workout> workouts) {
         workoutDao.init(workouts);
@@ -84,7 +101,7 @@ public class WorkoutServiceImpl implements WorkoutService {
     }
 
     @Override
-    public List<WorkoutDto> getAllWorkouts() {
+    public List<WorkoutDto> getAllUserWorkouts() {
         userManagementService.saveAction("Пользователь просмотрел свои предыдущие тренировки.");
         return workoutDao.findAll().stream()
                 .sorted(Comparator.comparing(Workout::getDate))

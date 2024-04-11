@@ -137,7 +137,7 @@ class WorkoutServiceImplTest {
 
         when(workoutDao.findAll()).thenReturn(workouts);
 
-        List<WorkoutDto> result = workoutService.getAllWorkouts();
+        List<WorkoutDto> result = workoutService.getAllUserWorkouts();
 
         assertEquals(workouts.size(), result.size());
     }

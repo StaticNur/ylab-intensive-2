@@ -14,15 +14,10 @@ import java.util.Optional;
  */
 public class UserDaoImpl implements UserDao {
 
-
     /**
      * The list that represents the user database.
      */
     private final List<User> userDB = new ArrayList<>();
-
-    public List<User> getUserDB() {
-        return userDB;
-    }
 
     @Override
     public boolean save(User user) {
@@ -54,6 +49,11 @@ public class UserDaoImpl implements UserDao {
         userDB.stream()
                 .filter(u -> u.getEmail().equals(email))
                 .forEach(u -> u.getAction().add(action));
+    }
+
+    @Override
+    public List<User> findAll() {
+        return userDB;
     }
 
 }

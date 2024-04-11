@@ -56,4 +56,11 @@ public interface UserManagementService {
      * @param action The action to be saved
      */
     void saveAction(String action);
+
+    /**
+     * Retrieves all workouts as DTOs.
+     *
+     * @return List of training DTOs.
+     */
+    List<User> getAllUser();
 }

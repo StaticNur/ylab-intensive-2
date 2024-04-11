@@ -18,18 +18,48 @@ import static com.ylab.intensive.ui.ConsoleText.*;
  * It handles user interaction and controls the flow of the program.
  */
 public class ApplicationRunner {
+    /**
+     * ANSI Color.
+     * This class provides ANSI color codes for console output.
+     */
     @Inject
     private AnsiColor ansiColor;
+
+    /**
+     * Input Data.
+     * This class allows access to the input data provided by the user.
+     */
     @Inject
     private InputData inputData;
+
+    /**
+     * Output Data.
+     * This class allows outputting data to the user.
+     */
     @Inject
     private OutputData outputData;
+
+    /**
+     * Training Controller.
+     * This controller is responsible for managing training-related operations.
+     */
     @Inject
     private TrainingController trainingController;
+
+    /**
+     * User Controller.
+     * This controller allows management of system users.
+     */
     @Inject
     private UserController userController;
+
+    /**
+     * Session.
+     * This class represents the current session or state of the user.
+     */
     @Inject
     private Session session;
+
 
     /**
      * Runs the main loop.
@@ -58,9 +88,9 @@ public class ApplicationRunner {
     private boolean processUnauthenticatedUser() {
         outputData.output(ansiColor.greyBackground(MENU_NOT_AUTH));
         Optional<Endpoints> selectedOption = getInputAndMapToEndpoint();
-        if(selectedOption.isEmpty()){
+        if (selectedOption.isEmpty()) {
             outputData.errOutput(ansiColor.redText(UNKNOWN_COMMAND));
-        }else {
+        } else {
             switch (selectedOption.get()) {
                 case REGISTRATION -> userController.registration();
                 case LOGIN -> userController.login();
@@ -87,9 +117,9 @@ public class ApplicationRunner {
         outputData.output(ansiColor.greyBackground(MENU_AUTH));
         Optional<Endpoints> selectedOption = getInputAndMapToEndpoint();
 
-        if(selectedOption.isEmpty()){
+        if (selectedOption.isEmpty()) {
             outputData.errOutput(ansiColor.redText(UNKNOWN_COMMAND));
-        }else {
+        } else {
             switch (selectedOption.get()) {
                 case ADD_TYPE_WORKOUT -> trainingController.addTrainingType();
                 case ADD_TRAINING -> trainingController.addWorkout();
@@ -99,6 +129,7 @@ public class ApplicationRunner {
                 case DELETE_TRAINING -> trainingController.deleteWorkout();
                 case CHANGE_USER_RIGHTS -> userController.changeUserPermissions();
                 case VIEW_STATISTICS -> trainingController.showWorkoutStatistics();
+                case VIEW_All_TRAININGS -> userController.showAllUserWorkouts();
                 case AUDIT -> userController.showAuditLog();
                 case EXIT -> userController.logout();
                 default -> outputData.errOutput(ansiColor.redText(UNKNOWN_COMMAND));
@@ -116,7 +147,7 @@ public class ApplicationRunner {
         String action = inputData.input().toString();
         try {
             return Optional.of(Endpoints.fromValue(action));
-        }catch (IllegalArgumentException e){
+        } catch (IllegalArgumentException e) {
             return Optional.empty();
         }
     }
