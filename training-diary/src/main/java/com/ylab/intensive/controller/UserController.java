@@ -38,7 +38,7 @@ public class UserController {
         userOperation(color.yellowText(" Регистрация "), () -> {
             String email = readInput(color.yellowBackground(" логин: "));
             String password = readInput(color.yellowBackground(" пароль: "));
-            String role = readInput(color.yellowBackground(" Role (ADMIN / USER): "));
+            String role = readInput(color.yellowBackground(" роль (ADMIN / USER): "));
             userManagementService.registerUser(email, password, role);
             log.info("The player trying to register with login " + email + " and password " + password);
         });
@@ -67,7 +67,7 @@ public class UserController {
     public void changeUserPermissions() {
         userOperation(color.yellowText("Изменение разрешений пользователя"), () -> {
             String email = readInput(color.yellowBackground("логин: "));
-            String role = readInput(color.yellowBackground("роль: "));
+            String role = readInput(color.yellowBackground("роль (ADMIN / USER): "));
             Optional<UserDto> userDto = userManagementService.changeUserPermissions(email, role);
             if (userDto.isEmpty()) {
                 outputData.errOutput("Не удалось изменить права пользователя! Это действие может выполнить админ.");

@@ -67,7 +67,8 @@ public class UserManagementServiceImpl implements UserManagementService {
             Optional<User> user = userDao.updateUserRole(email, role);
             if (user.isPresent()) {
                 saveAction("Пользователь изменил роль на: " + role);
-
+                authorizedUser.removeAttribute("authorizedUser");
+                authorizedUser.setAttribute("authorizedUser", entityToDto(user.get()));
                 return Optional.of(entityToDto(user.get()));
             }
         }

@@ -10,6 +10,8 @@ import com.ylab.intensive.model.enums.Endpoints;
 import com.ylab.intensive.model.security.Session;
 import com.ylab.intensive.ui.AnsiColor;
 
+import java.util.Optional;
+
 import static com.ylab.intensive.ui.ConsoleText.*;
 
 /**
@@ -55,18 +57,20 @@ public class ApplicationRunner {
      */
     private boolean processUnauthenticatedUser() {
         outputData.output(ansiColor.greyBackground(MENU_NOT_AUTH));
-        Endpoints selectedOption = getInputAndMapToEndpoint();
-
-        switch (selectedOption) {
-            case REGISTRATION -> userController.registration();
-            case LOGIN -> userController.login();
-            case EXIT -> {
-                outputData.output(ansiColor.greenText(GOODBYE));
-                return false;
+        Optional<Endpoints> selectedOption = getInputAndMapToEndpoint();
+        if(selectedOption.isEmpty()){
+            outputData.errOutput(ansiColor.redText(UNKNOWN_COMMAND));
+        }else {
+            switch (selectedOption.get()) {
+                case REGISTRATION -> userController.registration();
+                case LOGIN -> userController.login();
+                case EXIT -> {
+                    outputData.output(ansiColor.greenText(GOODBYE));
+                    return false;
+                }
+                default -> outputData.errOutput(ansiColor.redText(UNKNOWN_COMMAND));
             }
-            default -> outputData.errOutput(ansiColor.redText(UNKNOWN_COMMAND));
         }
-
         return true;
     }
 
@@ -81,22 +85,25 @@ public class ApplicationRunner {
         String authUser = String.format(AUTHORIZED_USER, user.getEmail() + " " + user.getRole());
         outputData.output(ansiColor.blueBackground(authUser));
         outputData.output(ansiColor.greyBackground(MENU_AUTH));
-        Endpoints selectedOption = getInputAndMapToEndpoint();
+        Optional<Endpoints> selectedOption = getInputAndMapToEndpoint();
 
-        switch (selectedOption) {
-            case ADD_TYPE_WORKOUT -> trainingController.addTrainingType();
-            case ADD_TRAINING -> trainingController.addWorkout();
-            case ADD_ADDITIONAL_INFORMATION -> trainingController.addWorkoutInfo();
-            case VIEW_TRAININGS -> trainingController.showWorkoutHistory();
-            case EDIT_TRAINING -> trainingController.editWorkout();
-            case DELETE_TRAINING -> trainingController.deleteWorkout();
-            case CHANGE_USER_RIGHTS -> userController.changeUserPermissions();
-            case VIEW_STATISTICS -> trainingController.showWorkoutStatistics();
-            case AUDIT -> userController.showAuditLog();
-            case EXIT -> userController.logout();
-            default -> outputData.errOutput(ansiColor.redText(UNKNOWN_COMMAND));
+        if(selectedOption.isEmpty()){
+            outputData.errOutput(ansiColor.redText(UNKNOWN_COMMAND));
+        }else {
+            switch (selectedOption.get()) {
+                case ADD_TYPE_WORKOUT -> trainingController.addTrainingType();
+                case ADD_TRAINING -> trainingController.addWorkout();
+                case ADD_ADDITIONAL_INFORMATION -> trainingController.addWorkoutInfo();
+                case VIEW_TRAININGS -> trainingController.showWorkoutHistory();
+                case EDIT_TRAINING -> trainingController.editWorkout();
+                case DELETE_TRAINING -> trainingController.deleteWorkout();
+                case CHANGE_USER_RIGHTS -> userController.changeUserPermissions();
+                case VIEW_STATISTICS -> trainingController.showWorkoutStatistics();
+                case AUDIT -> userController.showAuditLog();
+                case EXIT -> userController.logout();
+                default -> outputData.errOutput(ansiColor.redText(UNKNOWN_COMMAND));
+            }
         }
-
         return true;
     }
 
@@ -105,8 +112,12 @@ public class ApplicationRunner {
      *
      * @return The Endpoint enum value representing the user's input
      */
-    private Endpoints getInputAndMapToEndpoint() {
+    private Optional<Endpoints> getInputAndMapToEndpoint() {
         String action = inputData.input().toString();
-        return Endpoints.fromValue(action);
+        try {
+            return Optional.of(Endpoints.fromValue(action));
+        }catch (IllegalArgumentException e){
+            return Optional.empty();
+        }
     }
 }
