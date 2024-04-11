@@ -3,12 +3,19 @@ package com.ylab.intensive.dao;
 import com.ylab.intensive.model.User;
 import com.ylab.intensive.model.enums.Role;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
  * The UserDao interface provides methods to interact with user data in the database.
  */
 public interface UserDao {
+    /**
+     * For MigrationManager!
+     *
+     * @return database
+     */
+    List<User> getUserDB();
     /**
      * Saves a user to the database.
      *

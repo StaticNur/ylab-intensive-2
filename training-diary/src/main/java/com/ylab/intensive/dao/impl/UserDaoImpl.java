@@ -13,10 +13,16 @@ import java.util.Optional;
  * This class provides methods to interact with user data in the database.
  */
 public class UserDaoImpl implements UserDao {
+
+
     /**
      * The list that represents the user database.
      */
     private final List<User> userDB = new ArrayList<>();
+
+    public List<User> getUserDB() {
+        return userDB;
+    }
 
     @Override
     public boolean save(User user) {

@@ -17,16 +17,14 @@ public class TrainingDiaryApplication {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        Duration duration = Duration.parse("PT4H56M45S");
-        System.out.println(duration.toHours() + "ч. "+duration.toMinutesPart()+"м. "+duration.toSecondsPart()+"c. ");
-
-        /*TrainingDiaryApplication application = new TrainingDiaryApplication();
+        TrainingDiaryApplication application = new TrainingDiaryApplication();
         ApplicationContext context = application.initAppContext();
         ApplicationRunner applicationRunner = context.getBean(ApplicationRunner.class);
 
-        MigrationManager.migrate();
+        MigrationManager migrationManager = context.getBean(MigrationManager.class);
+        migrationManager.migrate();
 
-        applicationRunner.run();*/
+        applicationRunner.run();
     }
 
     /**
