@@ -7,6 +7,7 @@ import com.ylab.intensive.model.dto.WorkoutDto;
 import com.ylab.intensive.exception.*;
 import com.ylab.intensive.model.entity.Workout;
 import com.ylab.intensive.model.enums.Role;
+import com.ylab.intensive.model.mapper.WorkoutMapper;
 import com.ylab.intensive.model.security.Session;
 import com.ylab.intensive.service.UserManagementService;
 import com.ylab.intensive.service.WorkoutService;
@@ -42,6 +43,8 @@ public class WorkoutServiceImpl implements WorkoutService {
      */
     @Inject
     private Session authorizedUser;
+    @Inject
+    private WorkoutMapper workoutMapper;
 
 
     public void setAuthorizedWorkoutDB(List<Workout> workouts) {
@@ -105,7 +108,7 @@ public class WorkoutServiceImpl implements WorkoutService {
         userManagementService.saveAction("Пользователь просмотрел свои предыдущие тренировки.");
         return workoutDao.findAll().stream()
                 .sorted(Comparator.comparing(Workout::getDate))
-                .map(this::entityToDto)
+                .map(w -> workoutMapper.entityToDto(w))
                 .collect(Collectors.toList());
     }
 
@@ -113,7 +116,7 @@ public class WorkoutServiceImpl implements WorkoutService {
     public Optional<WorkoutDto> getWorkoutByDate(String date) {
         LocalDate localDate = getDate(date);
         Optional<Workout> workout = workoutDao.findByDate(localDate);
-        return Optional.of(workout.map(this::entityToDto)).orElseGet(Optional::empty);
+        return Optional.of(workout.map(w -> workoutMapper.entityToDto(w))).orElseGet(Optional::empty);
     }
 
     @Override
@@ -184,13 +187,4 @@ public class WorkoutServiceImpl implements WorkoutService {
         return date;
     }
 
-    private WorkoutDto entityToDto(Workout workout) {
-        WorkoutDto workoutDto = new WorkoutDto();
-        workoutDto.setDate(workout.getDate());
-        workoutDto.setType(workout.getType());
-        workoutDto.setDuration(workout.getDuration());
-        workoutDto.setCalorie(workout.getCalorie());
-        workoutDto.setInfo(workout.getInfo());
-        return workoutDto;
-    }
 }

@@ -9,6 +9,7 @@ import com.ylab.intensive.model.dto.WorkoutDto;
 import com.ylab.intensive.model.entity.User;
 import com.ylab.intensive.model.entity.Workout;
 import com.ylab.intensive.model.enums.Role;
+import com.ylab.intensive.model.mapper.UserMapper;
 import com.ylab.intensive.model.security.Session;
 import com.ylab.intensive.service.UserManagementService;
 
@@ -32,6 +33,8 @@ public class UserManagementServiceImpl implements UserManagementService {
      */
     @Inject
     private Session authorizedUser;
+    @Inject
+    private UserMapper userMapper;
 
 
     @Override
@@ -52,7 +55,7 @@ public class UserManagementServiceImpl implements UserManagementService {
         if (user.isPresent()) {
             String userPassword = user.get().getPassword();
             if (userPassword.equals(password)) {
-                authorizedUser.setAttribute("authorizedUser", entityToDto(user.get()));
+                authorizedUser.setAttribute("authorizedUser", userMapper.entityToDto(user.get()));
 
                 saveAction("Пользователь " + email + " авторизовался");
 
@@ -78,8 +81,8 @@ public class UserManagementServiceImpl implements UserManagementService {
             if (user.isPresent()) {
                 saveAction("Пользователь изменил роль на: " + role);
                 authorizedUser.removeAttribute("authorizedUser");
-                authorizedUser.setAttribute("authorizedUser", entityToDto(user.get()));
-                return Optional.of(entityToDto(user.get()));
+                authorizedUser.setAttribute("authorizedUser", userMapper.entityToDto(user.get()));
+                return Optional.of(userMapper.entityToDto(user.get()));
             }
         }
         return Optional.empty();
@@ -119,12 +122,5 @@ public class UserManagementServiceImpl implements UserManagementService {
             throw new ChangeUserPermissionsException(e.getMessage());
         }
         return role;
-    }
-
-    private UserDto entityToDto(User user) {
-        UserDto userDto = new UserDto();
-        userDto.setEmail(user.getEmail());
-        userDto.setRole(user.getRole());
-        return userDto;
     }
 }
