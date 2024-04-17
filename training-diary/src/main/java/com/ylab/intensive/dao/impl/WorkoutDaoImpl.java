@@ -62,28 +62,28 @@ public class WorkoutDaoImpl implements WorkoutDao {
     }
 
     @Override
-    public void updateWorkoutInfo(WorkoutDto workoutDto, String title, String info) {
-        Optional<Workout> workout = findByDate(workoutDto.getDate());
-        workout.get().getInfo().put(title, info);
+    public void updateWorkoutInfo(Workout workout, String title, String info) {
+        Optional<Workout> workoutFind = findByDate(workout.getDate());
+        workoutFind.get().getInfo().put(title, info);
     }
 
     @Override
-    public void updateCalorie(WorkoutDto workoutDto, Float calorie) {
-        Optional<Workout> workout = findByDate(workoutDto.getDate());
-        workout.get().setCalorie(calorie);
+    public void updateCalorie(Workout workout, Float calorie) {
+        Optional<Workout> workoutFind = findByDate(workout.getDate());
+        workoutFind.get().setCalorie(calorie);
     }
 
     @Override
-    public void updateDuration(WorkoutDto workoutDto, Duration duration) {
-        Optional<Workout> workout = findByDate(workoutDto.getDate());
-        workout.get().setDuration(duration);
+    public void updateDuration(Workout workout, Duration duration) {
+        Optional<Workout> workoutFind = findByDate(workout.getDate());
+        workoutFind.get().setDuration(duration);
     }
 
     @Override
-    public void updateType(WorkoutDto workoutDto, String oldType, String newType) {
-        Optional<Workout> workout = findByDate(workoutDto.getDate());
-        workout.get().getType().remove(oldType);
-        workout.get().getType().add(newType);
+    public void updateType(Workout workout, String oldType, String newType) {
+        Optional<Workout> workoutFind = findByDate(workout.getDate());
+        workoutFind.get().getType().remove(oldType);
+        workoutFind.get().getType().add(newType);
     }
 
     @Override

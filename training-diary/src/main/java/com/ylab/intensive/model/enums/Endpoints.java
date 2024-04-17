@@ -21,7 +21,10 @@ public enum Endpoints {
     EXIT(12),
     VIEW_All_TRAININGS(13);
 
-    private final int value; // The integer value associated with the endpoint
+    /**
+     * The integer value associated with the endpoint
+     */
+    private final int value;
 
     /**
      * Constructs an endpoint with the specified integer value.

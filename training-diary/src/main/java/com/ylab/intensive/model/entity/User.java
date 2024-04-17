@@ -14,10 +14,28 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class User {
-    private int id; // The ID of the user
-    private String email; // The email address of the user
-    private String password; // The password of the user
-    private List<Workout> workout; // The list of workouts associated with the user
-    private List<String> action; // The list of actions performed by the user (Audit)
-    private Role role; // The role of the user (e.g., ADMIN, USER)
+    /**
+     * The ID of the user
+     */
+    private int id;
+    /**
+     * The email address of the user
+     */
+    private String email;
+    /**
+     * The password of the user
+     */
+    private String password;
+    /**
+     * The list of workouts associated with the user
+     */
+    private List<Workout> workout;
+    /**
+     * The list of actions performed by the user (Audit)
+     */
+    private List<String> action;
+    /**
+     * The role of the user (e.g., ADMIN, USER)
+     */
+    private Role role;
 }

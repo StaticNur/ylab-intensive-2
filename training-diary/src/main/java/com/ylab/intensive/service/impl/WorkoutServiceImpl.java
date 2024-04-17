@@ -71,11 +71,13 @@ public class WorkoutServiceImpl implements WorkoutService {
         if (durationHMS.length != 3) {
             throw new DateFormatException("Не правильный формат данных (пример для '1 час 5 минут 24 секунды': 1:5:24 )!");
         }
-        Duration duration = Duration.ofHours(Integer.parseInt(durationHMS[0])).plusMinutes(Integer.parseInt(durationHMS[1])).plusSeconds(Integer.parseInt(durationHMS[2]));
+        Duration duration = Duration.ofHours(Integer.parseInt(durationHMS[0]))
+                                    .plusMinutes(Integer.parseInt(durationHMS[1]))
+                                    .plusSeconds(Integer.parseInt(durationHMS[2]));
 
         Optional<Workout> workoutMayBe = workoutDao.findByDate(localDate);
-        if (workoutMayBe.isPresent()) {
-            throw new WorkoutException("Тренировка в " + date + " уже была добавлена! Ее теперь можно только редактировать");
+        if (workoutMayBe.isPresent() && workoutMayBe.get().getType().contains(typeName)) {
+            throw new WorkoutException("Тренировка типа "+typeName+" в " + date + " уже была добавлена! Ее теперь можно только редактировать");
         }
         int size = workoutDao.getSize();
         Workout workout = new Workout(
@@ -121,7 +123,8 @@ public class WorkoutServiceImpl implements WorkoutService {
 
     @Override
     public void updateType(WorkoutDto workoutDto, String oldType, String newType) {
-        workoutDao.updateType(workoutDto, oldType, newType);
+        Workout workout = workoutMapper.dtoToEntity(workoutDto);
+        workoutDao.updateType(workout, oldType, newType);
         userManagementService.saveAction("Пользователь редактировал тип тренировки с " + oldType + " на " + newType);
     }
 
@@ -129,13 +132,15 @@ public class WorkoutServiceImpl implements WorkoutService {
     public void updateDuration(WorkoutDto workoutDto, String durationStr) {
         String[] durationHMS = durationStr.split(":");
         Duration duration = Duration.ofHours(Integer.parseInt(durationHMS[0])).plusMinutes(Integer.parseInt(durationHMS[1])).plusSeconds(Integer.parseInt(durationHMS[2]));
-        workoutDao.updateDuration(workoutDto, duration);
+        Workout workout = workoutMapper.dtoToEntity(workoutDto);
+        workoutDao.updateDuration(workout, duration);
         userManagementService.saveAction("Пользователь редактировал длительность тренировки, теперь " + durationStr);
     }
 
     @Override
     public void updateCalories(WorkoutDto workoutDto, String calories) {
-        workoutDao.updateCalorie(workoutDto, Float.parseFloat(calories));
+        Workout workout = workoutMapper.dtoToEntity(workoutDto);
+        workoutDao.updateCalorie(workout, Float.parseFloat(calories));
         userManagementService.saveAction("Пользователь редактировал количество потраченных калорий в " + workoutDto.getDate() + ", теперь " + calories);
     }
 
@@ -145,7 +150,8 @@ public class WorkoutServiceImpl implements WorkoutService {
         if (s == null || s.isEmpty()) {
             throw new WorkoutInfoException("Такой заголовок в доп. инфо. нет!");
         }
-        workoutDao.updateWorkoutInfo(workoutDto, title, info);
+        Workout workout = workoutMapper.dtoToEntity(workoutDto);
+        workoutDao.updateWorkoutInfo(workout, title, info);
         userManagementService.saveAction("Пользователь редактировал дополнительную информацию для "
                                          + title + " c " + workoutDto.getInfo().get(title) + " на  " + info);
     }

@@ -1,6 +1,5 @@
 package com.ylab.intensive.dao;
 
-import com.ylab.intensive.model.dto.WorkoutDto;
 import com.ylab.intensive.model.entity.Workout;
 
 import java.time.Duration;
@@ -79,36 +78,36 @@ public interface WorkoutDao {
     /**
      * Updates the information of a workout.
      *
-     * @param workoutDto The workout DTO containing the information to update
-     * @param title      The title of the information to update
-     * @param info       The new information
+     * @param workout The workout containing the information to update
+     * @param title   The title of the information to update
+     * @param info    The new information
      */
-    void updateWorkoutInfo(WorkoutDto workoutDto, String title, String info);
+    void updateWorkoutInfo(Workout workout, String title, String info);
 
     /**
      * Updates the calorie of a workout.
      *
-     * @param workoutDto The workout DTO containing the calorie to update
+     * @param workout The workout containing the calorie to update
      * @param calorie    The new calorie value
      */
-    void updateCalorie(WorkoutDto workoutDto, Float calorie);
+    void updateCalorie(Workout workout, Float calorie);
 
     /**
      * Updates the duration of a workout.
      *
-     * @param workoutDto The workout DTO containing the duration to update
-     * @param duration   The new duration value
+     * @param workout  The workout DTO containing the duration to update
+     * @param duration The new duration value
      */
-    void updateDuration(WorkoutDto workoutDto, Duration duration);
+    void updateDuration(Workout workout, Duration duration);
 
     /**
      * Updates the type of a workout.
      *
-     * @param workoutDto The workout DTO containing the type to update
-     * @param oldType    The old type of the workout
-     * @param newType    The new type of the workout
+     * @param workout The workout DTO containing the type to update
+     * @param oldType The old type of the workout
+     * @param newType The new type of the workout
      */
-    void updateType(WorkoutDto workoutDto, String oldType, String newType);
+    void updateType(Workout workout, String oldType, String newType);
 
     /**
      * Finds workouts within a specified date range.

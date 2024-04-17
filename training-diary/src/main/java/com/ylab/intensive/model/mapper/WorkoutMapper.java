@@ -14,4 +14,8 @@ public class WorkoutMapper {
         workoutDto.setInfo(workout.getInfo());
         return workoutDto;
     }
+
+    public Workout dtoToEntity(WorkoutDto workoutDto) {
+        return new Workout();
+    }
 }

@@ -16,10 +16,28 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Workout {
-    int id; // The ID of the workout
-    LocalDate date; // The date of the workout
-    Set<String> type; // The type(s) of the workout
-    Duration duration; // The duration of the workout
-    Float calorie; // The calorie burned during the workout
-    Map<String, String> info; // Additional information about the workout
+    /**
+     * The ID of the workout
+     */
+    int id;
+    /**
+     * The date of the workout
+     */
+    LocalDate date;
+    /**
+     * The type(s) of the workout
+     */
+    Set<String> type;
+    /**
+     * The duration of the workout
+     */
+    Duration duration;
+    /**
+     * The calorie burned during the workout
+     */
+    Float calorie;
+    /**
+     * Additional information about the workout
+     */
+    Map<String, String> info;
 }
