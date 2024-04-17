@@ -1,16 +1,19 @@
 package com.ylab.intensive.service;
 
-import com.ylab.intensive.dao.UserDao;
 import com.ylab.intensive.di.annatation.Inject;
 import com.ylab.intensive.in.OutputData;
-import com.ylab.intensive.model.entity.User;
-import com.ylab.intensive.model.entity.Workout;
-import com.ylab.intensive.model.enums.Role;
 import com.ylab.intensive.ui.AnsiColor;
+import liquibase.Liquibase;
+import liquibase.database.Database;
+import liquibase.database.DatabaseFactory;
+import liquibase.database.jvm.JdbcConnection;
+import liquibase.exception.LiquibaseException;
+import liquibase.resource.ClassLoaderResourceAccessor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.time.Duration;
-import java.time.LocalDate;
-import java.util.*;
+import java.sql.Connection;
+import java.sql.SQLException;
 
 /**
  * MigrationManager Class.
@@ -18,13 +21,6 @@ import java.util.*;
  * It adds some initial users and workouts to the user database.
  */
 public class MigrationManager {
-    /**
-     * User DAO.
-     * This DAO is responsible for data access operations related to users.
-     */
-    @Inject
-    private UserDao userDao;
-
     /**
      * Output data.
      * Allows outputting data to the user.
@@ -39,25 +35,23 @@ public class MigrationManager {
     @Inject
     private AnsiColor ansiColor;
 
+    /**
+     * Performs database migration using Liquibase.
+     * Retrieves a connection from the connection pool, initializes Liquibase with changelog file,
+     * and performs the migration. Prints a success message if migration is completed successfully,
+     * or an error message if any exception occurs.
+     */
     public void migrate() {
-        List<User> userDB = userDao.findAll();
-        User user1 = new User(1, "user1@example.com", "password1", new ArrayList<>(), new ArrayList<>(), Role.USER);
-        User user2 = new User(2, "user2@example.com", "password2", new ArrayList<>(), new ArrayList<>(), Role.ADMIN);
-        userDB.add(user1);
-        userDB.add(user2);
+        try (Connection connection = ConnectionManager.get()) {
+            Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection));
 
-
-        Workout workout1 = new Workout(1, LocalDate.now(), new HashSet<>(Arrays.asList("running", "cycling")), Duration.ofHours(1), 300f, new HashMap<>());
-        workout1.getInfo().put("количество выполненных упражнений", "20 - подтягиваний и 100 - отжиманий");
-        workout1.getInfo().put("пройденное расстояние", "12,34 км");
-        userDB.get(0).getWorkout().add(workout1);
-        Workout workout2 = new Workout(1, LocalDate.now(), new HashSet<>(Arrays.asList("running", "cycling")), Duration.ofHours(1), 300f, new HashMap<>());
-        workout2.getInfo().put("поднятия штанги", "20 - раз");
-        userDB.get(0).getWorkout().add(workout2);
-
-        Workout workout3 = new Workout(2, LocalDate.now(), new HashSet<>(Collections.singletonList("swimming")), Duration.ofMinutes(45), 200f, new HashMap<>());
-        workout3.getInfo().put("проплавленное расстояние", "450 метров");
-        userDB.get(1).getWorkout().add(workout3);
-        outputData.output(ansiColor.yellowText("Миграция данных успешно завершена!"));
+            Liquibase liquibase = new Liquibase("db.changelog/changelog.xml", new ClassLoaderResourceAccessor(), database);
+            liquibase.update();
+            outputData.output(ansiColor.yellowText("Миграция данных успешно завершена!"));
+        } catch (LiquibaseException e) {
+            outputData.errOutput("SQL Exception in migration " + e.getMessage());
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

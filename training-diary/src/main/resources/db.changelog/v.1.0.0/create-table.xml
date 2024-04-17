@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.5.xsd"
+        logicalFilePath="db/changelog.xml">
+
+    <!--   Таблица для ролей   -->
+    <changeSet id="create-role-table" author="Mukhammadnur">
+        <createSequence schemaName="internal" sequenceName="role_sequence" startValue="1" incrementBy="1"/>
+
+        <createTable schemaName="internal" tableName="role">
+            <column name="id" type="INT" defaultValueComputed="nextval('internal.role_sequence')">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <!--   Таблица для пользователей   -->
+    <changeSet id="create-user-table" author="Mukhammadnur">
+        <createSequence schemaName="internal" sequenceName="user_sequence" startValue="1" incrementBy="1"/>
+
+        <createTable schemaName="internal" tableName="user">
+            <column name="id" type="INT" defaultValueComputed="nextval('internal.user_sequence')">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="email" type="varchar(255)">
+                <constraints unique="true" nullable="false"/>
+            </column>
+            <column name="password" type="varchar(512)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="role_id" type="INT">
+                <constraints referencedTableSchemaName="internal"
+                             references="internal.role(id)" foreignKeyName="fk_user_role"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <!--   Таблица для тренировок   -->
+    <changeSet id="create-workout-table" author="Mukhammadnur">
+        <createSequence schemaName="internal" sequenceName="workout_sequence" startValue="1" incrementBy="1"/>
+
+        <createTable schemaName="internal" tableName="workout">
+            <column name="id" type="INT" defaultValueComputed="nextval('internal.workout_sequence')">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="INT">
+                <constraints nullable="false" referencedTableSchemaName="internal"
+                             references="internal.user(id)" foreignKeyName="fk_workout_user"/>
+            </column>
+            <column name="date" type="DATE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="duration" type="TIME">
+                <constraints nullable="false"/>
+            </column>
+            <column name="calorie" type="FLOAT"/>
+        </createTable>
+    </changeSet>
+
+    <!--   Таблица для типов тренировок   -->
+    <changeSet id="create-workout-type-table" author="Mukhammadnur">
+        <createSequence schemaName="internal" sequenceName="workout_type_sequence" startValue="1" incrementBy="1"/>
+
+        <createTable schemaName="internal" tableName="workout_type">
+            <column name="id" type="INT" defaultValueComputed="nextval('internal.workout_type_sequence')">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="workout_id" type="INT">
+                <constraints nullable="false" referencedTableSchemaName="internal"
+                             references="internal.workout(id)" foreignKeyName="fk_workout_type_workout"/>
+            </column>
+            <column name="type" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <!--   Таблица для дополнительной информации о тренировках   -->
+    <changeSet id="create-workout-info-table" author="Mukhammadnur">
+        <createSequence schemaName="internal" sequenceName="workout_info_sequence" startValue="1" incrementBy="1"/>
+
+        <createTable schemaName="internal" tableName="workout_info">
+            <column name="id" type="INT" defaultValueComputed="nextval('internal.workout_info_sequence')">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="workout_id" type="INT">
+                <constraints nullable="false" referencedTableSchemaName="internal"
+                             references="internal.workout(id)" foreignKeyName="fk_workout_info_workout"/>
+            </column>
+            <column name="title" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="info" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <!--   Таблица для аудита действий пользователей   -->
+    <changeSet id="create-audit-table" author="Mukhammadnur">
+        <createSequence schemaName="internal" sequenceName="audit_sequence" startValue="1" incrementBy="1"/>
+
+        <createTable schemaName="internal" tableName="audit">
+            <column name="id" type="INT" defaultValueComputed="nextval('internal.audit_sequence')">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="INT">
+                <constraints nullable="false" referencedTableSchemaName="internal"
+                             references="internal.user(id)" foreignKeyName="fk_audit_user"/>
+            </column>
+            <column name="action" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+</databaseChangeLog>

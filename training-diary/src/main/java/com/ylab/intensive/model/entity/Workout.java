@@ -19,25 +19,25 @@ public class Workout {
     /**
      * The ID of the workout
      */
-    int id;
+    private int id;
     /**
      * The date of the workout
      */
-    LocalDate date;
+    private LocalDate date;
     /**
      * The type(s) of the workout
      */
-    Set<String> type;
+    private Set<String> type;
     /**
      * The duration of the workout
      */
-    Duration duration;
+    private Duration duration;
     /**
      * The calorie burned during the workout
      */
-    Float calorie;
+    private Float calorie;
     /**
      * Additional information about the workout
      */
-    Map<String, String> info;
+    private Map<String, String> info;
 }
