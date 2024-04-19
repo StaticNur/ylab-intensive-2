@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
 import java.util.List;
-import java.util.Optional;
 
 import static com.ylab.intensive.ui.ConsoleText.UNKNOWN_COMMAND;
 
@@ -73,7 +72,8 @@ public class TrainingController {
     public void addWorkout() {
         String date = getUserInput(color.yellowBackground("Введите дату тренировки (dd-MM-yyyy):"));
         String type = getUserInput(color.yellowBackground("Введите тип тренировки:"));
-        String duration = getUserInput(color.yellowBackground("Введите длительность тренировки в формате hh:mm:ss (пример для '5 часов 7 минут 25 секунды': 5:7:25)"));
+        String duration = getUserInput(color.yellowBackground("Введите длительность тренировки в формате hh:mm:ss " +
+                                                              "(пример для '5 часов 7 минут 25 секунды': 5:7:25)"));
         String calorie = getUserInput(color.yellowBackground("Введите количество потраченных калорий во время тренировки:"));
         try {
             workoutService.addWorkout(date, type, duration, calorie);
@@ -88,7 +88,8 @@ public class TrainingController {
      */
     public void addWorkoutInfo() {
         String date = getUserInput(color.yellowBackground("Введите дату тренировки (dd-MM-yyyy):"));
-        String title = getUserInput(color.yellowBackground("Введите заголовок для добавления дополнительной информации (например: пройденное расстояние):"));
+        String title = getUserInput(color.yellowBackground("Введите заголовок для добавления дополнительной " +
+                                                           "информации (например: пройденное расстояние):"));
         String info = getUserInput(color.yellowBackground("Введите дополнительную информацию (например: 3,67 км):"));
         try {
             workoutService.addWorkoutInfo(date, title, info);
@@ -108,13 +109,7 @@ public class TrainingController {
         } else {
             StringBuilder formattedWorkouts = new StringBuilder();
             for (WorkoutDto workout : workouts) {
-                Duration duration = workout.getDuration();
-                String viewDuration = String.format("%dч. %dм. %dс.", duration.toHours(), duration.toMinutesPart(), duration.toSecondsPart());
-                formattedWorkouts.append("date = ").append(workout.getDate()).append(", ");
-                formattedWorkouts.append("types = ").append(workout.getType()).append(", ");
-                formattedWorkouts.append("duration = ").append(viewDuration).append(", ");
-                formattedWorkouts.append("calorie = ").append(workout.getCalorie()).append(", ");
-                formattedWorkouts.append("info = ").append(workout.getInfo()).append("\n");
+                buildUIForWorkout(workout, formattedWorkouts);
             }
             outputData.output(color.greenBackground(formattedWorkouts.toString()));
         }
@@ -128,13 +123,7 @@ public class TrainingController {
         try {
             WorkoutDto workoutDto = workoutService.getWorkoutByDate(date);
             StringBuilder formattedWorkouts = new StringBuilder();
-            Duration duration = workoutDto.getDuration();
-            String viewDuration = String.format("%dч. %dм. %dс.", duration.toHours(), duration.toMinutesPart(), duration.toSecondsPart());
-            formattedWorkouts.append("date = ").append(workoutDto.getDate()).append(", ");
-            formattedWorkouts.append("types = ").append(workoutDto.getType()).append(", ");
-            formattedWorkouts.append("duration = ").append(viewDuration).append(", ");
-            formattedWorkouts.append("calorie = ").append(workoutDto.getCalorie()).append(", ");
-            formattedWorkouts.append("info = ").append(workoutDto.getInfo());
+            buildUIForWorkout(workoutDto, formattedWorkouts);
             outputData.output(color.greenBackground(formattedWorkouts.toString()));
             outputData.output(color.greyBackground("Редактировать: " +
                                                    "\n 1 - тип тренировки " +
@@ -175,13 +164,25 @@ public class TrainingController {
         String end = getUserInput(color.yellowBackground("Введите дату конца (dd-MM-yyyy):"));
         try {
             int workoutStatistics = workoutService.getWorkoutStatistics(begin, end);
-            outputData.output(color.greenBackground("Количество потраченных калорий в разрезе времени с " + begin + " по " + end + ": " + workoutStatistics));
+            outputData.output(color.greenBackground("Количество потраченных калорий в разрезе времени с "
+                                                    + begin + " по " + end + ": " + workoutStatistics));
         } catch (RuntimeException e) {
             handleException(e);
         }
     }
 
     // Private helper methods
+
+
+    private void buildUIForWorkout(WorkoutDto workout, StringBuilder formattedWorkouts) {
+        Duration duration = workout.getDuration();
+        String viewDuration = String.format("%dч. %dм. %dс.", duration.toHours(), duration.toMinutesPart(), duration.toSecondsPart());
+        formattedWorkouts.append("date = ").append(workout.getDate()).append(", ");
+        formattedWorkouts.append("types = ").append(workout.getType()).append(", ");
+        formattedWorkouts.append("duration = ").append(viewDuration).append(", ");
+        formattedWorkouts.append("calorie = ").append(workout.getCalorie()).append(", ");
+        formattedWorkouts.append("info = ").append(workout.getInfo()).append("\n");
+    }
 
     /**
      * Edits the type of a workout.
@@ -197,7 +198,8 @@ public class TrainingController {
      * Edits the duration of a workout.
      */
     private void editDuration(WorkoutDto workoutDto) {
-        String newDuration = getUserInput(color.yellowBackground("Введите новую длительность тренировки в формате hh:mm:ss (пример для '5 часов 7 минут 25 секунды': 5:7:25)"));
+        String newDuration = getUserInput(color.yellowBackground("Введите новую длительность тренировки в формате" +
+                                                                 " hh:mm:ss (пример для '5 часов 7 минут 25 секунды': 5:7:25)"));
         workoutService.updateDuration(workoutDto, newDuration);
         outputData.output(color.greenBackground("Длительность тренировки успешно изменена!"));
     }
@@ -206,7 +208,8 @@ public class TrainingController {
      * Edits the calories of a workout.
      */
     private void editCalories(WorkoutDto workoutDto) {
-        String newCalories = getUserInput(color.yellowBackground("Введите новое количество потраченных калорий (например: 942.4):"));
+        String newCalories = getUserInput(color.yellowBackground("Введите новое количество потраченных " +
+                                                                 "калорий (например: 942.4):"));
         workoutService.updateCalories(workoutDto, newCalories);
         outputData.output(color.greenBackground("Количество потраченных калорий успешно изменено!"));
     }
@@ -215,8 +218,10 @@ public class TrainingController {
      * Edits the additional information of a workout.
      */
     private void editAdditionalInfo(WorkoutDto workoutDto) {
-        String title = getUserInput(color.yellowBackground("Введите заголовок дополнительной информации (например: пройденное расстояние):"));
-        String info = getUserInput(color.yellowBackground("Введите новые данные для этого заголовка (например: 11,6 км):"));
+        String title = getUserInput(color.yellowBackground("Введите заголовок дополнительной информации " +
+                                                           "(например: пройденное расстояние):"));
+        String info = getUserInput(color.yellowBackground("Введите новые данные для этого заголовка " +
+                                                          "(например: 11,6 км):"));
         workoutService.updateAdditionalInfo(workoutDto, title, info);
         outputData.output(color.greenBackground("Дополнительная информация успешно изменена!"));
     }

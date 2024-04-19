@@ -1,7 +1,6 @@
 package com.ylab.intensive.dao;
 
 import com.ylab.intensive.model.entity.User;
-import com.ylab.intensive.model.enums.Role;
 
 import java.util.List;
 import java.util.Optional;
@@ -29,7 +28,7 @@ public interface UserDao {
     /**
      * Updates the role of a user.
      *
-     * @param email   The email of the user to update
+     * @param email The email of the user to update
      * @return An Optional containing the updated user if found, otherwise empty
      */
     boolean updateUserRole(String email, int roleId);

@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class WorkoutInfoDaoImpl implements WorkoutInfoDao {
+
     @Override
     public void saveWorkoutInfo(int workoutId, String title, String info) {
         String INSERT_INFO = "INSERT INTO internal.workout_info (workout_id, title, info) VALUES (?, ?, ?)";
@@ -16,13 +17,13 @@ public class WorkoutInfoDaoImpl implements WorkoutInfoDao {
         try (Connection connection = ConnectionManager.get()) {
             connection.setAutoCommit(false);
 
-            try (PreparedStatement statement = connection.prepareStatement(INSERT_INFO)){
-                statement.setInt(1, workoutId);
-                statement.setString(2, title);
-                statement.setString(3, info);
+            try (PreparedStatement preparedStatement = connection.prepareStatement(INSERT_INFO)) {
+                preparedStatement.setInt(1, workoutId);
+                preparedStatement.setString(2, title);
+                preparedStatement.setString(3, info);
 
-                statement.executeUpdate();
-            }catch (SQLException e) {
+                preparedStatement.executeUpdate();
+            } catch (SQLException e) {
                 connection.rollback();
                 throw new DaoException(e.getMessage());
             }
@@ -33,7 +34,6 @@ public class WorkoutInfoDaoImpl implements WorkoutInfoDao {
         }
     }
 
-
     @Override
     public void updateWorkoutInfo(int workoutId, String title, String info) {
         String UPDATE_INFO = "UPDATE internal.workout_info SET info = ? WHERE workout_id = ? AND title = ?";
@@ -41,17 +41,17 @@ public class WorkoutInfoDaoImpl implements WorkoutInfoDao {
         try (Connection connection = ConnectionManager.get()) {
             connection.setAutoCommit(false);
 
-            try (PreparedStatement statement = connection.prepareStatement(UPDATE_INFO)){
-                statement.setString(1, info);
-                statement.setInt(2, workoutId);
-                statement.setString(3, title);
+            try (PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_INFO)) {
+                preparedStatement.setString(1, info);
+                preparedStatement.setInt(2, workoutId);
+                preparedStatement.setString(3, title);
 
-                int affectedRows = statement.executeUpdate();
+                int affectedRows = preparedStatement.executeUpdate();
 
                 if (affectedRows == 0) {
                     throw new SQLException("Updating workout info failed, no rows affected.");
                 }
-            }catch (SQLException e) {
+            } catch (SQLException e) {
                 connection.rollback();
                 throw new DaoException(e.getMessage());
             }
@@ -65,14 +65,14 @@ public class WorkoutInfoDaoImpl implements WorkoutInfoDao {
     @Override
     public Map<String, String> findByWorkoutId(int workoutId) {
         Map<String, String> workoutInfoMap = new HashMap<>();
-        String SELECT_INFO = "SELECT title, info FROM internal.workout_info WHERE workout_id = ?";
+        String FIND_BY_WORKOUT_ID = "SELECT title, info FROM internal.workout_info WHERE workout_id = ?";
 
         try (Connection connection = ConnectionManager.get();
-             PreparedStatement statement = connection.prepareStatement(SELECT_INFO)) {
+             PreparedStatement preparedStatement = connection.prepareStatement(FIND_BY_WORKOUT_ID)) {
 
-            statement.setInt(1, workoutId);
+            preparedStatement.setInt(1, workoutId);
 
-            try (ResultSet resultSet = statement.executeQuery()) {
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
                     String key = resultSet.getString("title");
                     String value = resultSet.getString("info");
@@ -94,11 +94,11 @@ public class WorkoutInfoDaoImpl implements WorkoutInfoDao {
         try (Connection connection = ConnectionManager.get()) {
             connection.setAutoCommit(false);
 
-            try (PreparedStatement statement = connection.prepareStatement(DELETE_WORKOUT)){
-                statement.setInt(1, workoutId);
+            try (PreparedStatement preparedStatement = connection.prepareStatement(DELETE_WORKOUT)) {
+                preparedStatement.setInt(1, workoutId);
 
-                statement.executeUpdate();
-            }catch (SQLException e) {
+                preparedStatement.executeUpdate();
+            } catch (SQLException e) {
                 connection.rollback();
                 throw new DaoException(e.getMessage());
             }

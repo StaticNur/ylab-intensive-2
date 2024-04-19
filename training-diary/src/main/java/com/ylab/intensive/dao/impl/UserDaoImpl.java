@@ -4,7 +4,6 @@ import com.ylab.intensive.dao.UserDao;
 import com.ylab.intensive.di.annatation.Inject;
 import com.ylab.intensive.exception.DaoException;
 import com.ylab.intensive.model.entity.User;
-import com.ylab.intensive.model.enums.Role;
 import com.ylab.intensive.model.mapper.ResultSetMapper;
 import com.ylab.intensive.service.ConnectionManager;
 
@@ -30,12 +29,12 @@ public class UserDaoImpl implements UserDao {
             connection.setAutoCommit(false);
             int rowsAffected = 0;
 
-            try (PreparedStatement userStatement = connection.prepareStatement(INSERT_USER, Statement.RETURN_GENERATED_KEYS)) {
-                userStatement.setString(1, user.getEmail());
-                userStatement.setString(2, user.getPassword());
-                userStatement.setInt(3, roleId);
+            try (PreparedStatement preparedStatement = connection.prepareStatement(INSERT_USER, Statement.RETURN_GENERATED_KEYS)) {
+                preparedStatement.setString(1, user.getEmail());
+                preparedStatement.setString(2, user.getPassword());
+                preparedStatement.setInt(3, roleId);
 
-                rowsAffected = userStatement.executeUpdate();
+                rowsAffected = preparedStatement.executeUpdate();
 
             } catch (SQLException e) {
                 connection.rollback();
@@ -59,9 +58,10 @@ public class UserDaoImpl implements UserDao {
                 """;
 
         try (Connection connection = ConnectionManager.get();
-             PreparedStatement statement = connection.prepareStatement(FIND_BY_EMAIL)) {
-            statement.setString(1, email);
-            try (ResultSet resultSet = statement.executeQuery()) {
+             PreparedStatement preparedStatement = connection.prepareStatement(FIND_BY_EMAIL)) {
+            preparedStatement.setString(1, email);
+
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
                     return resultSetMapper.buildUser(resultSet);
                 }
@@ -88,11 +88,11 @@ public class UserDaoImpl implements UserDao {
             connection.setAutoCommit(false);
             int rowsAffected = 0;
 
-            try (PreparedStatement updateUserRoleStatement = connection.prepareStatement(UPDATE_USER_ROLE)) {
-                updateUserRoleStatement.setInt(1, roleId);
-                updateUserRoleStatement.setString(2, email);
+            try (PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_USER_ROLE)) {
+                preparedStatement.setInt(1, roleId);
+                preparedStatement.setString(2, email);
 
-                rowsAffected = updateUserRoleStatement.executeUpdate();
+                rowsAffected = preparedStatement.executeUpdate();
             } catch (SQLException e) {
                 connection.rollback();
                 throw new DaoException(e.getMessage());
@@ -110,8 +110,8 @@ public class UserDaoImpl implements UserDao {
         String FIND_ALL_USERS = "SELECT u.id as user_id, u.email, u.password, u.role_id FROM internal.user u";
 
         try (Connection connection = ConnectionManager.get();
-             PreparedStatement statement = connection.prepareStatement(FIND_ALL_USERS);
-             ResultSet resultSet = statement.executeQuery()) {
+             PreparedStatement preparedStatement = connection.prepareStatement(FIND_ALL_USERS);
+             ResultSet resultSet = preparedStatement.executeQuery()) {
 
             while (resultSet.next()) {
                 User user = resultSetMapper.buildUser(resultSet).orElseThrow(() -> new DaoException("Error in UserDao"));

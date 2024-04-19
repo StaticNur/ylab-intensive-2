@@ -2,14 +2,17 @@ package com.ylab.intensive.dao.impl;
 
 import com.ylab.intensive.dao.WorkoutTypeDao;
 import com.ylab.intensive.exception.DaoException;
-import com.ylab.intensive.model.entity.Workout;
 import com.ylab.intensive.service.ConnectionManager;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Set;
 
 public class WorkoutTypeDaoImpl implements WorkoutTypeDao {
+
     @Override
     public void saveType(int workoutId, String type) {
         String INSERT_TYPE = "INSERT INTO internal.workout_type (workout_id, type) VALUES (?, ?)";
@@ -17,12 +20,12 @@ public class WorkoutTypeDaoImpl implements WorkoutTypeDao {
         try (Connection connection = ConnectionManager.get()) {
             connection.setAutoCommit(false);
 
-            try ( PreparedStatement statement = connection.prepareStatement(INSERT_TYPE)){
-                statement.setInt(1, workoutId);
-                statement.setString(2, type);
+            try (PreparedStatement preparedStatement = connection.prepareStatement(INSERT_TYPE)) {
+                preparedStatement.setInt(1, workoutId);
+                preparedStatement.setString(2, type);
 
-                statement.executeUpdate();
-            }catch (SQLException e) {
+                preparedStatement.executeUpdate();
+            } catch (SQLException e) {
                 connection.rollback();
                 throw new DaoException(e.getMessage());
             }
@@ -40,17 +43,17 @@ public class WorkoutTypeDaoImpl implements WorkoutTypeDao {
         try (Connection connection = ConnectionManager.get()) {
             connection.setAutoCommit(false);
 
-            try ( PreparedStatement statement = connection.prepareStatement(UPDATE_TYPE)){
-                statement.setString(1, newType);
-                statement.setInt(2, workoutId);
-                statement.setString(3, oldType);
+            try (PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_TYPE)) {
+                preparedStatement.setString(1, newType);
+                preparedStatement.setInt(2, workoutId);
+                preparedStatement.setString(3, oldType);
 
-                int affectedRows = statement.executeUpdate();
+                int affectedRows = preparedStatement.executeUpdate();
 
                 if (affectedRows == 0) {
                     throw new SQLException("Updating workout type failed, no rows affected.");
                 }
-            }catch (SQLException e) {
+            } catch (SQLException e) {
                 connection.rollback();
                 throw new DaoException(e.getMessage());
             }
@@ -64,14 +67,14 @@ public class WorkoutTypeDaoImpl implements WorkoutTypeDao {
     @Override
     public Set<String> findByWorkoutId(int workoutId) {
         Set<String> types = new HashSet<>();
-        String SELECT_TYPES = "SELECT type FROM internal.workout_type WHERE workout_id = ?";
+        String FIND_BY_WORKOUT_ID = "SELECT type FROM internal.workout_type WHERE workout_id = ?";
 
         try (Connection connection = ConnectionManager.get();
-             PreparedStatement statement = connection.prepareStatement(SELECT_TYPES)) {
+             PreparedStatement preparedStatement = connection.prepareStatement(FIND_BY_WORKOUT_ID)) {
 
-            statement.setInt(1, workoutId);
+            preparedStatement.setInt(1, workoutId);
 
-            try (ResultSet resultSet = statement.executeQuery()) {
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
                     types.add(resultSet.getString("type"));
                 }
@@ -91,11 +94,11 @@ public class WorkoutTypeDaoImpl implements WorkoutTypeDao {
         try (Connection connection = ConnectionManager.get()) {
             connection.setAutoCommit(false);
 
-            try (PreparedStatement statement = connection.prepareStatement(DELETE_WORKOUT)){
-                statement.setInt(1, workoutId);
+            try (PreparedStatement preparedStatement = connection.prepareStatement(DELETE_WORKOUT)) {
+                preparedStatement.setInt(1, workoutId);
 
-                statement.executeUpdate();
-            }catch (SQLException e) {
+                preparedStatement.executeUpdate();
+            } catch (SQLException e) {
                 connection.rollback();
                 throw new DaoException(e.getMessage());
             }

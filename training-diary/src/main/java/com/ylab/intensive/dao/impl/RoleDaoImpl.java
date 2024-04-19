@@ -14,15 +14,16 @@ public class RoleDaoImpl implements RoleDao {
     @Override
     public int findByName(Role role) {
         String FIND_BY_NAME = """
-            SELECT r.id
-            FROM internal.role r
-            WHERE r.name = ?
-            """;
+                SELECT r.id
+                FROM internal.role r
+                WHERE r.name = ?
+                """;
 
         try (Connection connection = ConnectionManager.get();
-             PreparedStatement statement = connection.prepareStatement(FIND_BY_NAME)) {
-            statement.setString(1, role.name());
-            try (ResultSet resultSet = statement.executeQuery()) {
+             PreparedStatement preparedStatement = connection.prepareStatement(FIND_BY_NAME)) {
+            preparedStatement.setString(1, role.name());
+
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
                     return resultSet.getInt("id");
                 } else {

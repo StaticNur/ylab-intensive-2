@@ -62,7 +62,6 @@ class UserControllerTest {
         user.setRole(Role.USER);
         when(inputData.input()).thenReturn("testEmail", "testPassword");
         when(userManagementService.login("testEmail", "testPassword")).thenReturn(Optional.of(user));
-        doNothing().when(workoutService).setAuthorizedWorkoutDB(anyList());
         when(color.yellowText(anyString())).thenReturn("text");
         when(color.yellowBackground(anyString())).thenReturn("text");
         when(color.greenBackground(anyString())).thenReturn("Пользователь успешно авторизовался: testEmail USER");

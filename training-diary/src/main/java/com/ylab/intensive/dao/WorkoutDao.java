@@ -46,15 +46,15 @@ public interface WorkoutDao {
     /**
      * Updates the calorie of a workout.
      *
-     * @param id The workout id containing the calorie to update
-     * @param calorie    The new calorie value
+     * @param id      The workout id containing the calorie to update
+     * @param calorie The new calorie value
      */
     void updateCalorie(int id, Float calorie);
 
     /**
      * Updates the duration of a workout.
      *
-     * @param id  The workout id containing the duration to update
+     * @param id       The workout id containing the duration to update
      * @param duration The new duration value
      */
     void updateDuration(int id, Duration duration);

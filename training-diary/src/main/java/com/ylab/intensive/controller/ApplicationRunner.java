@@ -1,7 +1,5 @@
 package com.ylab.intensive.controller;
 
-import com.ylab.intensive.controller.TrainingController;
-import com.ylab.intensive.controller.UserController;
 import com.ylab.intensive.di.annatation.Inject;
 import com.ylab.intensive.in.InputData;
 import com.ylab.intensive.in.OutputData;

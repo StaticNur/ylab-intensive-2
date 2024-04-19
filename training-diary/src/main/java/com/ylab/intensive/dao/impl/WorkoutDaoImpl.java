@@ -2,15 +2,12 @@ package com.ylab.intensive.dao.impl;
 
 import com.ylab.intensive.dao.WorkoutDao;
 import com.ylab.intensive.exception.DaoException;
-import com.ylab.intensive.model.dto.WorkoutDto;
-import com.ylab.intensive.model.entity.User;
 import com.ylab.intensive.model.entity.Workout;
 import com.ylab.intensive.service.ConnectionManager;
 
 import java.sql.*;
 import java.time.Duration;
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -22,17 +19,17 @@ import java.util.Optional;
 public class WorkoutDaoImpl implements WorkoutDao {
     @Override
     public Optional<Workout> findByDate(LocalDate date) {
-        String FIND_BY_EMAIL = """
+        String FIND_BY_DATE = """
                 SELECT w.id, w.user_id, w.date, w.duration, w.calorie
                 FROM internal.workout w
                 WHERE w.date = ?
                 """;
 
         try (Connection connection = ConnectionManager.get();
-             PreparedStatement statement = connection.prepareStatement(FIND_BY_EMAIL)) {
-            statement.setDate(1, java.sql.Date.valueOf(date));
+             PreparedStatement preparedStatement = connection.prepareStatement(FIND_BY_DATE)) {
+            preparedStatement.setDate(1, java.sql.Date.valueOf(date));
 
-            try (ResultSet rs = statement.executeQuery()) {
+            try (ResultSet rs = preparedStatement.executeQuery()) {
                 if (rs.next()) {
 
                     Workout workout = new Workout();
@@ -42,8 +39,8 @@ public class WorkoutDaoImpl implements WorkoutDao {
 
                     Duration durationFromDB = Duration.ofSeconds(rs.getInt("duration"));
                     workout.setDuration(durationFromDB);
-
                     workout.setCalorie(rs.getFloat("calorie"));
+
                     return Optional.of(workout);
                 }
             }
@@ -60,26 +57,26 @@ public class WorkoutDaoImpl implements WorkoutDao {
         try (Connection connection = ConnectionManager.get()) {
             connection.setAutoCommit(false);
 
-            try(PreparedStatement statement = connection.prepareStatement(INSERT_WORKOUT, Statement.RETURN_GENERATED_KEYS)){
-                statement.setInt(1, workout.getUserId());
-                statement.setDate(2, Date.valueOf(workout.getDate()));
-                statement.setInt(3, (int) workout.getDuration().getSeconds());
-                statement.setFloat(4, workout.getCalorie());
+            try (PreparedStatement preparedStatement = connection.prepareStatement(INSERT_WORKOUT, Statement.RETURN_GENERATED_KEYS)) {
+                preparedStatement.setInt(1, workout.getUserId());
+                preparedStatement.setDate(2, Date.valueOf(workout.getDate()));
+                preparedStatement.setInt(3, (int) workout.getDuration().getSeconds());
+                preparedStatement.setFloat(4, workout.getCalorie());
 
-                int affectedRows = statement.executeUpdate();
+                int affectedRows = preparedStatement.executeUpdate();
 
                 if (affectedRows == 0) {
                     throw new SQLException("Creating workout failed, no rows affected.");
                 }
 
-                try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
+                try (ResultSet generatedKeys = preparedStatement.getGeneratedKeys()) {
                     if (generatedKeys.next()) {
                         workout.setId(generatedKeys.getInt("id"));
                     } else {
                         throw new SQLException("Creating workout failed, no ID obtained.");
                     }
                 }
-            }catch (SQLException e) {
+            } catch (SQLException e) {
                 connection.rollback();
                 throw new DaoException(e.getMessage());
             }
@@ -101,11 +98,11 @@ public class WorkoutDaoImpl implements WorkoutDao {
                 """;
 
         try (Connection connection = ConnectionManager.get();
-             PreparedStatement statement = connection.prepareStatement(FIND_ALL_WORKOUT)) {
+             PreparedStatement preparedStatement = connection.prepareStatement(FIND_ALL_WORKOUT)) {
 
-            statement.setInt(1, userId);
+            preparedStatement.setInt(1, userId);
 
-            try (ResultSet rs = statement.executeQuery()) {
+            try (ResultSet rs = preparedStatement.executeQuery()) {
                 while (rs.next()) {
                     Workout workout = new Workout();
                     workout.setId(rs.getInt("id"));
@@ -114,7 +111,6 @@ public class WorkoutDaoImpl implements WorkoutDao {
 
                     Duration durationFromDB = Duration.ofSeconds(rs.getInt("duration"));
                     workout.setDuration(durationFromDB);
-
                     workout.setCalorie(rs.getFloat("calorie"));
 
                     workoutList.add(workout);
@@ -133,11 +129,11 @@ public class WorkoutDaoImpl implements WorkoutDao {
         try (Connection connection = ConnectionManager.get()) {
             connection.setAutoCommit(false);
 
-            try (PreparedStatement statement = connection.prepareStatement(DELETE_WORKOUT)){
-                statement.setDate(1, Date.valueOf(date));
+            try (PreparedStatement preparedStatement = connection.prepareStatement(DELETE_WORKOUT)) {
+                preparedStatement.setDate(1, Date.valueOf(date));
 
-                statement.executeUpdate();
-            }catch (SQLException e) {
+                preparedStatement.executeUpdate();
+            } catch (SQLException e) {
                 connection.rollback();
                 throw new DaoException(e.getMessage());
             }
@@ -155,12 +151,12 @@ public class WorkoutDaoImpl implements WorkoutDao {
         try (Connection connection = ConnectionManager.get()) {
             connection.setAutoCommit(false);
 
-            try (PreparedStatement statement = connection.prepareStatement(UPDATE_CALORIE)){
-                statement.setFloat(1, calorie);
-                statement.setInt(2, id);
+            try (PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_CALORIE)) {
+                preparedStatement.setFloat(1, calorie);
+                preparedStatement.setInt(2, id);
 
-                statement.executeUpdate();
-            }catch (SQLException e) {
+                preparedStatement.executeUpdate();
+            } catch (SQLException e) {
                 connection.rollback();
                 throw new DaoException(e.getMessage());
             }
@@ -179,12 +175,12 @@ public class WorkoutDaoImpl implements WorkoutDao {
         try (Connection connection = ConnectionManager.get()) {
             connection.setAutoCommit(false);
 
-            try (PreparedStatement statement = connection.prepareStatement(UPDATE_DURATION)){
-                statement.setInt(1, (int) duration.getSeconds());
-                statement.setInt(2, id);
+            try (PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_DURATION)) {
+                preparedStatement.setInt(1, (int) duration.getSeconds());
+                preparedStatement.setInt(2, id);
 
-                statement.executeUpdate();
-            }catch (SQLException e) {
+                preparedStatement.executeUpdate();
+            } catch (SQLException e) {
                 connection.rollback();
                 throw new DaoException(e.getMessage());
             }
@@ -199,16 +195,16 @@ public class WorkoutDaoImpl implements WorkoutDao {
     public List<Workout> findByDuration(LocalDate begin, LocalDate end) {
         List<Workout> workouts = new ArrayList<>();
         String FIND_BY_DURATION = """
-                                SELECT w.id, w.user_id, w.date, w.duration, w.calorie
-                                FROM internal.workout w WHERE date BETWEEN ? AND ?
-                                """;
+                SELECT w.id, w.user_id, w.date, w.duration, w.calorie
+                FROM internal.workout w WHERE date BETWEEN ? AND ?
+                """;
 
         try (Connection connection = ConnectionManager.get();
-             PreparedStatement statement = connection.prepareStatement(FIND_BY_DURATION)) {
-            statement.setDate(1, Date.valueOf(begin));
-            statement.setDate(2, Date.valueOf(end));
+             PreparedStatement preparedStatement = connection.prepareStatement(FIND_BY_DURATION)) {
+            preparedStatement.setDate(1, Date.valueOf(begin));
+            preparedStatement.setDate(2, Date.valueOf(end));
 
-            try (ResultSet rs = statement.executeQuery()) {
+            try (ResultSet rs = preparedStatement.executeQuery()) {
                 while (rs.next()) {
                     Workout workout = new Workout();
                     workout.setId(rs.getInt("id"));
