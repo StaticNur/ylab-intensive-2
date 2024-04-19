@@ -3,17 +3,17 @@ package com.ylab.intensive.service;
 import com.ylab.intensive.di.annatation.Inject;
 import com.ylab.intensive.in.OutputData;
 import com.ylab.intensive.ui.AnsiColor;
+import com.ylab.intensive.util.PropertiesUtil;
 import liquibase.Liquibase;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.LiquibaseException;
 import liquibase.resource.ClassLoaderResourceAccessor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 /**
  * MigrationManager Class.
@@ -45,7 +45,12 @@ public class MigrationManager {
         try (Connection connection = ConnectionManager.get()) {
             Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection));
 
-            Liquibase liquibase = new Liquibase("db.changelog/changelog.xml", new ClassLoaderResourceAccessor(), database);
+            String changeLogFile = PropertiesUtil.get("liquibase.changeLogFile");
+            String schemaName = PropertiesUtil.get("liquibase.schemaName");
+
+            createSchemaForMigration(connection, schemaName);
+            database.setLiquibaseSchemaName(schemaName);
+            Liquibase liquibase = new Liquibase(changeLogFile, new ClassLoaderResourceAccessor(), database);
             liquibase.update();
             outputData.output(ansiColor.yellowText("Миграция данных успешно завершена!"));
         } catch (LiquibaseException e) {
@@ -54,4 +59,12 @@ public class MigrationManager {
             throw new RuntimeException(e);
         }
     }
+
+    private void createSchemaForMigration(Connection connection, String schemaName) throws SQLException {
+        Statement statement = connection.createStatement();
+        String sql = "CREATE SCHEMA IF NOT EXISTS " + schemaName;
+        statement.executeUpdate(sql);
+        statement.close();
+    }
+
 }

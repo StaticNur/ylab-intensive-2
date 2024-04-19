@@ -109,7 +109,7 @@ public class TrainingController {
             StringBuilder formattedWorkouts = new StringBuilder();
             for (WorkoutDto workout : workouts) {
                 Duration duration = workout.getDuration();
-                String viewDuration = duration.toHours() + "ч. " + duration.toMinutesPart() + "м. " + duration.toSecondsPart() + "c. ";
+                String viewDuration = String.format("%dч. %dм. %dс.", duration.toHours(), duration.toMinutesPart(), duration.toSecondsPart());
                 formattedWorkouts.append("date = ").append(workout.getDate()).append(", ");
                 formattedWorkouts.append("types = ").append(workout.getType()).append(", ");
                 formattedWorkouts.append("duration = ").append(viewDuration).append(", ");
@@ -126,12 +126,16 @@ public class TrainingController {
     public void editWorkout() {
         String date = getUserInput(color.yellowBackground("Введите дату тренировки, которую хотите редактировать (dd-MM-yyyy):"));
         try {
-            Optional<WorkoutDto> workoutDto = workoutService.getWorkoutByDate(date);
-            if (workoutDto.isEmpty()) {
-                outputData.errOutput("В этот день не было тренировки");
-                return;
-            }
-            outputData.output(color.greenBackground(workoutDto.get().toString()));
+            WorkoutDto workoutDto = workoutService.getWorkoutByDate(date);
+            StringBuilder formattedWorkouts = new StringBuilder();
+            Duration duration = workoutDto.getDuration();
+            String viewDuration = String.format("%dч. %dм. %dс.", duration.toHours(), duration.toMinutesPart(), duration.toSecondsPart());
+            formattedWorkouts.append("date = ").append(workoutDto.getDate()).append(", ");
+            formattedWorkouts.append("types = ").append(workoutDto.getType()).append(", ");
+            formattedWorkouts.append("duration = ").append(viewDuration).append(", ");
+            formattedWorkouts.append("calorie = ").append(workoutDto.getCalorie()).append(", ");
+            formattedWorkouts.append("info = ").append(workoutDto.getInfo());
+            outputData.output(color.greenBackground(formattedWorkouts.toString()));
             outputData.output(color.greyBackground("Редактировать: " +
                                                    "\n 1 - тип тренировки " +
                                                    "\n 2 - длительность тренировки " +
@@ -139,10 +143,10 @@ public class TrainingController {
                                                    "\n 4 - дополнительная информация"));
             String choice = getUserInput("");
             switch (choice) {
-                case "1" -> editType(workoutDto.get());
-                case "2" -> editDuration(workoutDto.get());
-                case "3" -> editCalories(workoutDto.get());
-                case "4" -> editAdditionalInfo(workoutDto.get());
+                case "1" -> editType(workoutDto);
+                case "2" -> editDuration(workoutDto);
+                case "3" -> editCalories(workoutDto);
+                case "4" -> editAdditionalInfo(workoutDto);
                 default -> outputData.errOutput(UNKNOWN_COMMAND);
             }
         } catch (RuntimeException e) {

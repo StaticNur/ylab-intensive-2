@@ -35,19 +35,19 @@
         <insert schemaName="internal" tableName="workout">
             <column name="user_id" value="1"/>
             <column name="date" value="2024-04-17"/>
-            <column name="duration" value="01:00:00"/>
+            <column name="duration" value="3600"/>
             <column name="calorie" value="500"/>
         </insert>
         <insert schemaName="internal" tableName="workout">
             <column name="user_id" value="2"/>
             <column name="date" value="2024-04-19"/>
-            <column name="duration" value="03:30:00"/>
+            <column name="duration" value="12600"/>
             <column name="calorie" value="1500"/>
         </insert>
         <insert schemaName="internal" tableName="workout">
             <column name="user_id" value="2"/>
             <column name="date" value="2024-03-19"/>
-            <column name="duration" value="02:35:00"/>
+            <column name="duration" value="9332"/>
             <column name="calorie" value="1000"/>
         </insert>
     </changeSet>
@@ -57,6 +57,10 @@
         <insert schemaName="internal" tableName="workout_type">
             <column name="workout_id" value="1"/>
             <column name="type" value="cardio"/>
+        </insert>
+        <insert schemaName="internal" tableName="workout_type">
+            <column name="workout_id" value="1"/>
+            <column name="type" value="yoga"/>
         </insert>
         <insert schemaName="internal" tableName="workout_type">
             <column name="workout_id" value="2"/>

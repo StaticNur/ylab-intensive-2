@@ -1,6 +1,7 @@
 package com.ylab.intensive.model.entity;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -15,11 +16,16 @@ import java.util.Set;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Workout {
     /**
      * The ID of the workout
      */
     private int id;
+    /**
+     * The ID of the workout
+     */
+    private int userId;
     /**
      * The date of the workout
      */

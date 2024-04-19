@@ -2,6 +2,7 @@ package com.ylab.intensive.model.entity;
 
 import com.ylab.intensive.model.enums.Role;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -11,8 +12,7 @@ import java.util.List;
  * Represents a user in the system.
  */
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
+@Builder
 public class User {
     /**
      * The ID of the user

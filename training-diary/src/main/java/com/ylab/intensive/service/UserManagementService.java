@@ -2,6 +2,7 @@ package com.ylab.intensive.service;
 
 import com.ylab.intensive.model.entity.User;
 import com.ylab.intensive.model.dto.UserDto;
+import javassist.NotFoundException;
 
 import java.util.List;
 import java.util.Optional;
@@ -63,4 +64,6 @@ public interface UserManagementService {
      * @return List of training DTOs.
      */
     List<User> getAllUser();
+
+    Optional<User> findByEmail(String email);
 }

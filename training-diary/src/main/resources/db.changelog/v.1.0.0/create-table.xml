@@ -15,7 +15,7 @@
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="name" type="VARCHAR(255)">
-                <constraints nullable="false"/>
+                <constraints nullable="false" unique="true"/>
             </column>
         </createTable>
     </changeSet>
@@ -56,7 +56,7 @@
             <column name="date" type="DATE">
                 <constraints nullable="false"/>
             </column>
-            <column name="duration" type="TIME">
+            <column name="duration" type="INT">
                 <constraints nullable="false"/>
             </column>
             <column name="calorie" type="FLOAT"/>

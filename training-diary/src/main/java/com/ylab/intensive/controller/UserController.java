@@ -72,6 +72,7 @@ public class UserController {
             String role = readInput(color.yellowBackground(" роль (ADMIN / USER): "));
             userManagementService.registerUser(email, password, role);
             log.info("The player trying to register with login " + email + " and password " + password);
+            outputData.output(color.greenBackground(" Вы успешно зарегистрировались! Теперь можете входить в личный кабинет. "));
         });
     }
 
@@ -86,7 +87,6 @@ public class UserController {
             if (user.isEmpty()) {
                 outputData.errOutput(" Не правильный логин или пароль!");
             } else {
-                workoutService.setAuthorizedWorkoutDB(user.get().getWorkout());
                 outputData.output(color.greenBackground(" Пользователь успешно авторизовался: " + user.get().getEmail() + " " + user.get().getRole()));
             }
         });
@@ -135,7 +135,8 @@ public class UserController {
         if (userList.isEmpty()) {
             outputData.errOutput("Для этого запроса нужны права администратора!");
         } else {
-            for (User user : userList) {
+            List<User> userWithWorkouts = workoutService.getAllUsersWorkouts(userList);
+            for (User user : userWithWorkouts) {
                 outputData.output(color.greenBackground(user.getEmail() + " " + user.getRole()));
                 StringBuilder formattedWorkouts = new StringBuilder();
 
@@ -150,7 +151,7 @@ public class UserController {
                 }
 
                 if (user.getWorkout().isEmpty()) {
-                    outputData.output(color.greenBackground("Тренировок нет"));
+                    outputData.output(color.greenBackground("Тренировок нет\n"));
                 } else {
                     outputData.output(color.greenBackground(formattedWorkouts.toString()));
                 }

@@ -1,11 +1,16 @@
 package com.ylab.intensive.dao.impl;
 
 import com.ylab.intensive.dao.WorkoutDao;
+import com.ylab.intensive.exception.DaoException;
 import com.ylab.intensive.model.dto.WorkoutDto;
+import com.ylab.intensive.model.entity.User;
 import com.ylab.intensive.model.entity.Workout;
+import com.ylab.intensive.service.ConnectionManager;
 
+import java.sql.*;
 import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -15,88 +20,212 @@ import java.util.Optional;
  * This class provides methods to interact with workout data in the database.
  */
 public class WorkoutDaoImpl implements WorkoutDao {
-    /**
-     * The list that represents the workout database.
-     */
-    private List<Workout> workoutDB;
-
-    public void init(List<Workout> workoutDB) {
-        this.workoutDB = workoutDB;
-    }
-
-    @Override
-    public int getSize() {
-        return workoutDB.size();
-    }
-
     @Override
     public Optional<Workout> findByDate(LocalDate date) {
-        return workoutDB.stream()
-                .filter(workout -> workout.getDate().equals(date))
-                .findFirst();
+        String FIND_BY_EMAIL = """
+                SELECT w.id, w.user_id, w.date, w.duration, w.calorie
+                FROM internal.workout w
+                WHERE w.date = ?
+                """;
+
+        try (Connection connection = ConnectionManager.get();
+             PreparedStatement statement = connection.prepareStatement(FIND_BY_EMAIL)) {
+            statement.setDate(1, java.sql.Date.valueOf(date));
+
+            try (ResultSet rs = statement.executeQuery()) {
+                if (rs.next()) {
+
+                    Workout workout = new Workout();
+                    workout.setId(rs.getInt("id"));
+                    workout.setUserId(rs.getInt("user_id"));
+                    workout.setDate(rs.getDate("date").toLocalDate());
+
+                    Duration durationFromDB = Duration.ofSeconds(rs.getInt("duration"));
+                    workout.setDuration(durationFromDB);
+
+                    workout.setCalorie(rs.getFloat("calorie"));
+                    return Optional.of(workout);
+                }
+            }
+        } catch (SQLException e) {
+            throw new DaoException(e.getMessage());
+        }
+        return Optional.empty();
     }
 
     @Override
-    public void saveType(Workout workout, String type) {
-        workout.getType().add(type);
+    public Workout saveWorkout(Workout workout) {
+        String INSERT_WORKOUT = "INSERT INTO internal.workout (user_id, date, duration, calorie) VALUES (?, ?, ?, ?)";
+
+        try (Connection connection = ConnectionManager.get()) {
+            connection.setAutoCommit(false);
+
+            try(PreparedStatement statement = connection.prepareStatement(INSERT_WORKOUT, Statement.RETURN_GENERATED_KEYS)){
+                statement.setInt(1, workout.getUserId());
+                statement.setDate(2, Date.valueOf(workout.getDate()));
+                statement.setInt(3, (int) workout.getDuration().getSeconds());
+                statement.setFloat(4, workout.getCalorie());
+
+                int affectedRows = statement.executeUpdate();
+
+                if (affectedRows == 0) {
+                    throw new SQLException("Creating workout failed, no rows affected.");
+                }
+
+                try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        workout.setId(generatedKeys.getInt("id"));
+                    } else {
+                        throw new SQLException("Creating workout failed, no ID obtained.");
+                    }
+                }
+            }catch (SQLException e) {
+                connection.rollback();
+                throw new DaoException(e.getMessage());
+            }
+
+            connection.commit();
+            return workout;
+        } catch (SQLException e) {
+            throw new DaoException("Error saving workout. " + e.getMessage());
+        }
     }
 
-    @Override
-    public void saveWorkout(Workout workout) {
-        workoutDB.add(workout);
-    }
 
     @Override
-    public void saveWorkoutInfo(Workout workout, String title, String info) {
-        workout.getInfo().put(title, info);
-    }
+    public List<Workout> findByUserId(int userId) {
+        List<Workout> workoutList = new ArrayList<>();
+        String FIND_ALL_WORKOUT = """
+                SELECT w.id, w.user_id, w.date, w.duration, w.calorie
+                FROM internal.workout w where w.user_id = ?
+                """;
 
-    @Override
-    public List<Workout> findAll() {
-        return workoutDB;
+        try (Connection connection = ConnectionManager.get();
+             PreparedStatement statement = connection.prepareStatement(FIND_ALL_WORKOUT)) {
+
+            statement.setInt(1, userId);
+
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    Workout workout = new Workout();
+                    workout.setId(rs.getInt("id"));
+                    workout.setUserId(rs.getInt("user_id"));
+                    workout.setDate(rs.getDate("date").toLocalDate());
+
+                    Duration durationFromDB = Duration.ofSeconds(rs.getInt("duration"));
+                    workout.setDuration(durationFromDB);
+
+                    workout.setCalorie(rs.getFloat("calorie"));
+
+                    workoutList.add(workout);
+                }
+            }
+        } catch (SQLException | DaoException e) {
+            throw new DaoException("Error fetching workouts. " + e.getMessage());
+        }
+        return workoutList;
     }
 
     @Override
     public void deleteWorkout(LocalDate date) {
-        workoutDB.removeIf(workout -> workout.getDate().equals(date));
+        String DELETE_WORKOUT = "DELETE FROM internal.workout WHERE date = ?";
+
+        try (Connection connection = ConnectionManager.get()) {
+            connection.setAutoCommit(false);
+
+            try (PreparedStatement statement = connection.prepareStatement(DELETE_WORKOUT)){
+                statement.setDate(1, Date.valueOf(date));
+
+                statement.executeUpdate();
+            }catch (SQLException e) {
+                connection.rollback();
+                throw new DaoException(e.getMessage());
+            }
+
+            connection.commit();
+        } catch (SQLException e) {
+            throw new DaoException("Error delete workout. " + e.getMessage());
+        }
     }
 
     @Override
-    public void updateWorkoutInfo(Workout workout, String title, String info) {
-        Optional<Workout> workoutFind = findByDate(workout.getDate());
-        workoutFind.get().getInfo().put(title, info);
+    public void updateCalorie(int id, Float calorie) {
+        String UPDATE_CALORIE = "UPDATE internal.workout SET calorie = ? WHERE id = ?";
+
+        try (Connection connection = ConnectionManager.get()) {
+            connection.setAutoCommit(false);
+
+            try (PreparedStatement statement = connection.prepareStatement(UPDATE_CALORIE)){
+                statement.setFloat(1, calorie);
+                statement.setInt(2, id);
+
+                statement.executeUpdate();
+            }catch (SQLException e) {
+                connection.rollback();
+                throw new DaoException(e.getMessage());
+            }
+
+            connection.commit();
+        } catch (SQLException e) {
+            throw new DaoException("Error updating calorie for workout. " + e.getMessage());
+        }
     }
 
-    @Override
-    public void updateCalorie(Workout workout, Float calorie) {
-        Optional<Workout> workoutFind = findByDate(workout.getDate());
-        workoutFind.get().setCalorie(calorie);
-    }
 
     @Override
-    public void updateDuration(Workout workout, Duration duration) {
-        Optional<Workout> workoutFind = findByDate(workout.getDate());
-        workoutFind.get().setDuration(duration);
-    }
+    public void updateDuration(int id, Duration duration) {
+        String UPDATE_DURATION = "UPDATE internal.workout SET duration = ? WHERE id = ?";
 
-    @Override
-    public void updateType(Workout workout, String oldType, String newType) {
-        Optional<Workout> workoutFind = findByDate(workout.getDate());
-        workoutFind.get().getType().remove(oldType);
-        workoutFind.get().getType().add(newType);
+        try (Connection connection = ConnectionManager.get()) {
+            connection.setAutoCommit(false);
+
+            try (PreparedStatement statement = connection.prepareStatement(UPDATE_DURATION)){
+                statement.setInt(1, (int) duration.getSeconds());
+                statement.setInt(2, id);
+
+                statement.executeUpdate();
+            }catch (SQLException e) {
+                connection.rollback();
+                throw new DaoException(e.getMessage());
+            }
+
+            connection.commit();
+        } catch (SQLException e) {
+            throw new DaoException("Error updateDuration workout. " + e.getMessage());
+        }
     }
 
     @Override
     public List<Workout> findByDuration(LocalDate begin, LocalDate end) {
-        List<Workout> workoutFromTheRange = new ArrayList<>();
+        List<Workout> workouts = new ArrayList<>();
+        String FIND_BY_DURATION = """
+                                SELECT w.id, w.user_id, w.date, w.duration, w.calorie
+                                FROM internal.workout w WHERE date BETWEEN ? AND ?
+                                """;
 
-        for (Workout workout : workoutDB) {
-            LocalDate workoutDate = workout.getDate();
+        try (Connection connection = ConnectionManager.get();
+             PreparedStatement statement = connection.prepareStatement(FIND_BY_DURATION)) {
+            statement.setDate(1, Date.valueOf(begin));
+            statement.setDate(2, Date.valueOf(end));
 
-            if (workoutDate.isAfter(begin) && workoutDate.isBefore(end)) {
-                workoutFromTheRange.add(workout);
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    Workout workout = new Workout();
+                    workout.setId(rs.getInt("id"));
+                    workout.setUserId(rs.getInt("user_id"));
+                    workout.setDate(rs.getDate("date").toLocalDate());
+
+                    Duration durationFromDB = Duration.ofSeconds(rs.getInt("duration"));
+                    workout.setDuration(durationFromDB);
+
+                    workout.setCalorie(rs.getFloat("calorie"));
+                    workouts.add(workout);
+                }
             }
+        } catch (SQLException e) {
+            throw new DaoException("Error findByDuration workout. " + e.getMessage());
         }
-        return workoutFromTheRange;
+
+        return workouts;
     }
 }

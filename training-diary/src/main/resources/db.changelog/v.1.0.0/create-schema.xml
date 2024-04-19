@@ -7,6 +7,8 @@
         logicalFilePath="db/changelog.xml">
 
     <changeSet id="create-schema-internal" author="Mukhammadnur">
-        <sql>CREATE SCHEMA internal</sql>
+        <sql dbms="postgresql" endDelimiter=";">
+            CREATE SCHEMA IF NOT EXISTS internal
+        </sql>
     </changeSet>
 </databaseChangeLog>
