@@ -111,10 +111,10 @@ public class WorkoutServiceImpl implements WorkoutService {
 
     @Override
     public List<WorkoutDto> getAllUserWorkouts() {
-        auditService.saveAction(getAuthorizedUserId(), "Пользователь просмотрел свои предыдущие тренировки.");
         int userId = getAuthorizedUserId();
+        auditService.saveAction(userId, "Пользователь просмотрел свои предыдущие тренировки.");
         List<Workout> workoutList = workoutDao.findByUserId(userId);
-        for (Workout workout: workoutList){
+        for (Workout workout : workoutList) {
             workout.setType(workoutTypeService.findByWorkoutId(workout.getId()));
             workout.setInfo(workoutInfoService.getInfoByWorkoutId(workout.getId()));
         }
@@ -127,8 +127,8 @@ public class WorkoutServiceImpl implements WorkoutService {
     public WorkoutDto getWorkoutByDate(String date) {
         LocalDate localDate = getDate(date);
         Workout workout = workoutDao.findByDate(localDate)
-                .orElseThrow(() -> new NotFoundException("Тренировка в " + localDate +
-                                                                                                   " не проводилось! Сначала добавьте ее."));;
+                .orElseThrow(() -> new NotFoundException("Тренировка в "
+                                                         + localDate + " не проводилось! Сначала добавьте ее."));
 
         workout.setType(workoutTypeService.findByWorkoutId(workout.getId()));
         workout.setInfo(workoutInfoService.getInfoByWorkoutId(workout.getId()));
@@ -150,8 +150,8 @@ public class WorkoutServiceImpl implements WorkoutService {
     public void updateDuration(WorkoutDto workoutDto, String durationStr) {
         String[] durationHMS = durationStr.split(":");
         Duration duration = Duration.ofHours(Integer.parseInt(durationHMS[0]))
-                                        .plusMinutes(Integer.parseInt(durationHMS[1]))
-                                        .plusSeconds(Integer.parseInt(durationHMS[2]));
+                .plusMinutes(Integer.parseInt(durationHMS[1]))
+                .plusSeconds(Integer.parseInt(durationHMS[2]));
         Workout workout = workoutDao.findByDate(workoutDto.getDate())
                 .orElseThrow(() -> new NotFoundException("Тренировка в " + workoutDto.getDate() +
                                                          " не проводилось! Сначала добавьте ее."));
@@ -215,9 +215,9 @@ public class WorkoutServiceImpl implements WorkoutService {
 
     @Override
     public List<User> getAllUsersWorkouts(List<User> userList) {
-        for (User user: userList){
+        for (User user : userList) {
             List<Workout> workoutList = workoutDao.findByUserId(user.getId());
-            for (Workout workout: workoutList){
+            for (Workout workout : workoutList) {
                 workout.setType(workoutTypeService.findByWorkoutId(workout.getId()));
                 workout.setInfo(workoutInfoService.getInfoByWorkoutId(workout.getId()));
             }

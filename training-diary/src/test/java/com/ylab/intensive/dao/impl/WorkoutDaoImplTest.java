@@ -1,218 +1,132 @@
-/*
 package com.ylab.intensive.dao.impl;
 
+import com.ylab.intensive.dao.container.PostgresTestContainer;
+import com.ylab.intensive.dao.container.TestConfigurationEnvironment;
 import com.ylab.intensive.model.entity.Workout;
-import com.ylab.intensive.model.dto.WorkoutDto;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.junit.jupiter.MockitoSettings;
-import org.mockito.quality.Strictness;
 
 import java.time.Duration;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.*;
 
-@ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = Strictness.LENIENT)
 @DisplayName("Workout Database Operations Testing")
-class WorkoutDaoImplTest {
+class WorkoutDaoImplTest extends TestConfigurationEnvironment {
 
-    @InjectMocks
-    private WorkoutDaoImpl workoutDao;
+    private static WorkoutDaoImpl workoutDao;
 
-    @Test
-    @DisplayName("Get size of workout DB")
-    void testGetSize() {
-        List<Workout> workoutDB = new ArrayList<>();
-        workoutDao.init(workoutDB);
-
-        int result = workoutDao.getSize();
-
-        assertEquals(0, result);
+    @BeforeAll
+    static void setUp() {
+        postgreSQLContainer = PostgresTestContainer.getInstance();
+        workoutDao = new WorkoutDaoImpl();
     }
 
     @Test
-    @DisplayName("Find workout by date - Workout exists")
+    @DisplayName("Find workout by date - workout exists")
     void testFindByDate_WorkoutExists() {
-        LocalDate date = LocalDate.of(2024, 4, 11);
-        List<Workout> workoutDB = new ArrayList<>();
-        workoutDB.add(new Workout(1, date, Collections.emptySet(), Duration.ofHours(1), 500.0f, Collections.emptyMap()));
-        workoutDao.init(workoutDB);
+        LocalDate date = LocalDate.of(2024, 4, 17);
 
-        Optional<Workout> result = workoutDao.findByDate(date);
+        Optional<Workout> workout = workoutDao.findByDate(date);
 
-        assertTrue(result.isPresent());
-        assertEquals(date, result.get().getDate());
+        assertThat(workout).isPresent();
     }
 
     @Test
-    @DisplayName("Find workout by date - Workout does not exist")
+    @DisplayName("Find workout by date - workout does not exist")
     void testFindByDate_WorkoutDoesNotExist() {
-        LocalDate date = LocalDate.of(2024, 4, 11);
-        List<Workout> workoutDB = new ArrayList<>();
-        workoutDao.init(workoutDB);
+        LocalDate date = LocalDate.of(1000, 1, 1);
 
-        Optional<Workout> result = workoutDao.findByDate(date);
+        Optional<Workout> workout = workoutDao.findByDate(date);
 
-        assertTrue(result.isEmpty());
+        assertThat(workout).isEmpty();
     }
 
     @Test
-    @DisplayName("Save workout type")
-    void testSaveType() {
+    @DisplayName("Save workout - success")
+    void testSaveWorkout_Success() {
         Workout workout = new Workout();
-        workout.setType(new HashSet<>());
-        String type = "Running";
+        workout.setUserId(1);
+        workout.setDate(LocalDate.now());
+        workout.setDuration(Duration.ofMinutes(30));
+        workout.setCalorie(300.0f);
 
-        workoutDao.saveType(workout, type);
+        Workout savedWorkout = workoutDao.saveWorkout(workout);
 
-        assertTrue(workout.getType().contains(type));
+        assertThat(savedWorkout.getId()).isPositive();
     }
 
     @Test
-    @DisplayName("Save workout")
-    void testSaveWorkout() {
-        List<Workout> workoutDB = new ArrayList<>();
-        workoutDao.init(workoutDB);
-        Workout workout = new Workout();
+    @DisplayName("Find workouts by user ID")
+    void testFindByUserId() {
+        int userId = 1;
 
-        workoutDao.saveWorkout(workout);
+        List<Workout> workouts = workoutDao.findByUserId(userId);
 
-        assertEquals(1, workoutDB.size());
-        assertTrue(workoutDB.contains(workout));
+        assertThat(workouts).isNotEmpty();
     }
 
     @Test
-    @DisplayName("Save workout info")
-    void testSaveWorkoutInfo() {
-        Workout workout = new Workout();
-        workout.setInfo(new HashMap<>());
-        String title = "Title";
-        String info = "Info";
-
-        workoutDao.saveWorkoutInfo(workout, title, info);
-
-        assertEquals(info, workout.getInfo().get(title));
-    }
-
-    @Test
-    @DisplayName("Find all workouts")
-    void testFindAll() {
-        List<Workout> workoutDB = new ArrayList<>();
-        workoutDB.add(new Workout());
-        workoutDB.add(new Workout());
-        workoutDao.init(workoutDB);
-
-        List<Workout> result = workoutDao.findAll();
-
-        assertEquals(workoutDB.size(), result.size());
-        assertTrue(workoutDB.containsAll(result));
-    }
-
-    @Test
-    @DisplayName("Delete workout")
-    void testDeleteWorkout() {
-        LocalDate date = LocalDate.of(2024, 4, 11);
-        List<Workout> workoutDB = new ArrayList<>();
-        Workout workout = new Workout(1, date, Collections.emptySet(), Duration.ofHours(1), 500.0f, Collections.emptyMap());
-        workoutDao.init(workoutDB);
+    @DisplayName("Delete workout - success")
+    void testDeleteWorkout_Success() {
+        LocalDate date = LocalDate.of(2022, 2, 22);
 
         workoutDao.deleteWorkout(date);
 
-        assertTrue(workoutDB.isEmpty());
+        Optional<Workout> deletedWorkout = workoutDao.findByDate(date);
+
+        assertThat(deletedWorkout).isEmpty();
     }
 
     @Test
-    @DisplayName("Update workout info")
-    void testUpdateWorkoutInfo() {
-        LocalDate date = LocalDate.of(2024, 4, 11);
-        List<Workout> workoutDB = new ArrayList<>();
-        Workout workout = new Workout(1, date, new HashSet<>(), Duration.ofHours(1), 500.0f, new HashMap<>());
-        workoutDB.add(workout);
-        workoutDao.init(workoutDB);
-        WorkoutDto workoutDto = new WorkoutDto();
-        workoutDto.setDate(date);
-        String title = "Title";
-        String info = "Info";
+    @DisplayName("Update calorie for workout - success")
+    void testUpdateCalorie_Success() {
+        int workoutId = 2;
+        float calorie = 400.0f;
 
-        workoutDao.updateWorkoutInfo(workoutDto, title, info);
+        workoutDao.updateCalorie(workoutId, calorie);
 
-        assertEquals(info, workout.getInfo().get(title));
+        Optional<Workout> updatedWorkout = workoutDao.findByDate(LocalDate.parse("2024-04-19"));
+
+        assertThat(updatedWorkout)
+                .isPresent()
+                .get()
+                .hasFieldOrPropertyWithValue("calorie", calorie);
     }
 
     @Test
-    @DisplayName("Update workout calorie")
-    void testUpdateCalorie() {
-        LocalDate date = LocalDate.of(2024, 4, 11);
-        List<Workout> workoutDB = new ArrayList<>();
-        Workout workout = new Workout(1, date, Collections.emptySet(), Duration.ofHours(1), 500.0f, Collections.emptyMap());
-        workoutDB.add(workout);
-        workoutDao.init(workoutDB);
-        WorkoutDto workoutDto = new WorkoutDto();
-        workoutDto.setDate(date);
-        Float calorie = 600.0f;
+    @DisplayName("Update duration for workout - success")
+    void testUpdateDuration_Success() {
+        int workoutId = 2;
+        Duration duration = Duration.ofMinutes(45);
 
-        workoutDao.updateCalorie(workoutDto, calorie);
+        workoutDao.updateDuration(workoutId, duration);
 
-        assertEquals(calorie, workout.getCalorie());
-    }
+        Optional<Workout> updatedWorkout = workoutDao.findByDate(LocalDate.parse("2024-04-19"));
 
-    @Test
-    @DisplayName("Update workout duration")
-    void testUpdateDuration() {
-        LocalDate date = LocalDate.of(2024, 4, 11);
-        List<Workout> workoutDB = new ArrayList<>();
-        Workout workout = new Workout(1, date, Collections.emptySet(), Duration.ofHours(1), 500.0f, Collections.emptyMap());
-        workoutDB.add(workout);
-        workoutDao.init(workoutDB);
-        WorkoutDto workoutDto = new WorkoutDto();
-        workoutDto.setDate(date);
-        Duration duration = Duration.ofHours(2);
-
-        workoutDao.updateDuration(workoutDto, duration);
-
-        assertEquals(duration, workout.getDuration());
-    }
-
-    @Test
-    @DisplayName("Update workout type")
-    void testUpdateType() {
-        LocalDate date = LocalDate.of(2024, 4, 11);
-        List<Workout> workoutDB = new ArrayList<>();
-        Workout workout = new Workout(1, date, new HashSet<>(), Duration.ofHours(1), 500.0f, new HashMap<>());
-        workoutDB.add(workout);
-        workoutDao.init(workoutDB);
-        WorkoutDto workoutDto = new WorkoutDto();
-        workoutDto.setDate(date);
-        String oldType = "OldType";
-        String newType = "NewType";
-        workout.getType().add(oldType);
-
-        workoutDao.updateType(workoutDto, oldType, newType);
-
-        assertFalse(workout.getType().contains(oldType));
-        assertTrue(workout.getType().contains(newType));
+        assertThat(updatedWorkout)
+                .isPresent()
+                .get()
+                .hasFieldOrPropertyWithValue("duration", duration);
     }
 
     @Test
     @DisplayName("Find workouts by duration")
     void testFindByDuration() {
-        LocalDate begin = LocalDate.of(2024, 4, 1);
-        LocalDate end = LocalDate.of(2024, 4, 10);
-        List<Workout> workoutDB = new ArrayList<>();
-        workoutDB.add(new Workout(1, LocalDate.of(2024, 4, 5), Collections.emptySet(), Duration.ofHours(1), 500.0f, Collections.emptyMap()));
-        workoutDB.add(new Workout(2, LocalDate.of(2024, 4, 8), Collections.emptySet(), Duration.ofHours(2), 700.0f, Collections.emptyMap()));
-        workoutDB.add(new Workout(3, LocalDate.of(2024, 4, 15),Collections.emptySet(),  Duration.ofHours(1), 500.0f,Collections.emptyMap()));
-        workoutDao.init(workoutDB);
+        LocalDate begin = LocalDate.of(1000, 1, 1);
+        LocalDate end = LocalDate.of(3000, 1, 1);
 
-        List<Workout> result = workoutDao.findByDuration(begin, end);
+        List<Workout> workouts = workoutDao.findByDuration(begin, end);
 
-        assertEquals(2, result.size());
+        assertThat(workouts).isNotEmpty();
+    }
+
+    @AfterAll
+    static void tearDown() {
+        postgreSQLContainer.stop();
     }
 }
-*/

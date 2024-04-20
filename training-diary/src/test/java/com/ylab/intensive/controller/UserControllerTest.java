@@ -1,10 +1,9 @@
 package com.ylab.intensive.controller;
 
-
 import com.ylab.intensive.in.InputData;
 import com.ylab.intensive.in.OutputData;
-import com.ylab.intensive.model.entity.User;
 import com.ylab.intensive.model.dto.UserDto;
+import com.ylab.intensive.model.entity.User;
 import com.ylab.intensive.model.enums.Role;
 import com.ylab.intensive.service.UserManagementService;
 import com.ylab.intensive.service.WorkoutService;
@@ -18,6 +17,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -36,10 +37,13 @@ class UserControllerTest {
 
     @Mock
     private UserManagementService userManagementService;
+
     @Mock
     private WorkoutService workoutService;
+
     @Mock
     private AnsiColor color;
+
     @InjectMocks
     private UserController userController;
 
@@ -130,5 +134,41 @@ class UserControllerTest {
 
         verify(outputData).output(" Вы успешно разлогинились!");
         verify(userManagementService).logout();
+    }
+
+    @Test
+    @DisplayName("Show all user workouts - admin user")
+    void testShowAllUserWorkouts_AdminUser() {
+        User adminUser = new User();
+        adminUser.setEmail("admin@example.com");
+        adminUser.setRole(Role.ADMIN);
+
+        List<User> userList = new ArrayList<>();
+        userList.add(adminUser);
+        userList.get(0).setWorkout(Collections.emptyList());
+
+        when(userManagementService.getAllUser()).thenReturn(userList);
+        when(workoutService.getAllUsersWorkouts(userList)).thenReturn(userList);
+        when(color.greenBackground(anyString()))
+                .thenReturn("Test")
+                .thenReturn("Test");
+
+        userController.showAllUserWorkouts();
+
+        verify(outputData, times(2)).output(anyString());
+    }
+
+    @Test
+    @DisplayName("Show all user workouts - regular user")
+    void testShowAllUserWorkouts_RegularUser() {
+        User regularUser = new User();
+        regularUser.setEmail("regular@example.com");
+        regularUser.setRole(Role.USER);
+
+        when(userManagementService.getAllUser()).thenReturn(Collections.emptyList());
+
+        userController.showAllUserWorkouts();
+
+        verify(outputData).errOutput("Для этого запроса нужны права администратора!");
     }
 }

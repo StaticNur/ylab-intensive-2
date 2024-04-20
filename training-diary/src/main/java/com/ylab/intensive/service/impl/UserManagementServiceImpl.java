@@ -1,7 +1,5 @@
 package com.ylab.intensive.service.impl;
 
-import com.ylab.intensive.dao.AuditDao;
-import com.ylab.intensive.dao.RoleDao;
 import com.ylab.intensive.dao.UserDao;
 import com.ylab.intensive.di.annatation.Inject;
 import com.ylab.intensive.exception.ChangeUserPermissionsException;
@@ -15,7 +13,6 @@ import com.ylab.intensive.model.security.Session;
 import com.ylab.intensive.service.AuditService;
 import com.ylab.intensive.service.RoleService;
 import com.ylab.intensive.service.UserManagementService;
-import com.ylab.intensive.service.WorkoutService;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -26,6 +23,7 @@ import java.util.Optional;
  * Implementation of the UserManagementService interface providing methods for managing user-related operations.
  */
 public class UserManagementServiceImpl implements UserManagementService {
+
     /**
      * User DAO.
      * This DAO is responsible for data access operations related to users.
@@ -38,6 +36,7 @@ public class UserManagementServiceImpl implements UserManagementService {
 
     @Inject
     private AuditService auditService;
+
     /**
      * Authorized User Session.
      * This session represents the currently authorized user.
@@ -46,7 +45,6 @@ public class UserManagementServiceImpl implements UserManagementService {
     private Session authorizedUser;
     @Inject
     private UserMapper userMapper;
-
 
     @Override
     public boolean registerUser(String email, String password, String roleStr) {

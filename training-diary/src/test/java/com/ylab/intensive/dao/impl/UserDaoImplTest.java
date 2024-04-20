@@ -1,111 +1,76 @@
-/*
 package com.ylab.intensive.dao.impl;
 
+import com.ylab.intensive.dao.container.PostgresTestContainer;
+import com.ylab.intensive.dao.container.TestConfigurationEnvironment;
 import com.ylab.intensive.model.entity.User;
 import com.ylab.intensive.model.enums.Role;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.junit.jupiter.MockitoSettings;
-import org.mockito.quality.Strictness;
 
-import java.util.ArrayList;
-import java.util.Optional;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-@ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = Strictness.LENIENT)
 @DisplayName("User Database Operations Testing")
-class UserDaoImplTest {
+class UserDaoImplTest extends TestConfigurationEnvironment {
 
-    @InjectMocks
-    private UserDaoImpl userDao;
+    private static UserDaoImpl userDao;
+
+    @BeforeAll
+    static void setUp() {
+        postgreSQLContainer = PostgresTestContainer.getInstance();
+        userDao = new UserDaoImpl();
+    }
 
     @Test
-    @DisplayName("Save user")
+    @DisplayName("Save user successfully")
     void testSave() {
-        User user = new User(1, "test@example.com", "password",
-                new ArrayList<>(), new ArrayList<>(), Role.USER);
+        User user = User.builder().email("test@email.com").password("password").build();
+        int roleId = Role.USER.getValue();
 
-        boolean result = userDao.save(user);
+        boolean result = userDao.save(user, roleId);
 
-        assertTrue(result);
-        assertEquals(1, userDao.getSize());
+        assertThat(result).isTrue();
     }
 
     @Test
-    @DisplayName("Find user by email - User exists")
-    void testFindByEmail_UserExists() {
-        String email = "test@example.com";
-        User user = new User(1, email, "password", new ArrayList<>(), new ArrayList<>(), Role.USER);
-        userDao.save(user);
+    @DisplayName("Test findByEmail method - user exists")
+    void testFindByEmail() {
 
-        Optional<User> result = userDao.findByEmail(email);
-
-        assertTrue(result.isPresent());
-        assertEquals(email, result.get().getEmail());
+        assertThat(userDao.findByEmail("admin@example.com"))
+                .isPresent()
+                .get()
+                .hasFieldOrPropertyWithValue("role", Role.ADMIN);
     }
 
     @Test
-    @DisplayName("Find user by email - User does not exist")
+    @DisplayName("Find workout by date - user does not exist")
     void testFindByEmail_UserDoesNotExist() {
-        String email = "nonexistent@example.com";
-
-        Optional<User> result = userDao.findByEmail(email);
-
-        assertTrue(result.isEmpty());
+        assertThat(userDao.findByEmail("dw3rwed@example.com")).isEmpty();
     }
 
     @Test
-    @DisplayName("Update user role - User exists")
-    void testUpdateUserRole_UserExists() {
-        String email = "test@example.com";
-        User user = new User(1, email, "password", new ArrayList<>(), new ArrayList<>(), Role.USER);
-        userDao.save(user);
-        Role newRole = Role.ADMIN;
+    @DisplayName("Update user role - success")
+    void testUpdateUserRole_Success() {
+        String email = "test23@email.com";
+        int roleId = Role.ADMIN.getValue();
+        User userToSave = User.builder().email(email).password("password").build();
+        userDao.save(userToSave, Role.USER.getValue());
 
-        Optional<User> result = userDao.updateUserRole(email, newRole);
+        boolean result = userDao.updateUserRole(email, roleId);
 
-        assertTrue(result.isPresent());
-        assertEquals(newRole, result.get().getRole());
+        assertThat(result).isTrue();
     }
 
     @Test
-    @DisplayName("Update user role - User does not exist")
+    @DisplayName("Update user role - user does not exist")
     void testUpdateUserRole_UserDoesNotExist() {
-        String email = "nonexistent@example.com";
-        Role newRole = Role.ADMIN;
-
-        Optional<User> result = userDao.updateUserRole(email, newRole);
-
-        assertTrue(result.isEmpty());
+        boolean result = userDao.updateUserRole("nonexistent@email.com", Role.ADMIN.getValue());
+        assertThat(result).isFalse();
     }
 
-    @Test
-    @DisplayName("Save user action - User exists")
-    void testSaveAction_UserExists() {
-        String email = "test@example.com";
-        String action = "Action";
-        User user = new User(1, email, "password", new ArrayList<>(), new ArrayList<>(), Role.USER);
-        userDao.save(user);
-
-        userDao.saveAction(email, action);
-
-        assertEquals(action, userDao.findByEmail(email).get().getAction().get(0));
-    }
-
-    @Test
-    @DisplayName("Save user action - User does not exist")
-    void testSaveAction_UserDoesNotExist() {
-        String email = "nonexistent@example.com";
-        String action = "Action";
-
-        assertDoesNotThrow(() -> userDao.saveAction(email, action));
-
-        assertEquals(0, userDao.getSize());
+    @AfterAll
+    static void destroy() {
+        postgreSQLContainer.stop();
     }
 }
-*/

@@ -1,14 +1,15 @@
-/*
 package com.ylab.intensive.service.impl;
 
-
 import com.ylab.intensive.dao.UserDao;
+import com.ylab.intensive.exception.NotFoundException;
 import com.ylab.intensive.exception.RegisterException;
-import com.ylab.intensive.model.entity.User;
 import com.ylab.intensive.model.dto.UserDto;
+import com.ylab.intensive.model.entity.User;
 import com.ylab.intensive.model.enums.Role;
+import com.ylab.intensive.model.mapper.UserMapper;
 import com.ylab.intensive.model.security.Session;
-import com.ylab.intensive.service.WorkoutService;
+import com.ylab.intensive.service.AuditService;
+import com.ylab.intensive.service.RoleService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,11 +19,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -34,173 +34,195 @@ class UserManagementServiceImplTest {
     private UserDao userDao;
 
     @Mock
-    private WorkoutService workoutService;
+    private RoleService roleService;
+
+    @Mock
+    private AuditService auditService;
 
     @Mock
     private Session authorizedUser;
+
+    @Mock
+    private UserMapper userMapper;
 
     @InjectMocks
     private UserManagementServiceImpl userManagementService;
 
     @Test
-    @DisplayName("Register user - User does not exist")
-    void testRegisterUser_UserDoesNotExist() {
-        String email = "test@example.com";
+    @DisplayName("Register user - success")
+    void testRegisterUser_Success() {
+        String email = "test@email.com";
         String password = "password";
         String roleStr = "USER";
+        Role role = Role.USER;
 
         when(userDao.findByEmail(email)).thenReturn(Optional.empty());
-        when(userDao.getSize()).thenReturn(0);
-        when(userDao.save(any())).thenReturn(true);
+        when(roleService.getIdByName(role)).thenReturn(1);
+        when(userDao.save(any(User.class), anyInt())).thenReturn(true);
 
-        assertTrue(userManagementService.registerUser(email, password, roleStr));
+        boolean result = userManagementService.registerUser(email, password, roleStr);
+
+        assertThat(result).isTrue();
     }
 
     @Test
-    @DisplayName("Register user - User already exists")
-    void testRegisterUser_UserAlreadyExists() {
-        String email = "test@example.com";
+    @DisplayName("Register user - user already exists")
+    void testRegisterUser_UserExists() {
+        String email = "test@email.com";
         String password = "password";
         String roleStr = "USER";
 
         when(userDao.findByEmail(email)).thenReturn(Optional.of(new User()));
 
-        assertThrows(RegisterException.class, () -> userManagementService.registerUser(email, password, roleStr));
+        assertThatThrownBy(() -> userManagementService.registerUser(email, password, roleStr))
+                .isInstanceOf(RegisterException.class)
+                .hasMessage("Такой пользователь уже существует!");
     }
 
     @Test
-    @DisplayName("Login - Successful")
-    void testLogin_Successful() {
-        String email = "test@example.com";
-        String password = "password";
+    @DisplayName("Change user permissions - unauthorized")
+    void testChangeUserPermissions_Unauthorized() {
+        String email = "test@email.com";
+        String roleStr = "USER";
 
+        UserDto unauthorizedUser = new UserDto();
+        unauthorizedUser.setRole(Role.USER);
+        when(authorizedUser.getAttribute("authorizedUser")).thenReturn(unauthorizedUser);
+
+        assertThat(userManagementService.changeUserPermissions(email, roleStr)).isEmpty();
+    }
+
+    @Test
+    @DisplayName("Find by email - user not found")
+    void testFindByEmail_UserNotFound() {
+        String email = "test@email.com";
+
+        when(userDao.findByEmail(email)).thenReturn(Optional.empty());
+
+        assertThat(userManagementService.findByEmail(email)).isEmpty();
+    }
+
+    @Test
+    @DisplayName("Login - success")
+    void testLogin_Success() {
+        String email = "test@email.com";
+        String password = "password";
         UserDto userDto = new UserDto();
         userDto.setEmail(email);
         User user = new User();
+        user.setId(1);
         user.setEmail(email);
         user.setPassword(password);
-        user.setWorkout(new ArrayList<>());
+        user.setRole(Role.USER);
 
         when(userDao.findByEmail(email)).thenReturn(Optional.of(user));
+        when(userMapper.entityToDto(user)).thenReturn(userDto);
+        doNothing().when(auditService).saveAction(1, "Action 1");
         when(authorizedUser.getAttribute("authorizedUser")).thenReturn(userDto);
-        doNothing().when(userDao).saveAction(email, "Action 1");
-        doNothing().when(workoutService).setAuthorizedWorkoutDB(user.getWorkout());
 
-        Optional<User> loggedInUser = userManagementService.login(email, password);
+        Optional<User> result = userManagementService.login(email, password);
 
-        assertTrue(loggedInUser.isPresent());
-        assertEquals(email, loggedInUser.get().getEmail());
+        assertThat(result).isPresent();
+        assertThat(result.get().getEmail()).isEqualTo(email);
     }
 
     @Test
-    @DisplayName("Login - Incorrect password")
-    void testLogin_IncorrectPassword() {
-        String email = "test@example.com";
+    @DisplayName("Login - user not found")
+    void testLogin_UserNotFound() {
+        String email = "test@email.com";
         String password = "password";
-        String incorrectPassword = "incorrect";
 
+        when(userDao.findByEmail(email)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> userManagementService.login(email, password))
+                .isInstanceOf(NotFoundException.class)
+                .hasMessage("Пользователь с email = " + email + " не существует!");
+    }
+
+    @Test
+    @DisplayName("Login - wrong password")
+    void testLogin_WrongPassword() {
+        String email = "test@email.com";
+        String password = "wrongpassword";
         User user = new User();
-        user.setPassword(password);
+        user.setPassword("password");
 
         when(userDao.findByEmail(email)).thenReturn(Optional.of(user));
 
-        Optional<User> loggedInUser = userManagementService.login(email, incorrectPassword);
-
-        assertFalse(loggedInUser.isPresent());
+        assertThat(userManagementService.login(email, password)).isEmpty();
     }
 
     @Test
     @DisplayName("Logout")
     void testLogout() {
-        String email = "test@example.com";
-        String password = "password";
-
+        String email = "test@email.com";
         UserDto userDto = new UserDto();
         userDto.setEmail(email);
-
-        when(authorizedUser.getAttribute("authorizedUser")).thenReturn(userDto);
-        doNothing().when(userDao).saveAction(email, "Action 1");
-
-        userManagementService.login(email, password);
-        userManagementService.logout();
-
-        verify(authorizedUser).clearSession();
-    }
-
-    @Test
-    @DisplayName("Change user permissions - Admin success")
-    void testChangeUserPermissions_AdminSuccess() {
-        String email = "test@example.com";
-        String roleStr = "ADMIN";
-
-        UserDto adminUserDto = new UserDto();
-        adminUserDto.setRole(Role.ADMIN);
         User user = new User();
-        user.setEmail(email);
-        user.setRole(Role.ADMIN);
-        user.setWorkout(new ArrayList<>());
-
-        when(authorizedUser.getAttribute("authorizedUser")).thenReturn(adminUserDto);
-        when(userDao.updateUserRole(email, Role.ADMIN)).thenReturn(Optional.of(user));
-
-        Optional<UserDto> updatedUser = userManagementService.changeUserPermissions(email, roleStr);
-
-        assertTrue(updatedUser.isPresent());
-        assertEquals(Role.ADMIN, updatedUser.get().getRole());
-    }
-
-    @Test
-    @DisplayName("Change user permissions - Admin failure")
-    void testChangeUserPermissions_AdminFailure() {
-        String email = "test@example.com";
-        String roleStr = "USER";
-
-        UserDto nonAdminUserDto = new UserDto();
-        nonAdminUserDto.setRole(Role.USER);
-
-        when(authorizedUser.getAttribute("authorizedUser")).thenReturn(nonAdminUserDto);
-
-        Optional<UserDto> updatedUser = userManagementService.changeUserPermissions(email, roleStr);
-
-        assertFalse(updatedUser.isPresent());
-    }
-
-    @Test
-    @DisplayName("Get audit log for user")
-    void testGetAudit() {
-        String email = "test@example.com";
-        List<String> actions = new ArrayList<>();
-        actions.add("Action 1");
-        actions.add("Action 2");
-
-        UserDto userDto = new UserDto();
-        userDto.setEmail(email);
-
-        User user = new User();
-        user.setAction(actions);
+        user.setId(1);
 
         when(authorizedUser.getAttribute("authorizedUser")).thenReturn(userDto);
         when(userDao.findByEmail(email)).thenReturn(Optional.of(user));
 
-        List<String> audit = userManagementService.getAudit();
+        userManagementService.logout();
 
-        assertEquals(actions, audit);
+        verify(auditService).saveAction(anyInt(), eq("Пользователь разлогинился"));
+        verify(authorizedUser).clearSession();
     }
 
     @Test
-    @DisplayName("Save action")
-    void testSaveAction() {
-        String email = "test@example.com";
-        String action = "Test action";
+    @DisplayName("Change user permissions - success")
+    void testChangeUserPermissions_Success() {
+        String email = "test@email.com";
+        String roleStr = "ADMIN";
+        Role role = Role.ADMIN;
+        UserDto authorizedUserDto = new UserDto();
+        authorizedUserDto.setRole(Role.ADMIN);
+        User user = new User();
+        user.setId(1);
+        user.setEmail(email);
 
-        UserDto userDto = new UserDto();
-        userDto.setEmail(email);
+        when(authorizedUser.getAttribute("authorizedUser")).thenReturn(authorizedUserDto);
+        when(roleService.getIdByName(role)).thenReturn(1);
+        when(userDao.updateUserRole(email, 1)).thenReturn(true);
+        when(userDao.findByEmail(email)).thenReturn(Optional.of(user));
+        doNothing().when(auditService).saveAction(1, "Action 1");
+        doNothing().when(authorizedUser).removeAttribute("authorizedUser");
+        doNothing().when(authorizedUser).setAttribute("authorizedUser", authorizedUserDto);
+        when(userMapper.entityToDto(user)).thenReturn(authorizedUserDto);
 
-        when(authorizedUser.getAttribute("authorizedUser")).thenReturn(userDto);
+        Optional<UserDto> result = userManagementService.changeUserPermissions(email, roleStr);
 
-        userManagementService.saveAction(action);
+        assertThat(result).isPresent();
+        assertThat(result.get().getRole()).isEqualTo(role);
+    }
 
-        verify(userDao).saveAction(email, action);
+    @Test
+    @DisplayName("Get all users - unauthorized")
+    void testGetAllUser_Unauthorized() {
+        String email = "test@email.com";
+        UserDto unauthorizedUserDto = new UserDto();
+        unauthorizedUserDto.setRole(Role.USER);
+        unauthorizedUserDto.setEmail(email);
+
+        when(authorizedUser.getAttribute("authorizedUser")).thenReturn(unauthorizedUserDto);
+        when(userDao.findByEmail(email)).thenReturn(Optional.of(new User()));
+
+        assertThat(userManagementService.getAllUser()).isEmpty();
+    }
+
+    @Test
+    @DisplayName("Find by email")
+    void testFindByEmail() {
+        String email = "test@email.com";
+        User user = new User();
+        user.setEmail(email);
+
+        when(userDao.findByEmail(email)).thenReturn(Optional.of(user));
+
+        Optional<User> result = userManagementService.findByEmail(email);
+
+        assertThat(result).isPresent();
+        assertThat(result.get().getEmail()).isEqualTo(email);
     }
 }
-*/

@@ -27,4 +27,8 @@ public enum Role {
             throw new IllegalArgumentException("Invalid Role value: " + value);
         }
     }
+
+    public int getValue() {
+        return this.value;
+    }
 }

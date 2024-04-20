@@ -40,13 +40,13 @@ public final class ConnectionManager {
      * Initializes the connection pool based on configuration
      */
     private static void initConnectionPool() {
-        var poolSize = PropertiesUtil.get(POOL_SIZE);
-        var size = poolSize == null ? POOL_SIZE_DEFAULT : Integer.parseInt(poolSize);
+        String poolSize = PropertiesUtil.get(POOL_SIZE);
+        int size = poolSize == null ? POOL_SIZE_DEFAULT : Integer.parseInt(poolSize);
         pool = new ArrayBlockingQueue<>(size);
         sourcesConnections = new ArrayList<>();
         for (int i = 0; i < size; i++) {
-            var connection = open();
-            var proxyConnections = (Connection) Proxy.newProxyInstance(ConnectionManager.class.getClassLoader(),
+            Connection connection = open();
+            Connection proxyConnections = (Connection) Proxy.newProxyInstance(ConnectionManager.class.getClassLoader(),
                     new Class[]{Connection.class},
                     (proxy, method, args) -> method.getName().equals("close")
                             ? pool.add((Connection) proxy)

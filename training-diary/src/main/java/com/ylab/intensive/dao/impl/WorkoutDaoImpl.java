@@ -17,6 +17,7 @@ import java.util.Optional;
  * This class provides methods to interact with workout data in the database.
  */
 public class WorkoutDaoImpl implements WorkoutDao {
+
     @Override
     public Optional<Workout> findByDate(LocalDate date) {
         String FIND_BY_DATE = """
@@ -31,17 +32,7 @@ public class WorkoutDaoImpl implements WorkoutDao {
 
             try (ResultSet rs = preparedStatement.executeQuery()) {
                 if (rs.next()) {
-
-                    Workout workout = new Workout();
-                    workout.setId(rs.getInt("id"));
-                    workout.setUserId(rs.getInt("user_id"));
-                    workout.setDate(rs.getDate("date").toLocalDate());
-
-                    Duration durationFromDB = Duration.ofSeconds(rs.getInt("duration"));
-                    workout.setDuration(durationFromDB);
-                    workout.setCalorie(rs.getFloat("calorie"));
-
-                    return Optional.of(workout);
+                    return Optional.of(buildWorkout(rs));
                 }
             }
         } catch (SQLException e) {
@@ -88,7 +79,6 @@ public class WorkoutDaoImpl implements WorkoutDao {
         }
     }
 
-
     @Override
     public List<Workout> findByUserId(int userId) {
         List<Workout> workoutList = new ArrayList<>();
@@ -104,16 +94,7 @@ public class WorkoutDaoImpl implements WorkoutDao {
 
             try (ResultSet rs = preparedStatement.executeQuery()) {
                 while (rs.next()) {
-                    Workout workout = new Workout();
-                    workout.setId(rs.getInt("id"));
-                    workout.setUserId(rs.getInt("user_id"));
-                    workout.setDate(rs.getDate("date").toLocalDate());
-
-                    Duration durationFromDB = Duration.ofSeconds(rs.getInt("duration"));
-                    workout.setDuration(durationFromDB);
-                    workout.setCalorie(rs.getFloat("calorie"));
-
-                    workoutList.add(workout);
+                    workoutList.add(buildWorkout(rs));
                 }
             }
         } catch (SQLException | DaoException e) {
@@ -206,16 +187,7 @@ public class WorkoutDaoImpl implements WorkoutDao {
 
             try (ResultSet rs = preparedStatement.executeQuery()) {
                 while (rs.next()) {
-                    Workout workout = new Workout();
-                    workout.setId(rs.getInt("id"));
-                    workout.setUserId(rs.getInt("user_id"));
-                    workout.setDate(rs.getDate("date").toLocalDate());
-
-                    Duration durationFromDB = Duration.ofSeconds(rs.getInt("duration"));
-                    workout.setDuration(durationFromDB);
-
-                    workout.setCalorie(rs.getFloat("calorie"));
-                    workouts.add(workout);
+                    workouts.add(buildWorkout(rs));
                 }
             }
         } catch (SQLException e) {
@@ -223,5 +195,18 @@ public class WorkoutDaoImpl implements WorkoutDao {
         }
 
         return workouts;
+    }
+
+    private Workout buildWorkout(ResultSet rs) throws SQLException {
+        Workout workout = new Workout();
+        workout.setId(rs.getInt("id"));
+        workout.setUserId(rs.getInt("user_id"));
+        workout.setDate(rs.getDate("date").toLocalDate());
+
+        Duration durationFromDB = Duration.ofSeconds(rs.getInt("duration"));
+        workout.setDuration(durationFromDB);
+
+        workout.setCalorie(rs.getFloat("calorie"));
+        return workout;
     }
 }

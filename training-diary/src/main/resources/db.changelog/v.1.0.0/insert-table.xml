@@ -50,6 +50,12 @@
             <column name="duration" value="9332"/>
             <column name="calorie" value="1000"/>
         </insert>
+        <insert schemaName="internal" tableName="workout">
+            <column name="user_id" value="1"/>
+            <column name="date" value="2022-02-22"/>
+            <column name="duration" value="9332"/>
+            <column name="calorie" value="1000"/>
+        </insert>
     </changeSet>
 
     <!-- Заполнение таблицы workout_type -->

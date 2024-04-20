@@ -1,10 +1,9 @@
 package com.ylab.intensive.dao.impl;
 
 import com.ylab.intensive.dao.UserDao;
-import com.ylab.intensive.di.annatation.Inject;
 import com.ylab.intensive.exception.DaoException;
 import com.ylab.intensive.model.entity.User;
-import com.ylab.intensive.model.mapper.ResultSetMapper;
+import com.ylab.intensive.model.enums.Role;
 import com.ylab.intensive.service.ConnectionManager;
 
 import java.sql.*;
@@ -17,9 +16,6 @@ import java.util.Optional;
  * This class provides methods to interact with user data in the database.
  */
 public class UserDaoImpl implements UserDao {
-
-    @Inject
-    private ResultSetMapper resultSetMapper;
 
     @Override
     public boolean save(User user, int roleId) {
@@ -48,7 +44,6 @@ public class UserDaoImpl implements UserDao {
         }
     }
 
-
     @Override
     public Optional<User> findByEmail(String email) {
         String FIND_BY_EMAIL = """
@@ -63,7 +58,7 @@ public class UserDaoImpl implements UserDao {
 
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
-                    return resultSetMapper.buildUser(resultSet);
+                    return buildUser(resultSet);
                 }
             }
         } catch (SQLException e) {
@@ -71,7 +66,6 @@ public class UserDaoImpl implements UserDao {
         }
         return Optional.empty();
     }
-
 
     /**
      * Updates the user's role in the database by the specified identifier.
@@ -114,7 +108,7 @@ public class UserDaoImpl implements UserDao {
              ResultSet resultSet = preparedStatement.executeQuery()) {
 
             while (resultSet.next()) {
-                User user = resultSetMapper.buildUser(resultSet).orElseThrow(() -> new DaoException("Error in UserDao"));
+                User user = buildUser(resultSet).orElseThrow(() -> new DaoException("Error in UserDao"));
 
                 userList.add(user);
             }
@@ -124,4 +118,14 @@ public class UserDaoImpl implements UserDao {
         return userList;
     }
 
+    private Optional<User> buildUser(ResultSet resultSet) throws SQLException {
+        Optional<User> user = Optional.of(User.builder().build());
+        user.get().setId(resultSet.getInt("user_id"));
+        user.get().setEmail(resultSet.getString("email"));
+        user.get().setPassword(resultSet.getString("password"));
+        user.get().setWorkout(new ArrayList<>());
+        user.get().setAction(new ArrayList<>());
+        user.get().setRole(Role.fromValue(resultSet.getString("role_id")));
+        return user;
+    }
 }
