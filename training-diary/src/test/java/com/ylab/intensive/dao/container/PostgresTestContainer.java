@@ -3,7 +3,7 @@ package com.ylab.intensive.dao.container;
 import com.github.dockerjava.api.model.ExposedPort;
 import com.github.dockerjava.api.model.PortBinding;
 import com.github.dockerjava.api.model.Ports;
-import com.ylab.intensive.service.ConnectionManager;
+import com.ylab.intensive.config.ConnectionManager;
 import com.ylab.intensive.util.PropertiesUtil;
 import liquibase.Liquibase;
 import liquibase.database.Database;

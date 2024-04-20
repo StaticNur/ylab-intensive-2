@@ -1,7 +1,7 @@
 package com.ylab.intensive;
 
 import com.ylab.intensive.controller.ApplicationRunner;
-import com.ylab.intensive.service.MigrationManager;
+import com.ylab.intensive.config.MigrationManager;
 import com.ylab.intensive.di.context.ApplicationContext;
 import com.ylab.intensive.di.factory.BeanFactory;
 

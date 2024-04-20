@@ -4,7 +4,7 @@ import com.ylab.intensive.dao.UserDao;
 import com.ylab.intensive.exception.DaoException;
 import com.ylab.intensive.model.entity.User;
 import com.ylab.intensive.model.enums.Role;
-import com.ylab.intensive.service.ConnectionManager;
+import com.ylab.intensive.config.ConnectionManager;
 
 import java.sql.*;
 import java.util.ArrayList;

@@ -2,7 +2,7 @@ package com.ylab.intensive.dao.impl;
 
 import com.ylab.intensive.dao.AuditDao;
 import com.ylab.intensive.exception.DaoException;
-import com.ylab.intensive.service.ConnectionManager;
+import com.ylab.intensive.config.ConnectionManager;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

@@ -1,4 +1,4 @@
-package com.ylab.intensive.service;
+package com.ylab.intensive.config;
 
 import com.ylab.intensive.di.annatation.Inject;
 import com.ylab.intensive.in.OutputData;
