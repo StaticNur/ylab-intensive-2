@@ -3,6 +3,7 @@ package com.ylab.intensive.service.impl;
 import com.ylab.intensive.dao.UserDao;
 import com.ylab.intensive.di.annatation.Inject;
 import com.ylab.intensive.exception.ChangeUserPermissionsException;
+import com.ylab.intensive.exception.DateFormatException;
 import com.ylab.intensive.exception.NotFoundException;
 import com.ylab.intensive.exception.RegisterException;
 import com.ylab.intensive.model.dto.UserDto;
@@ -31,9 +32,15 @@ public class UserManagementServiceImpl implements UserManagementService {
     @Inject
     private UserDao userDao;
 
+    /**
+     * Service for role-related operations.
+     */
     @Inject
     private RoleService roleService;
 
+    /**
+     * Service for audit-related operations.
+     */
     @Inject
     private AuditService auditService;
 
@@ -43,6 +50,10 @@ public class UserManagementServiceImpl implements UserManagementService {
      */
     @Inject
     private Session authorizedUser;
+
+    /**
+     * Mapper for converting User entities to UserDto objects.
+     */
     @Inject
     private UserMapper userMapper;
 
@@ -117,11 +128,6 @@ public class UserManagementServiceImpl implements UserManagementService {
     }
 
     @Override
-    public void saveAction(String action) {
-        auditService.saveAction(getAuthorizedUserId(), action);
-    }
-
-    @Override
     public List<User> getAllUser() {
         UserDto userFromAttribute = (UserDto) authorizedUser.getAttribute("authorizedUser");
         User user = userDao.findByEmail(userFromAttribute.getEmail())
@@ -141,6 +147,13 @@ public class UserManagementServiceImpl implements UserManagementService {
         return userDao.findByEmail(email);
     }
 
+    /**
+     * Parses a role string into a Role enum.
+     *
+     * @param roleStr the date string in "ADMIN" or "USER" format
+     * @return the parsed Role enum
+     * @throws IllegalArgumentException if the Role string has an incorrect format
+     */
     private Role getRole(String roleStr) {
         Role role;
         try {
@@ -150,6 +163,13 @@ public class UserManagementServiceImpl implements UserManagementService {
         }
         return role;
     }
+
+    /**
+     * Retrieves the ID of the currently authorized user.
+     *
+     * @return the ID of the authorized user
+     * @throws NotFoundException if the authorized user is not found
+     */
     private int getAuthorizedUserId() {
         UserDto userFromAttribute = (UserDto) authorizedUser.getAttribute("authorizedUser");
         User user = userDao.findByEmail(userFromAttribute.getEmail())

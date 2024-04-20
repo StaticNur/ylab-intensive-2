@@ -19,7 +19,7 @@ public interface WorkoutDao {
      * @return An Optional containing the workout if found, otherwise empty
      */
 
-    Optional<Workout> findByDate(LocalDate date);
+    Optional<Workout> findByDate(LocalDate date, int userId);
 
     /**
      * Saves a workout to the database.
@@ -30,8 +30,9 @@ public interface WorkoutDao {
     Workout saveWorkout(Workout workout);
 
     /**
-     * Finds all workouts in the database.
+     * Finds all workouts for a given user.
      *
+     * @param userId The user id
      * @return A list of all workouts in the database
      */
     List<Workout> findByUserId(int userId);
@@ -41,7 +42,7 @@ public interface WorkoutDao {
      *
      * @param date The date of the workout to delete
      */
-    void deleteWorkout(LocalDate date);
+    void deleteWorkout(LocalDate date, int userId);
 
     /**
      * Updates the calorie of a workout.
@@ -66,5 +67,5 @@ public interface WorkoutDao {
      * @param end   The end date of the range
      * @return A list of workouts within the specified date range
      */
-    List<Workout> findByDuration(LocalDate begin, LocalDate end);
+    List<Workout> findByDuration(int userId, LocalDate begin, LocalDate end);
 }

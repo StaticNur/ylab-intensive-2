@@ -10,6 +10,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+/**
+ * Implementation class for {@link RoleDao}.
+ */
 public class RoleDaoImpl implements RoleDao {
     @Override
     public int findByName(Role role) {

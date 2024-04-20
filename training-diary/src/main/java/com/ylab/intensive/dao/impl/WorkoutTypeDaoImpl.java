@@ -11,6 +11,9 @@ import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Implementation class for {@link WorkoutTypeDao}.
+ */
 public class WorkoutTypeDaoImpl implements WorkoutTypeDao {
 
     @Override

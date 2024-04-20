@@ -6,12 +6,12 @@ import com.ylab.intensive.exception.WorkoutException;
 import com.ylab.intensive.model.entity.User;
 
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Service interface for managing workout-related operations.
  */
 public interface WorkoutService {
+
     /**
      * Adds a new training type on the specified date.
      *
@@ -106,5 +106,11 @@ public interface WorkoutService {
      */
     int getWorkoutStatistics(String begin, String end);
 
+    /**
+     * Retrieves all workouts for the users in the provided list.
+     *
+     * @param userList the list of users
+     * @return a list of all workouts for the users
+     */
     List<User> getAllUsersWorkouts(List<User> userList);
 }

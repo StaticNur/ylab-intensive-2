@@ -9,6 +9,7 @@ import com.ylab.intensive.di.factory.BeanFactory;
  * The main entry point for the application.
  */
 public class TrainingDiaryApplication {
+
     /**
      * The main method of the application.
      * Initializes the application context and starts migration.

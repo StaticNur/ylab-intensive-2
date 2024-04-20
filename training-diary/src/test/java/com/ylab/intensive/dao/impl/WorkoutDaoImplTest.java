@@ -31,7 +31,7 @@ class WorkoutDaoImplTest extends TestConfigurationEnvironment {
     void testFindByDate_WorkoutExists() {
         LocalDate date = LocalDate.of(2024, 4, 17);
 
-        Optional<Workout> workout = workoutDao.findByDate(date);
+        Optional<Workout> workout = workoutDao.findByDate(date, 1);
 
         assertThat(workout).isPresent();
     }
@@ -41,7 +41,7 @@ class WorkoutDaoImplTest extends TestConfigurationEnvironment {
     void testFindByDate_WorkoutDoesNotExist() {
         LocalDate date = LocalDate.of(1000, 1, 1);
 
-        Optional<Workout> workout = workoutDao.findByDate(date);
+        Optional<Workout> workout = workoutDao.findByDate(date, 1);
 
         assertThat(workout).isEmpty();
     }
@@ -75,9 +75,9 @@ class WorkoutDaoImplTest extends TestConfigurationEnvironment {
     void testDeleteWorkout_Success() {
         LocalDate date = LocalDate.of(2022, 2, 22);
 
-        workoutDao.deleteWorkout(date);
+        workoutDao.deleteWorkout(date, 1);
 
-        Optional<Workout> deletedWorkout = workoutDao.findByDate(date);
+        Optional<Workout> deletedWorkout = workoutDao.findByDate(date, 1);
 
         assertThat(deletedWorkout).isEmpty();
     }
@@ -90,7 +90,7 @@ class WorkoutDaoImplTest extends TestConfigurationEnvironment {
 
         workoutDao.updateCalorie(workoutId, calorie);
 
-        Optional<Workout> updatedWorkout = workoutDao.findByDate(LocalDate.parse("2024-04-19"));
+        Optional<Workout> updatedWorkout = workoutDao.findByDate(LocalDate.parse("2024-04-19"), 2);
 
         assertThat(updatedWorkout)
                 .isPresent()
@@ -106,7 +106,7 @@ class WorkoutDaoImplTest extends TestConfigurationEnvironment {
 
         workoutDao.updateDuration(workoutId, duration);
 
-        Optional<Workout> updatedWorkout = workoutDao.findByDate(LocalDate.parse("2024-04-19"));
+        Optional<Workout> updatedWorkout = workoutDao.findByDate(LocalDate.parse("2024-04-19"), 2);
 
         assertThat(updatedWorkout)
                 .isPresent()
@@ -120,7 +120,7 @@ class WorkoutDaoImplTest extends TestConfigurationEnvironment {
         LocalDate begin = LocalDate.of(1000, 1, 1);
         LocalDate end = LocalDate.of(3000, 1, 1);
 
-        List<Workout> workouts = workoutDao.findByDuration(begin, end);
+        List<Workout> workouts = workoutDao.findByDuration( 1,begin, end);
 
         assertThat(workouts).isNotEmpty();
     }

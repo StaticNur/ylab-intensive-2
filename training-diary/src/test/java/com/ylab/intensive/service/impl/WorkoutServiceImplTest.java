@@ -73,7 +73,7 @@ class WorkoutServiceImplTest {
         user.setId(1);
         user.setEmail(email);
 
-        when(workoutDao.findByDate(any())).thenReturn(Optional.of(workout));
+        when(workoutDao.findByDate(LocalDate.parse("2022-01-01"), 1)).thenReturn(Optional.of(workout));
         when(workoutTypeService.findByWorkoutId(anyInt())).thenReturn(Set.of());
         doNothing().when(workoutTypeService).saveType(anyInt(), anyString());
         doNothing().when(auditService).saveAction(anyInt(), anyString());
@@ -99,7 +99,7 @@ class WorkoutServiceImplTest {
 
         when(authorizedUser.getAttribute("authorizedUser")).thenReturn(userDto);
         when(userManagementService.findByEmail(email)).thenReturn(Optional.of(user));
-        when(workoutDao.findByDate(any())).thenReturn(Optional.of(new Workout()));
+        when(workoutDao.findByDate(LocalDate.parse("2022-01-01"), 1)).thenReturn(Optional.of(new Workout()));
         when(workoutTypeService.findByWorkoutId(anyInt())).thenReturn(Set.of(typeName));
 
         assertThatThrownBy(() -> workoutService.addTrainingType(date, typeName))
@@ -122,7 +122,7 @@ class WorkoutServiceImplTest {
 
         when(authorizedUser.getAttribute("authorizedUser")).thenReturn(userDto);
         when(userManagementService.findByEmail(email)).thenReturn(Optional.of(user));
-        when(workoutDao.findByDate(any())).thenReturn(Optional.of(new Workout()));
+        when(workoutDao.findByDate(LocalDate.parse("2022-01-01"), 1)).thenReturn(Optional.of(new Workout()));
         doNothing().when(workoutInfoService).saveWorkoutInfo(anyInt(), anyString(), anyString());
         doNothing().when(auditService).saveAction(anyInt(), anyString());
 
@@ -146,7 +146,7 @@ class WorkoutServiceImplTest {
 
         when(authorizedUser.getAttribute("authorizedUser")).thenReturn(userDto);
         when(userManagementService.findByEmail(email)).thenReturn(Optional.of(user));
-        when(workoutDao.findByDate(any())).thenReturn(Optional.empty());
+        when(workoutDao.findByDate(LocalDate.parse("2022-01-01"), 1)).thenReturn(Optional.empty());
         doNothing().when(auditService).saveAction(anyInt(), anyString());
 
         assertThatThrownBy(() -> workoutService.addWorkoutInfo(date, title, info))
@@ -192,7 +192,7 @@ class WorkoutServiceImplTest {
 
         when(authorizedUser.getAttribute("authorizedUser")).thenReturn(userDto);
         when(userManagementService.findByEmail(email)).thenReturn(Optional.of(user));
-        when(workoutDao.findByDate(any())).thenReturn(Optional.of(workout));
+        when(workoutDao.findByDate(LocalDate.parse("2022-01-01"), 1)).thenReturn(Optional.of(workout));
         when(workoutTypeService.findByWorkoutId(anyInt())).thenReturn(Set.of());
         when(workoutInfoService.getInfoByWorkoutId(anyInt())).thenReturn(Collections.emptyMap());
         when(workoutMapper.entityToDto(workout)).thenReturn(new WorkoutDto());
@@ -219,7 +219,7 @@ class WorkoutServiceImplTest {
 
         when(authorizedUser.getAttribute("authorizedUser")).thenReturn(userDto);
         when(userManagementService.findByEmail(email)).thenReturn(Optional.of(user));
-        when(workoutDao.findByDate(workoutDto.getDate())).thenReturn(Optional.of(workout));
+        when(workoutDao.findByDate(workoutDto.getDate(), 1)).thenReturn(Optional.of(workout));
 
         workoutService.updateType(workoutDto, oldType, newType);
 
@@ -231,9 +231,9 @@ class WorkoutServiceImplTest {
     @DisplayName("Update duration - success")
     void testUpdateDuration_Success() {
         WorkoutDto workoutDto = new WorkoutDto();
-        workoutDto.setDate(LocalDate.now());
+        workoutDto.setDate(LocalDate.parse("2022-01-01"));
         String durationStr = "1:5:24";
-        Workout workout = Workout.builder().id(1).date(LocalDate.now()).build();
+        Workout workout = Workout.builder().id(1).date(LocalDate.parse("2022-01-01")).build();
         String email = "test@email.com";
         UserDto userDto = new UserDto();
         userDto.setEmail(email);
@@ -243,7 +243,7 @@ class WorkoutServiceImplTest {
 
         when(authorizedUser.getAttribute("authorizedUser")).thenReturn(userDto);
         when(userManagementService.findByEmail(email)).thenReturn(Optional.of(user));
-        when(workoutDao.findByDate(any())).thenReturn(Optional.of(workout));
+        when(workoutDao.findByDate(LocalDate.parse("2022-01-01"), 1)).thenReturn(Optional.of(workout));
 
         workoutService.updateDuration(workoutDto, durationStr);
 
@@ -254,9 +254,9 @@ class WorkoutServiceImplTest {
     @DisplayName("Update calories - success")
     void testUpdateCalories_Success() {
         WorkoutDto workoutDto = new WorkoutDto();
-        workoutDto.setDate(LocalDate.now());
+        workoutDto.setDate(LocalDate.parse("2022-01-01"));
         String calories = "300";
-        Workout workout = Workout.builder().id(1).date(LocalDate.now()).build();
+        Workout workout = Workout.builder().id(1).date(LocalDate.parse("2022-01-01")).build();
         String email = "test@email.com";
         UserDto userDto = new UserDto();
         userDto.setEmail(email);
@@ -266,7 +266,7 @@ class WorkoutServiceImplTest {
 
         when(authorizedUser.getAttribute("authorizedUser")).thenReturn(userDto);
         when(userManagementService.findByEmail(email)).thenReturn(Optional.of(user));
-        when(workoutDao.findByDate(any())).thenReturn(Optional.of(workout));
+        when(workoutDao.findByDate(LocalDate.parse("2022-01-01"), 1)).thenReturn(Optional.of(workout));
         doNothing().when(workoutDao).updateCalorie(anyInt(), anyFloat());
         doNothing().when(auditService).saveAction(anyInt(), anyString());
 
@@ -279,12 +279,12 @@ class WorkoutServiceImplTest {
     @DisplayName("Update additional info - success")
     void testUpdateAdditionalInfo_Success() {
         WorkoutDto workoutDto = new WorkoutDto();
-        workoutDto.setDate(LocalDate.now());
+        workoutDto.setDate(LocalDate.parse("2022-01-01"));
         workoutDto.setInfo(new HashMap<>());
         String title = "Title";
         String info = "Info";
         workoutDto.getInfo().put(title, info);
-        Workout workout = Workout.builder().id(1).date(LocalDate.now()).build();
+        Workout workout = Workout.builder().id(1).date(LocalDate.parse("2022-01-01")).build();
         String email = "test@email.com";
         UserDto userDto = new UserDto();
         userDto.setEmail(email);
@@ -294,7 +294,7 @@ class WorkoutServiceImplTest {
 
         when(authorizedUser.getAttribute("authorizedUser")).thenReturn(userDto);
         when(userManagementService.findByEmail(email)).thenReturn(Optional.of(user));
-        when(workoutDao.findByDate(any())).thenReturn(Optional.of(workout));
+        when(workoutDao.findByDate(LocalDate.parse("2022-01-01"), 1)).thenReturn(Optional.of(workout));
         doNothing().when(workoutInfoService).updateWorkoutInfo(anyInt(), anyString(), anyString());
         doNothing().when(auditService).saveAction(anyInt(), anyString());
 
@@ -316,10 +316,10 @@ class WorkoutServiceImplTest {
 
         when(authorizedUser.getAttribute("authorizedUser")).thenReturn(userDto);
         when(userManagementService.findByEmail(email)).thenReturn(Optional.of(user));
-        when(workoutDao.findByDate(any())).thenReturn(Optional.of(new Workout()));
+        when(workoutDao.findByDate(LocalDate.parse("2022-01-01"), 1)).thenReturn(Optional.of(new Workout()));
         doNothing().when(workoutTypeService).delete(anyInt());
         doNothing().when(workoutInfoService).delete(anyInt());
-        doNothing().when(workoutDao).deleteWorkout(any(LocalDate.class));
+        doNothing().when(workoutDao).deleteWorkout(LocalDate.parse("2022-01-01"), 1);
         doNothing().when(auditService).saveAction(anyInt(), anyString());
 
         workoutService.deleteWorkout(date);
@@ -339,7 +339,7 @@ class WorkoutServiceImplTest {
         user.setId(1);
         user.setEmail(email);
 
-        when(workoutDao.findByDuration(any(), any()))
+        when(workoutDao.findByDuration(1, LocalDate.parse("2022-01-01"), LocalDate.parse("2022-01-02")))
                 .thenReturn(Arrays.asList(Workout.builder().id(1).date(LocalDate.now()).calorie(123f).build(),
                         Workout.builder().id(2).date(LocalDate.now()).calorie(123f).build()));
         doNothing().when(auditService).saveAction(1, "Пользователь просмотрел статистику по тренировкам за период " + begin + " -- " + end);

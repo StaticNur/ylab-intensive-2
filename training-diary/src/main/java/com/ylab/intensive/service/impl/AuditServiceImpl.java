@@ -6,8 +6,14 @@ import com.ylab.intensive.service.AuditService;
 
 import java.util.List;
 
+/**
+ * Implementation class for {@link AuditService}.
+ */
 public class AuditServiceImpl implements AuditService {
 
+    /**
+     * This DAO is responsible for data access operations related to audit.
+     */
     @Inject
     private AuditDao auditDao;
 

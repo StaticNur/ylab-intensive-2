@@ -1,6 +1,5 @@
 package com.ylab.intensive.service;
 
-
 import com.ylab.intensive.util.PropertiesUtil;
 
 import java.lang.reflect.Proxy;

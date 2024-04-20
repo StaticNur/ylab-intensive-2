@@ -19,16 +19,17 @@ import java.util.Optional;
 public class WorkoutDaoImpl implements WorkoutDao {
 
     @Override
-    public Optional<Workout> findByDate(LocalDate date) {
+    public Optional<Workout> findByDate(LocalDate date, int userId) {
         String FIND_BY_DATE = """
                 SELECT w.id, w.user_id, w.date, w.duration, w.calorie
                 FROM internal.workout w
-                WHERE w.date = ?
+                WHERE w.date = ? and w.user_id = ?
                 """;
 
         try (Connection connection = ConnectionManager.get();
              PreparedStatement preparedStatement = connection.prepareStatement(FIND_BY_DATE)) {
-            preparedStatement.setDate(1, java.sql.Date.valueOf(date));
+            preparedStatement.setDate(1, Date.valueOf(date));
+            preparedStatement.setInt(2, userId);
 
             try (ResultSet rs = preparedStatement.executeQuery()) {
                 if (rs.next()) {
@@ -104,14 +105,15 @@ public class WorkoutDaoImpl implements WorkoutDao {
     }
 
     @Override
-    public void deleteWorkout(LocalDate date) {
-        String DELETE_WORKOUT = "DELETE FROM internal.workout WHERE date = ?";
+    public void deleteWorkout(LocalDate date, int userId) {
+        String DELETE_WORKOUT = "DELETE FROM internal.workout WHERE date = ? and user_id = ?";
 
         try (Connection connection = ConnectionManager.get()) {
             connection.setAutoCommit(false);
 
             try (PreparedStatement preparedStatement = connection.prepareStatement(DELETE_WORKOUT)) {
                 preparedStatement.setDate(1, Date.valueOf(date));
+                preparedStatement.setInt(2, userId);
 
                 preparedStatement.executeUpdate();
             } catch (SQLException e) {
@@ -173,17 +175,18 @@ public class WorkoutDaoImpl implements WorkoutDao {
     }
 
     @Override
-    public List<Workout> findByDuration(LocalDate begin, LocalDate end) {
+    public List<Workout> findByDuration(int userId, LocalDate begin, LocalDate end) {
         List<Workout> workouts = new ArrayList<>();
         String FIND_BY_DURATION = """
                 SELECT w.id, w.user_id, w.date, w.duration, w.calorie
-                FROM internal.workout w WHERE date BETWEEN ? AND ?
+                FROM internal.workout w WHERE w.user_id = ? and w.date BETWEEN ? AND ?
                 """;
 
         try (Connection connection = ConnectionManager.get();
              PreparedStatement preparedStatement = connection.prepareStatement(FIND_BY_DURATION)) {
-            preparedStatement.setDate(1, Date.valueOf(begin));
-            preparedStatement.setDate(2, Date.valueOf(end));
+            preparedStatement.setInt(1, userId);
+            preparedStatement.setDate(2, Date.valueOf(begin));
+            preparedStatement.setDate(3, Date.valueOf(end));
 
             try (ResultSet rs = preparedStatement.executeQuery()) {
                 while (rs.next()) {

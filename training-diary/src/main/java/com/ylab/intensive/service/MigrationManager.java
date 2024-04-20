@@ -60,11 +60,17 @@ public class MigrationManager {
         }
     }
 
+    /**
+     * Creates a schema if it does not already exist.
+     *
+     * @param connection the database connection
+     * @param schemaName the name of the schema to create
+     * @throws SQLException if a database access error occurs
+     */
     private void createSchemaForMigration(Connection connection, String schemaName) throws SQLException {
         Statement statement = connection.createStatement();
         String sql = "CREATE SCHEMA IF NOT EXISTS " + schemaName;
         statement.executeUpdate(sql);
         statement.close();
     }
-
 }

@@ -6,7 +6,14 @@ import com.ylab.intensive.service.WorkoutInfoService;
 
 import java.util.Map;
 
+/**
+ * Implementation class for {@link WorkoutInfoService}.
+ */
 public class WorkoutInfoServiceImpl implements WorkoutInfoService {
+
+    /**
+     * Data access object for workout information operations.
+     */
     @Inject
     private WorkoutInfoDao workoutInfoDao;
 

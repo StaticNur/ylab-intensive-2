@@ -173,7 +173,12 @@ public class TrainingController {
 
     // Private helper methods
 
-
+    /**
+     * Builds a formatted string representation of a workout.
+     *
+     * @param workout           the {@link WorkoutDto} containing workout details
+     * @param formattedWorkouts the {@link StringBuilder} to append the formatted workout string
+     */
     private void buildUIForWorkout(WorkoutDto workout, StringBuilder formattedWorkouts) {
         Duration duration = workout.getDuration();
         String viewDuration = String.format("%dч. %dм. %dс.", duration.toHours(), duration.toMinutesPart(), duration.toSecondsPart());
@@ -186,6 +191,8 @@ public class TrainingController {
 
     /**
      * Edits the type of a workout.
+     *
+     * @param workoutDto the {@link WorkoutDto} containing workout details
      */
     private void editType(WorkoutDto workoutDto) {
         String oldType = getUserInput(color.yellowBackground("Введите текущий тип тренировки:"));
@@ -196,6 +203,8 @@ public class TrainingController {
 
     /**
      * Edits the duration of a workout.
+     *
+     * @param workoutDto the {@link WorkoutDto} containing workout details
      */
     private void editDuration(WorkoutDto workoutDto) {
         String newDuration = getUserInput(color.yellowBackground("Введите новую длительность тренировки в формате" +
@@ -206,6 +215,8 @@ public class TrainingController {
 
     /**
      * Edits the calories of a workout.
+     *
+     * @param workoutDto the {@link WorkoutDto} containing workout details
      */
     private void editCalories(WorkoutDto workoutDto) {
         String newCalories = getUserInput(color.yellowBackground("Введите новое количество потраченных " +
@@ -216,6 +227,8 @@ public class TrainingController {
 
     /**
      * Edits the additional information of a workout.
+     *
+     * @param workoutDto the {@link WorkoutDto} containing workout details
      */
     private void editAdditionalInfo(WorkoutDto workoutDto) {
         String title = getUserInput(color.yellowBackground("Введите заголовок дополнительной информации " +

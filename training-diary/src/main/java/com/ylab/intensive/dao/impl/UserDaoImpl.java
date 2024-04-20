@@ -67,13 +67,6 @@ public class UserDaoImpl implements UserDao {
         return Optional.empty();
     }
 
-    /**
-     * Updates the user's role in the database by the specified identifier.
-     *
-     * @param email the user email
-     * @return the updated user
-     * @throws DaoException if an SQL exception occurs
-     */
     @Override
     public boolean updateUserRole(String email, int roleId) {
         String UPDATE_USER_ROLE = "UPDATE internal.user SET role_id = ? WHERE email = ?";

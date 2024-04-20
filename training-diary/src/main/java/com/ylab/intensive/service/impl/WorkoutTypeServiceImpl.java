@@ -6,9 +6,17 @@ import com.ylab.intensive.service.WorkoutTypeService;
 
 import java.util.Set;
 
+/**
+ * Implementation class for {@link WorkoutTypeService}.
+ */
 public class WorkoutTypeServiceImpl implements WorkoutTypeService {
+
+    /**
+     * Data access object for workout type operations.
+     */
     @Inject
     private WorkoutTypeDao workoutTypeDao;
+
     @Override
     public void saveType(int workoutId, String typeName) {
         workoutTypeDao.saveType(workoutId, typeName);

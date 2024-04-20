@@ -11,7 +11,11 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Implementation class for {@link AuditDao}.
+ */
 public class AuditDaoImpl implements AuditDao {
+
     @Override
     public List<String> getUserActions(int userId) {
         List<String> actions = new ArrayList<>();

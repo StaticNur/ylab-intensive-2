@@ -1,5 +1,6 @@
 package com.ylab.intensive.dao;
 
+import com.ylab.intensive.exception.DaoException;
 import com.ylab.intensive.model.entity.User;
 
 import java.util.List;
@@ -26,10 +27,12 @@ public interface UserDao {
     Optional<User> findByEmail(String email);
 
     /**
-     * Updates the role of a user.
+     * Updates the user's role in the database by the specified identifier.
      *
-     * @param email The email of the user to update
-     * @return An Optional containing the updated user if found, otherwise empty
+     * @param email  the user email
+     * @param roleId the role id
+     * @return the updated user
+     * @throws DaoException if an SQL exception occurs
      */
     boolean updateUserRole(String email, int roleId);
 

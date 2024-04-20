@@ -16,9 +16,29 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 public class WorkoutDto {
-    LocalDate date;
-    Set<String> type;
-    Duration duration;
-    Float calorie;
-    Map<String, String> info;
+
+    /**
+     * The date of the workout
+     */
+    private LocalDate date;
+
+    /**
+     * The type(s) of the workout
+     */
+    private Set<String> type;
+
+    /**
+     * The duration of the workout
+     */
+    private Duration duration;
+
+    /**
+     * The calorie burned during the workout
+     */
+    private Float calorie;
+
+    /**
+     * Additional information about the workout
+     */
+    private Map<String, String> info;
 }

@@ -8,6 +8,9 @@ import java.sql.*;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Implementation class for {@link WorkoutInfoDao}.
+ */
 public class WorkoutInfoDaoImpl implements WorkoutInfoDao {
 
     @Override

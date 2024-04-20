@@ -11,6 +11,7 @@ import org.junit.platform.launcher.listeners.TestExecutionSummary;
 import java.io.PrintWriter;
 
 public class TestLauncher {
+
     public static void main(String[] args) {
         Launcher launcher = LauncherFactory.create();
         SummaryGeneratingListener listener = new SummaryGeneratingListener();
