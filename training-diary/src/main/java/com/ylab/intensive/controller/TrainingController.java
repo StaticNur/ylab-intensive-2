@@ -150,6 +150,7 @@ public class TrainingController {
         String date = getUserInput(color.yellowBackground("Введите дату тренировки, которую хотите удалить (dd-MM-yyyy):"));
         try {
             workoutService.deleteWorkout(date);
+            outputData.output(color.greenBackground("Тренировка успешно удалена!"));
         } catch (RuntimeException e) {
             handleException(e);
         }
