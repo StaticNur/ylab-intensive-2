@@ -72,6 +72,8 @@ public class UserController {
             String role = readInput(color.yellowBackground(" роль (ADMIN / USER): "));
             userManagementService.registerUser(email, password, role);
             log.info("The player trying to register with login " + email + " and password " + password);
+            outputData.output(color.greenBackground(" Вы успешно зарегистрировались! " +
+                                                    "Теперь можете входить в личный кабинет. "));
         });
     }
 
@@ -86,8 +88,8 @@ public class UserController {
             if (user.isEmpty()) {
                 outputData.errOutput(" Не правильный логин или пароль!");
             } else {
-                workoutService.setAuthorizedWorkoutDB(user.get().getWorkout());
-                outputData.output(color.greenBackground(" Пользователь успешно авторизовался: " + user.get().getEmail() + " " + user.get().getRole()));
+                outputData.output(color.greenBackground(" Пользователь успешно авторизовался: "
+                                                        + user.get().getEmail() + " " + user.get().getRole()));
             }
         });
     }
@@ -103,7 +105,8 @@ public class UserController {
             if (userDto.isEmpty()) {
                 outputData.errOutput("Не удалось изменить права пользователя! Это действие может выполнить админ.");
             }
-            outputData.output(color.greenBackground("Роль пользователя была успешно изменена на: " + userDto.get().getRole()));
+            outputData.output(color.greenBackground("Роль пользователя была успешно изменена на: "
+                                                    + userDto.get().getRole()));
         });
     }
 
@@ -135,13 +138,15 @@ public class UserController {
         if (userList.isEmpty()) {
             outputData.errOutput("Для этого запроса нужны права администратора!");
         } else {
-            for (User user : userList) {
+            List<User> userWithWorkouts = workoutService.getAllUsersWorkouts(userList);
+            for (User user : userWithWorkouts) {
                 outputData.output(color.greenBackground(user.getEmail() + " " + user.getRole()));
                 StringBuilder formattedWorkouts = new StringBuilder();
 
                 for (Workout workout : user.getWorkout()) {
                     Duration duration = workout.getDuration();
-                    String viewDuration = duration.toHours() + "ч. " + duration.toMinutesPart() + "м. " + duration.toSecondsPart() + "c. ";
+                    String viewDuration = String.format("%dч. %dм. %dс.", duration.toHours(),
+                            duration.toMinutesPart(), duration.toSecondsPart());
                     formattedWorkouts.append("date = ").append(workout.getDate()).append(", ");
                     formattedWorkouts.append("types = ").append(workout.getType()).append(", ");
                     formattedWorkouts.append("duration = ").append(viewDuration).append(", ");
@@ -150,7 +155,7 @@ public class UserController {
                 }
 
                 if (user.getWorkout().isEmpty()) {
-                    outputData.output(color.greenBackground("Тренировок нет"));
+                    outputData.output(color.greenBackground("Тренировок нет\n"));
                 } else {
                     outputData.output(color.greenBackground(formattedWorkouts.toString()));
                 }

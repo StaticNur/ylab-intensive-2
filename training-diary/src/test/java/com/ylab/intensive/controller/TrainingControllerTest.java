@@ -15,9 +15,10 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
 import java.time.Duration;
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
@@ -111,9 +112,10 @@ class TrainingControllerTest {
     @Test
     @DisplayName("Test editWorkout method")
     void testEditWorkout() {
-        WorkoutDto workoutDto = new WorkoutDto();
+        WorkoutDto workoutDto = new WorkoutDto(LocalDate.now(),
+                Collections.emptySet(), Duration.ofHours(1), 1f, Collections.emptyMap());
         when(inputData.input()).thenReturn("01-04-2024", "2", "2:00:00");
-        when(workoutService.getWorkoutByDate("01-04-2024")).thenReturn(Optional.of(workoutDto));
+        when(workoutService.getWorkoutByDate("01-04-2024")).thenReturn(workoutDto);
         when(color.greenBackground(anyString()))
                 .thenReturn("workoutDto.get().toString()")
                 .thenReturn("Длительность тренировки успешно изменена!");

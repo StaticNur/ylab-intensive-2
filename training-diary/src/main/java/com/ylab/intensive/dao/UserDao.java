@@ -1,9 +1,8 @@
 package com.ylab.intensive.dao;
 
+import com.ylab.intensive.exception.DaoException;
 import com.ylab.intensive.model.entity.User;
-import com.ylab.intensive.model.enums.Role;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,7 +16,7 @@ public interface UserDao {
      * @param user The user to save
      * @return true if the user was successfully saved, false otherwise
      */
-    boolean save(User user);
+    boolean save(User user, int roleId);
 
     /**
      * Finds a user by their email.
@@ -28,28 +27,14 @@ public interface UserDao {
     Optional<User> findByEmail(String email);
 
     /**
-     * Gets the size of the user database.
+     * Updates the user's role in the database by the specified identifier.
      *
-     * @return The size of the user database
+     * @param email  the user email
+     * @param roleId the role id
+     * @return the updated user
+     * @throws DaoException if an SQL exception occurs
      */
-    int getSize();
-
-    /**
-     * Updates the role of a user.
-     *
-     * @param email   The email of the user to update
-     * @param newRole The new role for the user
-     * @return An Optional containing the updated user if found, otherwise empty
-     */
-    Optional<User> updateUserRole(String email, Role newRole);
-
-    /**
-     * Saves an action performed by a user.
-     *
-     * @param email  The email of the user who performed the action
-     * @param action The action to save
-     */
-    void saveAction(String email, String action);
+    boolean updateUserRole(String email, int roleId);
 
     /**
      * Finds all users in the database.

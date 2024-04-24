@@ -3,21 +3,14 @@ package com.ylab.intensive.service;
 import com.ylab.intensive.model.dto.WorkoutDto;
 import com.ylab.intensive.exception.DateFormatException;
 import com.ylab.intensive.exception.WorkoutException;
-import com.ylab.intensive.model.entity.Workout;
+import com.ylab.intensive.model.entity.User;
 
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Service interface for managing workout-related operations.
  */
 public interface WorkoutService {
-    /**
-     * Sets up the authorized user's workout database with the specified list of workouts.
-     *
-     * @param workouts The list of workouts to be set as the authorized workout database
-     */
-    void setAuthorizedWorkoutDB(List<Workout> workouts);
 
     /**
      * Adds a new training type on the specified date.
@@ -61,7 +54,7 @@ public interface WorkoutService {
      * @param date The date of the workout
      * @return An optional containing the workout DTO if found, empty otherwise
      */
-    Optional<WorkoutDto> getWorkoutByDate(String date);
+    WorkoutDto getWorkoutByDate(String date);
 
     /**
      * Updates the type of the workout with the specified old type to the new type.
@@ -112,4 +105,12 @@ public interface WorkoutService {
      * @return The total calorie burned within the specified date range
      */
     int getWorkoutStatistics(String begin, String end);
+
+    /**
+     * Retrieves all workouts for the users in the provided list.
+     *
+     * @param userList the list of users
+     * @return a list of all workouts for the users
+     */
+    List<User> getAllUsersWorkouts(List<User> userList);
 }

@@ -1,7 +1,7 @@
 package com.ylab.intensive;
 
 import com.ylab.intensive.controller.ApplicationRunner;
-import com.ylab.intensive.service.MigrationManager;
+import com.ylab.intensive.config.MigrationManager;
 import com.ylab.intensive.di.context.ApplicationContext;
 import com.ylab.intensive.di.factory.BeanFactory;
 
@@ -9,6 +9,7 @@ import com.ylab.intensive.di.factory.BeanFactory;
  * The main entry point for the application.
  */
 public class TrainingDiaryApplication {
+
     /**
      * The main method of the application.
      * Initializes the application context and starts migration.

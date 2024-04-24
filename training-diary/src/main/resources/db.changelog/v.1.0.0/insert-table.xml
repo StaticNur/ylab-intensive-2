@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.5.xsd"
+        logicalFilePath="db/changelog.xml">
+
+    <!-- Заполнение таблицы role -->
+    <changeSet id="insert-roles" author="Mukhammadnur">
+        <insert schemaName="internal" tableName="role">
+            <column name="name" value="ADMIN"/>
+        </insert>
+        <insert schemaName="internal" tableName="role">
+            <column name="name" value="USER"/>
+        </insert>
+    </changeSet>
+
+    <!-- Заполнение таблицы user -->
+    <changeSet id="insert-users" author="Mukhammadnur">
+        <insert schemaName="internal" tableName="user">
+            <column name="email" value="admin@example.com"/>
+            <column name="password" value="adminPassword"/>
+            <column name="role_id" value="1"/>
+        </insert>
+        <insert schemaName="internal" tableName="user">
+            <column name="email" value="user@example.com"/>
+            <column name="password" value="userPassword"/>
+            <column name="role_id" value="2"/>
+        </insert>
+    </changeSet>
+
+    <!-- Заполнение таблицы workout -->
+    <changeSet id="insert-workouts" author="Mukhammadnur">
+        <insert schemaName="internal" tableName="workout">
+            <column name="user_id" value="1"/>
+            <column name="date" value="2024-04-17"/>
+            <column name="duration" value="3600"/>
+            <column name="calorie" value="500"/>
+        </insert>
+        <insert schemaName="internal" tableName="workout">
+            <column name="user_id" value="2"/>
+            <column name="date" value="2024-04-19"/>
+            <column name="duration" value="12600"/>
+            <column name="calorie" value="1500"/>
+        </insert>
+        <insert schemaName="internal" tableName="workout">
+            <column name="user_id" value="2"/>
+            <column name="date" value="2024-03-19"/>
+            <column name="duration" value="9332"/>
+            <column name="calorie" value="1000"/>
+        </insert>
+        <insert schemaName="internal" tableName="workout">
+            <column name="user_id" value="1"/>
+            <column name="date" value="2022-02-22"/>
+            <column name="duration" value="9332"/>
+            <column name="calorie" value="1000"/>
+        </insert>
+    </changeSet>
+
+    <!-- Заполнение таблицы workout_type -->
+    <changeSet id="insert-workout-types" author="Mukhammadnur">
+        <insert schemaName="internal" tableName="workout_type">
+            <column name="workout_id" value="1"/>
+            <column name="type" value="cardio"/>
+        </insert>
+        <insert schemaName="internal" tableName="workout_type">
+            <column name="workout_id" value="1"/>
+            <column name="type" value="yoga"/>
+        </insert>
+        <insert schemaName="internal" tableName="workout_type">
+            <column name="workout_id" value="2"/>
+            <column name="type" value="strength training"/>
+        </insert>
+        <insert schemaName="internal" tableName="workout_type">
+            <column name="workout_id" value="3"/>
+            <column name="type" value="yoga"/>
+        </insert>
+    </changeSet>
+
+    <!-- Заполнение таблицы workout_info -->
+    <changeSet id="insert-workout-info" author="Mukhammadnur">
+        <insert schemaName="internal" tableName="workout_info">
+            <column name="workout_id" value="1"/>
+            <column name="title" value="distance traveled"/>
+            <column name="info" value="1500 км"/>
+        </insert>
+        <insert schemaName="internal" tableName="workout_info">
+            <column name="workout_id" value="2"/>
+            <column name="title" value="number of exercises performed"/>
+            <column name="info" value="554"/>
+        </insert>
+    </changeSet>
+
+    <!-- Заполнение таблицы audit -->
+    <changeSet id="insert-audit" author="Mukhammadnur">
+        <insert schemaName="internal" tableName="audit">
+            <column name="user_id" value="1"/>
+            <column name="action" value="Login"/>
+        </insert>
+        <insert schemaName="internal" tableName="audit">
+            <column name="user_id" value="2"/>
+            <column name="action" value="Login"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>

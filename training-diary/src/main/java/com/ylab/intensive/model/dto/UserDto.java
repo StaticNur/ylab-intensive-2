@@ -12,6 +12,13 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserDto {
+    /**
+     * The email address of the user
+     */
     private String email;
+
+    /**
+     * The role of the user (e.g., ADMIN, USER)
+     */
     private Role role;
 }
