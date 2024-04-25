@@ -7,8 +7,20 @@
         logicalFilePath="db/changelog.xml">
 
     <changeSet id="create-schema-internal" author="Mukhammadnur">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM information_schema.schemata WHERE schema_name = 'internal';
+            </sqlCheck>
+        </preConditions>
+
         <sql dbms="postgresql" endDelimiter=";">
             CREATE SCHEMA IF NOT EXISTS internal
         </sql>
+
+        <rollback>
+            <sql dbms="postgresql" endDelimiter=";">
+                DROP SCHEMA IF EXISTS internal CASCADE
+            </sql>
+        </rollback>
     </changeSet>
 </databaseChangeLog>

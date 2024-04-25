@@ -47,7 +47,7 @@ public class PostgresTestContainer extends PostgreSQLContainer<PostgresTestConta
                 .withUsername("test_user")
                 .withPassword("test_psw")
                 .withCreateContainerCmdModifier(cmd -> cmd.withPortBindings(new PortBinding(Ports.
-                        Binding.bindPort(5435), new ExposedPort(5432))));
+                        Binding.bindPort(5434), new ExposedPort(5432))));
         container.start();
         return container;
     }

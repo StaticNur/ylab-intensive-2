@@ -8,6 +8,13 @@
 
     <!--   Таблица для ролей   -->
     <changeSet id="create-role-table" author="Mukhammadnur">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists schemaName="internal" tableName="role"/>
+                <sequenceExists schemaName="internal" sequenceName="role_sequence"/>
+            </not>
+        </preConditions>
+
         <createSequence schemaName="internal" sequenceName="role_sequence" startValue="1" incrementBy="1"/>
 
         <createTable schemaName="internal" tableName="role">
@@ -18,10 +25,22 @@
                 <constraints nullable="false" unique="true"/>
             </column>
         </createTable>
+
+        <rollback>
+            <dropTable schemaName="internal" tableName="role" />
+            <dropSequence schemaName="internal" sequenceName="role_sequence"/>
+        </rollback>
     </changeSet>
 
     <!--   Таблица для пользователей   -->
     <changeSet id="create-user-table" author="Mukhammadnur">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists schemaName="internal" tableName="user"/>
+                <sequenceExists schemaName="internal" sequenceName="user_sequence"/>
+            </not>
+        </preConditions>
+
         <createSequence schemaName="internal" sequenceName="user_sequence" startValue="1" incrementBy="1"/>
 
         <createTable schemaName="internal" tableName="user">
@@ -39,10 +58,22 @@
                              references="internal.role(id)" foreignKeyName="fk_user_role"/>
             </column>
         </createTable>
+
+        <rollback>
+            <dropTable schemaName="internal" tableName="user" />
+            <dropSequence schemaName="internal" sequenceName="user_sequence"/>
+        </rollback>
     </changeSet>
 
     <!--   Таблица для тренировок   -->
     <changeSet id="create-workout-table" author="Mukhammadnur">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists schemaName="internal" tableName="workout"/>
+                <sequenceExists schemaName="internal" sequenceName="workout_sequence"/>
+            </not>
+        </preConditions>
+
         <createSequence schemaName="internal" sequenceName="workout_sequence" startValue="1" incrementBy="1"/>
 
         <createTable schemaName="internal" tableName="workout">
@@ -61,10 +92,22 @@
             </column>
             <column name="calorie" type="FLOAT"/>
         </createTable>
+
+        <rollback>
+            <dropTable schemaName="internal" tableName="workout" />
+            <dropSequence schemaName="internal" sequenceName="workout_sequence"/>
+        </rollback>
     </changeSet>
 
     <!--   Таблица для типов тренировок   -->
     <changeSet id="create-workout-type-table" author="Mukhammadnur">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists schemaName="internal" tableName="workout_type"/>
+                <sequenceExists schemaName="internal" sequenceName="workout_type_sequence"/>
+            </not>
+        </preConditions>
+
         <createSequence schemaName="internal" sequenceName="workout_type_sequence" startValue="1" incrementBy="1"/>
 
         <createTable schemaName="internal" tableName="workout_type">
@@ -79,10 +122,22 @@
                 <constraints nullable="false"/>
             </column>
         </createTable>
+
+        <rollback>
+            <dropTable schemaName="internal" tableName="workout_type" />
+            <dropSequence schemaName="internal" sequenceName="workout_type_sequence"/>
+        </rollback>
     </changeSet>
 
     <!--   Таблица для дополнительной информации о тренировках   -->
     <changeSet id="create-workout-info-table" author="Mukhammadnur">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists schemaName="internal" tableName="workout_info"/>
+                <sequenceExists schemaName="internal" sequenceName="workout_info_sequence"/>
+            </not>
+        </preConditions>
+
         <createSequence schemaName="internal" sequenceName="workout_info_sequence" startValue="1" incrementBy="1"/>
 
         <createTable schemaName="internal" tableName="workout_info">
@@ -100,10 +155,22 @@
                 <constraints nullable="false"/>
             </column>
         </createTable>
+
+        <rollback>
+            <dropTable schemaName="internal" tableName="workout_info" />
+            <dropSequence schemaName="internal" sequenceName="workout_info_sequence"/>
+        </rollback>
     </changeSet>
 
     <!--   Таблица для аудита действий пользователей   -->
     <changeSet id="create-audit-table" author="Mukhammadnur">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists schemaName="internal" tableName="audit"/>
+                <sequenceExists schemaName="internal" sequenceName="audit_sequence"/>
+            </not>
+        </preConditions>
+
         <createSequence schemaName="internal" sequenceName="audit_sequence" startValue="1" incrementBy="1"/>
 
         <createTable schemaName="internal" tableName="audit">
@@ -118,6 +185,11 @@
                 <constraints nullable="false"/>
             </column>
         </createTable>
+
+        <rollback>
+            <dropTable schemaName="internal" tableName="audit" />
+            <dropSequence schemaName="internal" sequenceName="audit_sequence"/>
+        </rollback>
     </changeSet>
 
 </databaseChangeLog>
