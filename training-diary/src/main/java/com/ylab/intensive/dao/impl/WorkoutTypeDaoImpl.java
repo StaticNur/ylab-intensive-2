@@ -3,6 +3,8 @@ package com.ylab.intensive.dao.impl;
 import com.ylab.intensive.dao.WorkoutTypeDao;
 import com.ylab.intensive.exception.DaoException;
 import com.ylab.intensive.config.ConnectionManager;
+import com.ylab.intensive.util.DaoUtil;
+import lombok.extern.log4j.Log4j2;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -14,6 +16,7 @@ import java.util.Set;
 /**
  * Implementation class for {@link WorkoutTypeDao}.
  */
+@Log4j2
 public class WorkoutTypeDaoImpl implements WorkoutTypeDao {
 
     @Override
@@ -28,14 +31,14 @@ public class WorkoutTypeDaoImpl implements WorkoutTypeDao {
                 preparedStatement.setString(2, type);
 
                 preparedStatement.executeUpdate();
-            } catch (SQLException e) {
+            } catch (SQLException exc) {
                 connection.rollback();
-                throw new DaoException(e.getMessage());
+                DaoUtil.handleSQLException(exc, log);
             }
 
             connection.commit();
-        } catch (SQLException e) {
-            throw new DaoException("Error saving workout type. " + e.getMessage());
+        } catch (SQLException exc) {
+            DaoUtil.handleSQLException(exc, log);
         }
     }
 
@@ -54,16 +57,16 @@ public class WorkoutTypeDaoImpl implements WorkoutTypeDao {
                 int affectedRows = preparedStatement.executeUpdate();
 
                 if (affectedRows == 0) {
-                    throw new SQLException("Updating workout type failed, no rows affected.");
+                    throw new DaoException("Updating workout type failed, no rows affected.");
                 }
-            } catch (SQLException e) {
+            } catch (SQLException exc) {
                 connection.rollback();
-                throw new DaoException(e.getMessage());
+                DaoUtil.handleSQLException(exc, log);
             }
 
             connection.commit();
-        } catch (SQLException e) {
-            throw new DaoException("Error updating workout type. " + e.getMessage());
+        } catch (SQLException exc) {
+            DaoUtil.handleSQLException(exc, log);
         }
     }
 
@@ -81,10 +84,9 @@ public class WorkoutTypeDaoImpl implements WorkoutTypeDao {
             while (resultSet.next()) {
                 types.add(resultSet.getString("type"));
             }
-        } catch (SQLException e) {
-            throw new DaoException("Error finding types by workoutId. " + e.getMessage());
+        } catch (SQLException exc) {
+            DaoUtil.handleSQLException(exc, log);
         }
-
         return types;
     }
 
@@ -99,14 +101,14 @@ public class WorkoutTypeDaoImpl implements WorkoutTypeDao {
                 preparedStatement.setInt(1, workoutId);
 
                 preparedStatement.executeUpdate();
-            } catch (SQLException e) {
+            } catch (SQLException exc) {
                 connection.rollback();
-                throw new DaoException(e.getMessage());
+                DaoUtil.handleSQLException(exc, log);
             }
 
             connection.commit();
-        } catch (SQLException e) {
-            throw new DaoException("Error delete workout_type. " + e.getMessage());
+        } catch (SQLException exc) {
+            DaoUtil.handleSQLException(exc, log);
         }
     }
 }

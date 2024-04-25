@@ -4,6 +4,8 @@ import com.ylab.intensive.dao.WorkoutDao;
 import com.ylab.intensive.exception.DaoException;
 import com.ylab.intensive.model.entity.Workout;
 import com.ylab.intensive.config.ConnectionManager;
+import com.ylab.intensive.util.DaoUtil;
+import lombok.extern.log4j.Log4j2;
 
 import java.sql.*;
 import java.time.Duration;
@@ -16,6 +18,7 @@ import java.util.Optional;
  * Implementation of the WorkoutDao interface.
  * This class provides methods to interact with workout data in the database.
  */
+@Log4j2
 public class WorkoutDaoImpl implements WorkoutDao {
 
     @Override
@@ -35,8 +38,8 @@ public class WorkoutDaoImpl implements WorkoutDao {
             if (rs.next()) {
                 return Optional.of(buildWorkout(rs));
             }
-        } catch (SQLException e) {
-            throw new DaoException(e.getMessage());
+        } catch (SQLException exc) {
+            DaoUtil.handleSQLException(exc, log);
         }
         return Optional.empty();
     }
@@ -57,24 +60,25 @@ public class WorkoutDaoImpl implements WorkoutDao {
                 int affectedRows = preparedStatement.executeUpdate();
 
                 if (affectedRows == 0) {
-                    throw new SQLException("Creating workout failed, no rows affected.");
+                    throw new DaoException("Creating workout failed, no rows affected.");
                 }
 
                 ResultSet generatedKeys = preparedStatement.getGeneratedKeys();
                 if (generatedKeys.next()) {
                     workout.setId(generatedKeys.getInt("id"));
                 } else {
-                    throw new SQLException("Creating workout failed, no ID obtained.");
+                    throw new DaoException("Creating workout failed, no ID obtained.");
                 }
-            } catch (SQLException e) {
+            } catch (SQLException exc) {
                 connection.rollback();
-                throw new DaoException(e.getMessage());
+                DaoUtil.handleSQLException(exc, log);
             }
 
             connection.commit();
             return workout;
-        } catch (SQLException e) {
-            throw new DaoException("Error saving workout. " + e.getMessage());
+        } catch (SQLException exc) {
+            DaoUtil.handleSQLException(exc, log);
+            return new Workout();
         }
     }
 
@@ -95,8 +99,8 @@ public class WorkoutDaoImpl implements WorkoutDao {
             while (rs.next()) {
                 workoutList.add(buildWorkout(rs));
             }
-        } catch (SQLException | DaoException e) {
-            throw new DaoException("Error fetching workouts. " + e.getMessage());
+        } catch (SQLException exc) {
+            DaoUtil.handleSQLException(exc, log);
         }
         return workoutList;
     }
@@ -113,14 +117,14 @@ public class WorkoutDaoImpl implements WorkoutDao {
                 preparedStatement.setInt(2, userId);
 
                 preparedStatement.executeUpdate();
-            } catch (SQLException e) {
+            } catch (SQLException exc) {
                 connection.rollback();
-                throw new DaoException(e.getMessage());
+                DaoUtil.handleSQLException(exc, log);
             }
 
             connection.commit();
-        } catch (SQLException e) {
-            throw new DaoException("Error delete workout. " + e.getMessage());
+        } catch (SQLException exc) {
+            DaoUtil.handleSQLException(exc, log);
         }
     }
 
@@ -136,14 +140,14 @@ public class WorkoutDaoImpl implements WorkoutDao {
                 preparedStatement.setInt(2, id);
 
                 preparedStatement.executeUpdate();
-            } catch (SQLException e) {
+            } catch (SQLException exc) {
                 connection.rollback();
-                throw new DaoException(e.getMessage());
+                DaoUtil.handleSQLException(exc, log);
             }
 
             connection.commit();
-        } catch (SQLException e) {
-            throw new DaoException("Error updating calorie for workout. " + e.getMessage());
+        } catch (SQLException exc) {
+            DaoUtil.handleSQLException(exc, log);
         }
     }
 
@@ -160,14 +164,14 @@ public class WorkoutDaoImpl implements WorkoutDao {
                 preparedStatement.setInt(2, id);
 
                 preparedStatement.executeUpdate();
-            } catch (SQLException e) {
+            } catch (SQLException exc) {
                 connection.rollback();
-                throw new DaoException(e.getMessage());
+                DaoUtil.handleSQLException(exc, log);
             }
 
             connection.commit();
-        } catch (SQLException e) {
-            throw new DaoException("Error updateDuration workout. " + e.getMessage());
+        } catch (SQLException exc) {
+            DaoUtil.handleSQLException(exc, log);
         }
     }
 
@@ -189,8 +193,8 @@ public class WorkoutDaoImpl implements WorkoutDao {
             while (rs.next()) {
                 workouts.add(buildWorkout(rs));
             }
-        } catch (SQLException e) {
-            throw new DaoException("Error findByDuration workout. " + e.getMessage());
+        }  catch (SQLException exc) {
+            DaoUtil.handleSQLException(exc, log);
         }
 
         return workouts;

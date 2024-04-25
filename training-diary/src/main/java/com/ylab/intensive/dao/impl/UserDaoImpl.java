@@ -5,9 +5,12 @@ import com.ylab.intensive.exception.DaoException;
 import com.ylab.intensive.model.entity.User;
 import com.ylab.intensive.model.enums.Role;
 import com.ylab.intensive.config.ConnectionManager;
+import com.ylab.intensive.util.DaoUtil;
+import lombok.extern.log4j.Log4j2;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,6 +18,7 @@ import java.util.Optional;
  * Implementation of the UserDao interface.
  * This class provides methods to interact with user data in the database.
  */
+@Log4j2
 public class UserDaoImpl implements UserDao {
 
     @Override
@@ -32,15 +36,16 @@ public class UserDaoImpl implements UserDao {
 
                 rowsAffected = preparedStatement.executeUpdate();
 
-            } catch (SQLException e) {
+            } catch (SQLException exc) {
                 connection.rollback();
-                throw new DaoException(e.getMessage());
+                DaoUtil.handleSQLException(exc, log);
             }
 
             connection.commit();
             return rowsAffected > 0;
-        } catch (SQLException e) {
-            throw new DaoException(e.getMessage());
+        } catch (SQLException exc) {
+            DaoUtil.handleSQLException(exc, log);
+            return false;
         }
     }
 
@@ -60,8 +65,8 @@ public class UserDaoImpl implements UserDao {
             if (resultSet.next()) {
                 return buildUser(resultSet);
             }
-        } catch (SQLException e) {
-            throw new DaoException(e.getMessage());
+        } catch (SQLException exc) {
+            DaoUtil.handleSQLException(exc, log);
         }
         return Optional.empty();
     }
@@ -79,14 +84,15 @@ public class UserDaoImpl implements UserDao {
                 preparedStatement.setString(2, email);
 
                 rowsAffected = preparedStatement.executeUpdate();
-            } catch (SQLException e) {
+            } catch (SQLException exc) {
                 connection.rollback();
-                throw new DaoException(e.getMessage());
+                DaoUtil.handleSQLException(exc, log);
             }
             connection.commit();
             return rowsAffected > 0;
-        } catch (SQLException e) {
-            throw new DaoException(e.getMessage());
+        } catch (SQLException exc) {
+            DaoUtil.handleSQLException(exc, log);
+            return false;
         }
     }
 
@@ -104,8 +110,9 @@ public class UserDaoImpl implements UserDao {
 
                 userList.add(user);
             }
-        } catch (SQLException | DaoException e) {
-            throw new DaoException("Error fetching users. " + e.getMessage());
+        } catch (SQLException exc) {
+            DaoUtil.handleSQLException(exc, log);
+            return Collections.emptyList();
         }
         return userList;
     }
