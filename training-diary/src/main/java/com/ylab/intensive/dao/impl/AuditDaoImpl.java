@@ -31,10 +31,9 @@ public class AuditDaoImpl implements AuditDao {
 
             preparedStatement.setInt(1, userId);
 
-            try (ResultSet resultSet = preparedStatement.executeQuery();) {
-                while (resultSet.next()) {
-                    actions.add(resultSet.getString("action"));
-                }
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                actions.add(resultSet.getString("action"));
             }
         } catch (SQLException e) {
             throw new DaoException(e.getMessage());

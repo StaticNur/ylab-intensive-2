@@ -75,12 +75,11 @@ public class WorkoutInfoDaoImpl implements WorkoutInfoDao {
 
             preparedStatement.setInt(1, workoutId);
 
-            try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                while (resultSet.next()) {
-                    String key = resultSet.getString("title");
-                    String value = resultSet.getString("info");
-                    workoutInfoMap.put(key, value);
-                }
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                String key = resultSet.getString("title");
+                String value = resultSet.getString("info");
+                workoutInfoMap.put(key, value);
             }
 
         } catch (SQLException e) {

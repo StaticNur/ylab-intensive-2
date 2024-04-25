@@ -31,10 +31,9 @@ public class WorkoutDaoImpl implements WorkoutDao {
             preparedStatement.setDate(1, Date.valueOf(date));
             preparedStatement.setInt(2, userId);
 
-            try (ResultSet rs = preparedStatement.executeQuery()) {
-                if (rs.next()) {
-                    return Optional.of(buildWorkout(rs));
-                }
+            ResultSet rs = preparedStatement.executeQuery();
+            if (rs.next()) {
+                return Optional.of(buildWorkout(rs));
             }
         } catch (SQLException e) {
             throw new DaoException(e.getMessage());
@@ -61,12 +60,11 @@ public class WorkoutDaoImpl implements WorkoutDao {
                     throw new SQLException("Creating workout failed, no rows affected.");
                 }
 
-                try (ResultSet generatedKeys = preparedStatement.getGeneratedKeys()) {
-                    if (generatedKeys.next()) {
-                        workout.setId(generatedKeys.getInt("id"));
-                    } else {
-                        throw new SQLException("Creating workout failed, no ID obtained.");
-                    }
+                ResultSet generatedKeys = preparedStatement.getGeneratedKeys();
+                if (generatedKeys.next()) {
+                    workout.setId(generatedKeys.getInt("id"));
+                } else {
+                    throw new SQLException("Creating workout failed, no ID obtained.");
                 }
             } catch (SQLException e) {
                 connection.rollback();
@@ -93,10 +91,9 @@ public class WorkoutDaoImpl implements WorkoutDao {
 
             preparedStatement.setInt(1, userId);
 
-            try (ResultSet rs = preparedStatement.executeQuery()) {
-                while (rs.next()) {
-                    workoutList.add(buildWorkout(rs));
-                }
+            ResultSet rs = preparedStatement.executeQuery();
+            while (rs.next()) {
+                workoutList.add(buildWorkout(rs));
             }
         } catch (SQLException | DaoException e) {
             throw new DaoException("Error fetching workouts. " + e.getMessage());
@@ -188,10 +185,9 @@ public class WorkoutDaoImpl implements WorkoutDao {
             preparedStatement.setDate(2, Date.valueOf(begin));
             preparedStatement.setDate(3, Date.valueOf(end));
 
-            try (ResultSet rs = preparedStatement.executeQuery()) {
-                while (rs.next()) {
-                    workouts.add(buildWorkout(rs));
-                }
+            ResultSet rs = preparedStatement.executeQuery();
+            while (rs.next()) {
+                workouts.add(buildWorkout(rs));
             }
         } catch (SQLException e) {
             throw new DaoException("Error findByDuration workout. " + e.getMessage());

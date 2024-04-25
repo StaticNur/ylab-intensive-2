@@ -77,12 +77,10 @@ public class WorkoutTypeDaoImpl implements WorkoutTypeDao {
 
             preparedStatement.setInt(1, workoutId);
 
-            try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                while (resultSet.next()) {
-                    types.add(resultSet.getString("type"));
-                }
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                types.add(resultSet.getString("type"));
             }
-
         } catch (SQLException e) {
             throw new DaoException("Error finding types by workoutId. " + e.getMessage());
         }

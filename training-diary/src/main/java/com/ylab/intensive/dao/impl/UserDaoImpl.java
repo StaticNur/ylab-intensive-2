@@ -56,10 +56,9 @@ public class UserDaoImpl implements UserDao {
              PreparedStatement preparedStatement = connection.prepareStatement(FIND_BY_EMAIL)) {
             preparedStatement.setString(1, email);
 
-            try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                if (resultSet.next()) {
-                    return buildUser(resultSet);
-                }
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                return buildUser(resultSet);
             }
         } catch (SQLException e) {
             throw new DaoException(e.getMessage());

@@ -26,12 +26,11 @@ public class RoleDaoImpl implements RoleDao {
              PreparedStatement preparedStatement = connection.prepareStatement(FIND_BY_NAME)) {
             preparedStatement.setString(1, role.name());
 
-            try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                if (resultSet.next()) {
-                    return resultSet.getInt("id");
-                } else {
-                    throw new DaoException("Role not found.");
-                }
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                return resultSet.getInt("id");
+            } else {
+                throw new DaoException("Role not found.");
             }
         } catch (SQLException e) {
             throw new DaoException(e.getMessage());
