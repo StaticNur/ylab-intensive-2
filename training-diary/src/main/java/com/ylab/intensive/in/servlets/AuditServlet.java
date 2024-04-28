@@ -19,7 +19,7 @@ import java.io.IOException;
 /**
  * The AuditServlet class is a servlet responsible for retrieving and displaying audit logs of user actions.
  * <p>
- * This servlet allows users to view audit logs of their actions by sending a GET request to the "/user/audit" endpoint.
+ * This servlet allows users to view audit logs of their actions by sending a GET request to the "training-diary/user/audit" endpoint.
  * The servlet retrieves the audit logs from the AuditService, converts them to DTOs, and returns them in JSON format.
  */
 @WebServlet("/training-diary/user/audit")

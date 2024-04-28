@@ -1,4 +1,3 @@
-/*
 package com.ylab.intensive.dao.impl;
 
 import com.ylab.intensive.dao.container.PostgresTestContainer;
@@ -28,12 +27,15 @@ class UserDaoImplTest extends TestConfigurationEnvironment {
     @Test
     @DisplayName("Save user successfully")
     void testSave() {
-        User user = User.builder().email("test@email.com").password("password").build();
+        User user = new User();
+        user.setUuid(UUID.fromString("622e0957-e81b-19d3-a446-426614879357"));
+        user.setEmail("test@email.com");
+        user.setPassword("password");
         int roleId = Role.USER.getValue();
 
         User userSaved = userDao.save(user, roleId);
 
-        assertThat(userSaved.getId() != -1).isTrue();
+        assertThat(userSaved.getId() != 0).isTrue();
     }
 
     @Test
@@ -57,9 +59,12 @@ class UserDaoImplTest extends TestConfigurationEnvironment {
     void testUpdateUserRole_Success() {
         String email = "test23@email.com";
         int roleId = Role.ADMIN.getValue();
-        User userToSave = User.builder().uuid(UUID.fromString("123e4567-e89b-12d3-a456-426614174012"))
-                .email(email).password("password").build();
-        User userSaved = userDao.save(userToSave, Role.USER.getValue());
+        User user = new User();
+        user.setUuid(UUID.fromString("123e4567-e89b-12d3-a456-426614174012"));
+        user.setEmail(email);
+        user.setPassword("password");
+
+        User userSaved = userDao.save(user, Role.USER.getValue());
 
         boolean result = userDao.updateUserRole(userSaved.getUuid(), roleId);
 
@@ -78,4 +83,4 @@ class UserDaoImplTest extends TestConfigurationEnvironment {
     static void destroy() {
         postgreSQLContainer.stop();
     }
-}*/
+}

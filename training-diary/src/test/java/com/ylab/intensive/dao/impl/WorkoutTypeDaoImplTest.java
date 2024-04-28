@@ -1,14 +1,14 @@
-/*
 package com.ylab.intensive.dao.impl;
 
 import com.ylab.intensive.dao.container.PostgresTestContainer;
 import com.ylab.intensive.dao.container.TestConfigurationEnvironment;
+import com.ylab.intensive.model.entity.WorkoutType;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.Set;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -26,41 +26,38 @@ class WorkoutTypeDaoImplTest extends TestConfigurationEnvironment {
     @Test
     @DisplayName("Save workout type - success")
     void testSaveType_Success() {
-        int workoutId = 1;
-        String type = "cardio";
+        int userId = 1;
+        String expectedWorkoutType = "cardio12";
 
-        workoutTypeDao.saveType(workoutId, type);
+        workoutTypeDao.saveType(userId, expectedWorkoutType);
 
-        Set<String> types = workoutTypeDao.findByUserId(workoutId);
-
-        assertThat(types)
-                .isNotEmpty()
-                .contains(type);
+        List<WorkoutType> savedWorkoutTypes = workoutTypeDao.findByUserId(userId);
+        assertThat(savedWorkoutTypes)
+                .extracting(WorkoutType::getType)
+                .contains(expectedWorkoutType);
     }
 
     @Test
     @DisplayName("Update workout type - success")
     void testUpdateType_Success() {
-        int workoutId = 1;
-        String oldType = "yoga";
-        String newType = "Strength";
+        int userId = 1;
+        String oldWorkoutType = "yoga";
+        String newWorkoutType = "Strength";
 
-        workoutTypeDao.updateType(workoutId, oldType, newType);
+        workoutTypeDao.updateType(userId, oldWorkoutType, newWorkoutType);
 
-        Set<String> types = workoutTypeDao.findByUserId(workoutId);
-
-        assertThat(types)
-                .isNotEmpty()
-                .contains(newType)
-                .doesNotContain(oldType);
+        List<WorkoutType> updatedWorkoutTypes = workoutTypeDao.findByUserId(userId);
+        assertThat(updatedWorkoutTypes)
+                .extracting(WorkoutType::getType)
+                .contains(newWorkoutType);
     }
 
     @Test
     @DisplayName("Find types by workoutId")
     void testFindByWorkoutId() {
-        int workoutId = 1;
+        int userId = 1;
 
-        Set<String> types = workoutTypeDao.findByUserId(workoutId);
+        List<WorkoutType> types = workoutTypeDao.findByUserId(userId);
 
         assertThat(types).isNotEmpty();
     }
@@ -68,11 +65,11 @@ class WorkoutTypeDaoImplTest extends TestConfigurationEnvironment {
     @Test
     @DisplayName("Delete workout type - success")
     void testDelete_Success() {
-        int workoutId = 2;
+        int userId = 2;
 
-        workoutTypeDao.delete(workoutId);
+        workoutTypeDao.delete(userId);
 
-        Set<String> types = workoutTypeDao.findByUserId(workoutId);
+        List<WorkoutType> types = workoutTypeDao.findByUserId(userId);
 
         assertThat(types).isEmpty();
     }
@@ -82,4 +79,3 @@ class WorkoutTypeDaoImplTest extends TestConfigurationEnvironment {
         postgreSQLContainer.stop();
     }
 }
-*/

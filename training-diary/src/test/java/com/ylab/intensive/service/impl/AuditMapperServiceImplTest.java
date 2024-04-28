@@ -1,7 +1,7 @@
-/*
 package com.ylab.intensive.service.impl;
 
 import com.ylab.intensive.dao.AuditDao;
+import com.ylab.intensive.model.entity.Audit;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,6 +11,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 
@@ -45,13 +46,13 @@ public class AuditMapperServiceImplTest {
     @DisplayName("Get user audit - success")
     void testGetAudit_Success() {
         int userId = 1;
-        List<String> mockActions = Arrays.asList("User login", "User logout");
+        List<Audit> mockActions = Arrays.asList(new Audit(1,2, LocalDateTime.now(), "User login"),
+                new Audit(1,2, LocalDateTime.now(), "User login"));
 
         when(auditDao.getUserActions(userId)).thenReturn(mockActions);
 
-        List<String> result = auditService.getAudit(userId);
+        List<Audit> result = auditService.getAudit(userId);
 
         assertThat(result).isEqualTo(mockActions);
     }
 }
-*/

@@ -20,11 +20,11 @@ public interface WorkoutTypeDao {
     /**
      * Updates the type of a workout.
      *
-     * @param workoutId The workout ID containing the type to update
+     * @param userId The user ID containing the type to update
      * @param oldType   The old type of the workout
      * @param newType   The new type of the workout
      */
-    void updateType(int workoutId, String oldType, String newType);
+    void updateType(int userId, String oldType, String newType);
 
     /**
      * Finds workout types by workout ID.
@@ -37,9 +37,9 @@ public interface WorkoutTypeDao {
     /**
      * Deletes workout types by workout ID.
      *
-     * @param workoutId the ID of the workout
+     * @param userId the ID of the user
      */
-    void delete(int workoutId);
+    void delete(int userId);
 
     Optional<WorkoutType> findById(int id);
 

@@ -52,10 +52,9 @@ public class WorkoutInfoServlet extends HttpServlet {
         Pattern pattern = Pattern.compile("[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}");
 
         if (pattern.matcher(uuid).matches()) {
-            Authentication authentication = (Authentication) (req.getServletContext()).getAttribute("authentication");
             WorkoutInfoDto workoutInfoDto = converter.getRequestBody(req, WorkoutInfoDto.class);
 
-            Workout workout = workoutService.addWorkoutInfo(authentication.getLogin(), uuid, workoutInfoDto);
+            Workout workout = workoutService.addWorkoutInfo(uuid, workoutInfoDto);
 
             resp.setStatus(HttpServletResponse.SC_OK);
             resp.getWriter()

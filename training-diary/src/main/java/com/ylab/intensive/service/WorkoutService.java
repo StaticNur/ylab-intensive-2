@@ -10,7 +10,9 @@ import com.ylab.intensive.model.entity.User;
 import com.ylab.intensive.model.entity.Workout;
 import com.ylab.intensive.model.entity.WorkoutType;
 
+import java.time.Duration;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Service interface for managing workout-related operations.
@@ -28,7 +30,7 @@ public interface WorkoutService {
     /**
      * Adds additional information to a workout with the specified date, title, and info.
      */
-    Workout addWorkoutInfo(String email, String uuidStr, WorkoutInfoDto workoutInfoDto);
+    Workout addWorkoutInfo(String uuidStr, WorkoutInfoDto workoutInfoDto);
 
     /**
      * Retrieves all workouts as DTOs sorted by date.
@@ -40,36 +42,27 @@ public interface WorkoutService {
     /**
      * Updates the type of the workout with the specified old type to the new type.
      *
-     * @param workoutDto The workout DTO to be updated
-     * @param oldType    The old type of the workout
-     * @param newType    The new type of the workout
      */
-    //void updateType(WorkoutDto workoutDto, String oldType, String newType);
+    void updateType(int userId, int workoutId, String type);
 
     /**
      * Updates the duration of the workout.
      *
-     * @param workoutDto The workout DTO to be updated
      * @param duration   The new duration of the workout in the format hh:mm:ss
      */
-    //void updateDuration(WorkoutDto workoutDto, String duration);
+    void updateDuration(int userId, int workoutId, Duration duration);
 
     /**
      * Updates the calorie burned during the workout.
      *
-     * @param workoutDto The workout DTO to be updated
-     * @param calorie    The new calorie burned during the workout
      */
-    //void updateCalories(WorkoutDto workoutDto, String calorie);
+    void updateCalories(int userId, int workoutId, Float calories);
 
     /**
      * Updates additional information of the workout with the specified title to the new info.
      *
-     * @param workoutDto The workout DTO to be updated
-     * @param title      The title of the additional information to be updated
-     * @param info       The new information to be set for the specified title
      */
-    //void updateAdditionalInfo(WorkoutDto workoutDto, String title, String info);
+    void updateAdditionalInfo(int userId, int workoutId, Map<String, String> workoutInfo);
 
     /**
      * Deletes the workout with the specified date.

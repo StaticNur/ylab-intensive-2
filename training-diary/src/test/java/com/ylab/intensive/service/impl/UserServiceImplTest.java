@@ -1,13 +1,16 @@
-/*
 package com.ylab.intensive.service.impl;
 
 import com.ylab.intensive.dao.UserDao;
+import com.ylab.intensive.exception.AuthorizeException;
+import com.ylab.intensive.exception.ChangeUserPermissionsException;
 import com.ylab.intensive.exception.NotFoundException;
 import com.ylab.intensive.exception.RegisterException;
-import com.ylab.intensive.model.dto.UserDto;
+import com.ylab.intensive.model.dto.*;
 import com.ylab.intensive.model.entity.User;
 import com.ylab.intensive.model.enums.Role;
 import com.ylab.intensive.mapper.UserMapper;
+import com.ylab.intensive.security.Authentication;
+import com.ylab.intensive.security.JwtTokenService;
 import com.ylab.intensive.service.AuditService;
 import com.ylab.intensive.service.RoleService;
 import org.junit.jupiter.api.DisplayName;
@@ -18,8 +21,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.mockito.stubbing.OngoingStubbing;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -37,6 +42,9 @@ class UserServiceImplTest {
     private RoleService roleService;
 
     @Mock
+    private JwtTokenService jwtTokenService;
+
+    @Mock
     private AuditService auditService;
 
     @Mock
@@ -50,16 +58,19 @@ class UserServiceImplTest {
     void testRegisterUser_Success() {
         String email = "test@email.com";
         String password = "password";
-        String roleStr = "USER";
         Role role = Role.USER;
+        User user = new User();
+        user.setEmail(email);
+        user.setPassword("password");
+        user.setRole(role);
 
         when(userDao.findByEmail(email)).thenReturn(Optional.empty());
         when(roleService.getIdByName(role)).thenReturn(1);
-        when(userDao.save(any(User.class), anyInt())).thenReturn(true);
+        when(userDao.save(any(User.class), anyInt())).thenReturn(user);
 
-        boolean result = userManagementService.registerUser(email, password, roleStr);
+        User result = userManagementService.registerUser(new RegistrationDto(email, password, role));
 
-        assertThat(result).isTrue();
+        assertThat(result).isEqualTo(user);
     }
 
     @Test
@@ -67,26 +78,27 @@ class UserServiceImplTest {
     void testRegisterUser_UserExists() {
         String email = "test@email.com";
         String password = "password";
-        String roleStr = "USER";
+        Role role = Role.USER;
 
         when(userDao.findByEmail(email)).thenReturn(Optional.of(new User()));
 
-        assertThatThrownBy(() -> userManagementService.registerUser(email, password, roleStr))
+        assertThatThrownBy(() -> userManagementService.registerUser(new RegistrationDto(email, password, role)))
                 .isInstanceOf(RegisterException.class)
                 .hasMessage("Такой пользователь уже существует!");
     }
 
     @Test
-    @DisplayName("Change user permissions - unauthorized")
-    void testChangeUserPermissions_Unauthorized() {
-        String email = "test@email.com";
-        String roleStr = "USER";
+    @DisplayName("Change user permissions - Failed")
+    void testChangeUserPermissions_Failed() {
+        String uuid = "123e4567-e89b-12d3-a456-428613178104";
+        Role role = Role.USER;
 
-        UserDto unauthorizedUser = new UserDto();
-        unauthorizedUser.setRole(Role.USER);
-        when(authorizedUser.getAttribute("authorizedUser")).thenReturn(unauthorizedUser);
+        when(roleService.getIdByName(role)).thenReturn(1);
+        when(userDao.updateUserRole(UUID.fromString(""),1)).thenReturn(false);
 
-        assertThat(userManagementService.changeUserPermissions(email, roleStr)).isEmpty();
+        assertThatThrownBy(() -> userManagementService.changeUserPermissions(uuid, new ChangeUserRightsDto(role)))
+                .isInstanceOf(ChangeUserPermissionsException.class)
+                .hasMessage("Failed to change user role");
     }
 
     @Test
@@ -102,25 +114,23 @@ class UserServiceImplTest {
     @Test
     @DisplayName("Login - success")
     void testLogin_Success() {
-        String email = "test@email.com";
+        String email = "key";
         String password = "password";
-        UserDto userDto = new UserDto();
-        userDto.setEmail(email);
+        LoginDto loginDto = new LoginDto(email, password);
         User user = new User();
-        user.setId(1);
         user.setEmail(email);
         user.setPassword(password);
         user.setRole(Role.USER);
 
         when(userDao.findByEmail(email)).thenReturn(Optional.of(user));
-        when(userMapper.entityToDto(user)).thenReturn(userDto);
-        doNothing().when(auditService).saveAction(1, "Action 1");
-        when(authorizedUser.getAttribute("authorizedUser")).thenReturn(userDto);
+        when(jwtTokenService.createAccessToken(email, Role.USER)).thenReturn("key");
+        when(jwtTokenService.createRefreshToken(email, Role.USER)).thenReturn("key");
+        when(jwtTokenService.authentication("key")).thenReturn(new Authentication());
 
-        Optional<User> result = userManagementService.login(email, password);
+        JwtResponse result = userManagementService.login(loginDto);
 
-        assertThat(result).isPresent();
-        assertThat(result.get().getEmail()).isEqualTo(email);
+        assertThat(result.login()).isEqualTo(email);
+        assertThat(result.accessToken()).isEqualTo("key");
     }
 
     @Test
@@ -131,81 +141,65 @@ class UserServiceImplTest {
 
         when(userDao.findByEmail(email)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> userManagementService.login(email, password))
+        assertThatThrownBy(() -> userManagementService.login(new LoginDto(email, password)))
                 .isInstanceOf(NotFoundException.class)
-                .hasMessage("Пользователь с email = " + email + " не существует!");
+                .hasMessage("There is no user with this login in the database.");
     }
 
     @Test
     @DisplayName("Login - wrong password")
     void testLogin_WrongPassword() {
         String email = "test@email.com";
-        String password = "wrongpassword";
+        String password = "password";
         User user = new User();
-        user.setPassword("password");
+        user.setPassword(password);
 
         when(userDao.findByEmail(email)).thenReturn(Optional.of(user));
 
-        assertThat(userManagementService.login(email, password)).isEmpty();
-    }
-
-    @Test
-    @DisplayName("Logout")
-    void testLogout() {
-        String email = "test@email.com";
-        UserDto userDto = new UserDto();
-        userDto.setEmail(email);
-        User user = new User();
-        user.setId(1);
-
-        when(authorizedUser.getAttribute("authorizedUser")).thenReturn(userDto);
-        when(userDao.findByEmail(email)).thenReturn(Optional.of(user));
-
-        userManagementService.logout();
-
-        verify(auditService).saveAction(anyInt(), eq("Пользователь разлогинился"));
-        verify(authorizedUser).clearSession();
+        assertThatThrownBy(() -> userManagementService.login(new LoginDto(email, "password787")))
+                .isInstanceOf(AuthorizeException.class)
+                .hasMessage("Incorrect password.");
     }
 
     @Test
     @DisplayName("Change user permissions - success")
     void testChangeUserPermissions_Success() {
-        String email = "test@email.com";
-        String roleStr = "ADMIN";
-        Role role = Role.ADMIN;
-        UserDto authorizedUserDto = new UserDto();
-        authorizedUserDto.setRole(Role.ADMIN);
-        User user = new User();
-        user.setId(1);
-        user.setEmail(email);
+        String uuidStr = "123e4567-e89b-12d3-a456-426614174000";
+        ChangeUserRightsDto changeUserRightsDto = new ChangeUserRightsDto(Role.USER);
 
-        when(authorizedUser.getAttribute("authorizedUser")).thenReturn(authorizedUserDto);
-        when(roleService.getIdByName(role)).thenReturn(1);
-        when(userDao.updateUserRole(email, 1)).thenReturn(true);
-        when(userDao.findByEmail(email)).thenReturn(Optional.of(user));
-        doNothing().when(auditService).saveAction(1, "Action 1");
-        doNothing().when(authorizedUser).removeAttribute("authorizedUser");
-        doNothing().when(authorizedUser).setAttribute("authorizedUser", authorizedUserDto);
-        when(userMapper.entityToDto(user)).thenReturn(authorizedUserDto);
+        UUID uuid = UUID.fromString(uuidStr);
+        int roleId = 2;
+        User existingUser = new User();
+        existingUser.setId(1);
+        existingUser.setUuid(uuid);
+        existingUser.setRole(Role.USER);
 
-        Optional<UserDto> result = userManagementService.changeUserPermissions(email, roleStr);
+        when(roleService.getIdByName(Role.USER)).thenReturn(roleId);
+        when(userDao.updateUserRole(uuid, roleId)).thenReturn(true);
+        when(userDao.findByUUID(uuid)).thenReturn(Optional.of(existingUser));
 
-        assertThat(result).isPresent();
-        assertThat(result.get().getRole()).isEqualTo(role);
+        User updatedUser = userManagementService.changeUserPermissions(uuidStr, changeUserRightsDto);
+
+        assertThat(updatedUser.getRole()).isEqualTo(Role.USER);
+        verify(auditService, times(1)).saveAction(existingUser.getId(), "Пользователь изменил роль на: USER");
     }
 
     @Test
     @DisplayName("Get all users - unauthorized")
-    void testGetAllUser_Unauthorized() {
-        String email = "test@email.com";
-        UserDto unauthorizedUserDto = new UserDto();
-        unauthorizedUserDto.setRole(Role.USER);
-        unauthorizedUserDto.setEmail(email);
+    void testChangeUserPermissions_UserNotFound() {
+        String uuidStr = "123e4567-e89b-12d3-a456-426614174000";
+        ChangeUserRightsDto changeUserRightsDto = new ChangeUserRightsDto(Role.ADMIN);
 
-        when(authorizedUser.getAttribute("authorizedUser")).thenReturn(unauthorizedUserDto);
-        when(userDao.findByEmail(email)).thenReturn(Optional.of(new User()));
+        UUID uuid = UUID.fromString(uuidStr);
+        int roleId = 2;
 
-        assertThat(userManagementService.getAllUser()).isEmpty();
+        when(roleService.getIdByName(Role.ADMIN)).thenReturn(roleId);
+        when(userDao.updateUserRole(uuid, roleId)).thenReturn(true);
+        when(userDao.findByUUID(uuid)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> userManagementService.changeUserPermissions(uuidStr, changeUserRightsDto))
+                .isInstanceOf(NotFoundException.class)
+                .hasMessage("Пользователь с uuid = " + uuidStr + " не существует!");
     }
 
     @Test
@@ -223,4 +217,3 @@ class UserServiceImplTest {
         assertThat(result.get().getEmail()).isEqualTo(email);
     }
 }
-*/

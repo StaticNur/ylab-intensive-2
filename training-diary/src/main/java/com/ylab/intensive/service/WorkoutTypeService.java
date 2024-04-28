@@ -34,4 +34,6 @@ public interface WorkoutTypeService {
     void updateType(int workoutId, String oldType, String newType);
 
     WorkoutType findById(int id);
+
+    void delete(int userId);
 }

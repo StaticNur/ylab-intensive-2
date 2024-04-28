@@ -67,20 +67,6 @@ public class WorkoutServiceImpl implements WorkoutService {
         this.workoutInfoService = workoutInfoService;
         this.workoutTypeService = workoutTypeService;
     }
-    /*public void addTrainingType(String date, String typeName) {
-        LocalDate localDate = getDate(date);
-        int userId = getAuthorizedUserId();
-        Optional<Workout> workout = workoutDao.findByDate(localDate, userId);
-        if (workout.isPresent()) {
-            Set<String> types = workoutTypeService.findByUserId(workout.get().getId());
-            if (types.contains(typeName)) {
-                throw new TrainingTypeException("Такой тип тренировки уже существует в " + date);
-            }
-            workoutTypeService.saveType(workout.get().getId(), typeName);
-            auditService.saveAction(userId, "Пользователь расширил перечень типов тренировок. " +
-                                            "Добавлено: " + typeName + " на " + date);
-        } else throw new TrainingTypeException("В " + date + " тренировки не было");
-    }*/
 
     @Override
     @Timed
@@ -113,7 +99,7 @@ public class WorkoutServiceImpl implements WorkoutService {
                 workoutInfoService.saveWorkoutInfo(savedWorkout.getId(), infoMap.getKey(), infoMap.getValue());
             }
             workoutDto.setUuid(savedWorkout.getUuid());
-            auditService.saveAction(userId, "Пользователь добавил новую тренировку. Добавлено: " + workout);
+            //auditService.saveAction(userId, "Пользователь добавил новую тренировку. Добавлено: " + workout);
             return workoutDto;
         } else throw new WorkoutException("Тренировка типа " + type
                                           + " не существует для данного пользователя, с начала добавьте ее.");
@@ -122,8 +108,7 @@ public class WorkoutServiceImpl implements WorkoutService {
     @Override
     @Timed
     @Loggable
-    public Workout addWorkoutInfo(String email, String uuidStr, WorkoutInfoDto workoutInfoDto) {
-        int userId = getAuthorizedUserId(email);
+    public Workout addWorkoutInfo(String uuidStr, WorkoutInfoDto workoutInfoDto) {
         UUID uuid = convertToUUID(uuidStr);
         Workout workout = workoutDao.findByUUID(uuid)
                 .orElseThrow(() -> new NotFoundException("Тренировка с uuid = " + uuid +
@@ -133,8 +118,6 @@ public class WorkoutServiceImpl implements WorkoutService {
 
         for (Map.Entry<String, String> infoMap : workoutInfoDto.getWorkoutInfo().entrySet()) {
             workoutInfoService.saveWorkoutInfo(workout.getId(), infoMap.getKey(), infoMap.getValue());
-            auditService.saveAction(userId, "Пользователь добавил дополнительную информацию о тренировке. " +
-                                            "Добавлено: " + infoMap.getKey() + " = " + infoMap.getValue());
             workout.getWorkoutInfo().put(infoMap.getKey(), infoMap.getValue());
         }
         return workout;
@@ -145,7 +128,6 @@ public class WorkoutServiceImpl implements WorkoutService {
     @Loggable
     public List<WorkoutDto> getAllUserWorkouts(String login) {
         int userId = getAuthorizedUserId(login);
-        auditService.saveAction(userId, "Пользователь просмотрел свои предыдущие тренировки.");
         List<Workout> workoutList = workoutDao.findByUserId(userId);
         List<WorkoutDto> workoutDtoList = new ArrayList<>();
         for (Workout workout : workoutList) {
@@ -168,18 +150,6 @@ public class WorkoutServiceImpl implements WorkoutService {
         }
         return workoutDtoList;
     }
-
-    /*public Workout getWorkoutByDate(String date) {
-        LocalDate localDate = getDate(date);
-        int userId = getAuthorizedUserId();
-        Workout workout = workoutDao.findByDate(localDate, userId)
-                .orElseThrow(() -> new NotFoundException("Тренировка в "
-                                                         + localDate + " не проводилось! Сначала добавьте ее."));
-
-        workout.setType(workoutTypeService.findByUserId(workout.getId()));
-        workout.setInfo(workoutInfoService.getInfoByWorkoutId(workout.getId()));
-        return workout;
-    }*/
 
     @Override
     @Timed
@@ -216,7 +186,8 @@ public class WorkoutServiceImpl implements WorkoutService {
         return workout;
     }
 
-    private void updateType(int userId, int workoutId, String type) {
+    @Override
+    public void updateType(int userId, int workoutId, String type) {
         List<WorkoutType> types = workoutTypeService.findByUserId(userId);
 
         Optional<WorkoutType> typeOptional = types.stream()
@@ -225,27 +196,23 @@ public class WorkoutServiceImpl implements WorkoutService {
 
         if (typeOptional.isPresent()) {
             workoutDao.updateType(workoutId, typeOptional.get().getId());
-            auditService.saveAction(userId, "Пользователь редактировал тип тренировки.");
         } else throw new WorkoutInfoException("Такой тип тренировки " + type + " нет в базе данных!");
     }
 
-    private void updateDuration(int userId, int workoutId, Duration duration) {
+    @Override
+    public void updateDuration(int userId, int workoutId, Duration duration) {
         workoutDao.updateDuration(workoutId, duration);
-        auditService.saveAction(userId, "Пользователь редактировал " +
-                                        "длительность тренировки, теперь " + duration);
     }
 
-    private void updateCalories(int userId, int workoutId, Float calories) {
+    @Override
+    public void updateCalories(int userId, int workoutId, Float calories) {
         workoutDao.updateCalorie(workoutId, calories);
-        auditService.saveAction(userId, "Пользователь редактировал количество потраченных калорий");
     }
 
-    private void updateAdditionalInfo(int userId, int workoutId, Map<String, String> workoutInfo) {
+    @Override
+    public void updateAdditionalInfo(int userId, int workoutId, Map<String, String> workoutInfo) {
         for (Map.Entry<String, String> infoMap : workoutInfo.entrySet()) {
-            //if (types.contains(infoMap.getKey())) {
             workoutInfoService.updateWorkoutInfo(workoutId, infoMap.getKey(), infoMap.getValue());
-            //} else throw new WorkoutInfoException("Такой заголовок " + infoMap.getKey() + " в доп. инфо. нет!");
-            auditService.saveAction(userId, "Пользователь редактировал дополнительную информацию.");
         }
     }
 
@@ -260,7 +227,6 @@ public class WorkoutServiceImpl implements WorkoutService {
                                                          " нет в базе данных! Сначала добавьте ее."));
         workoutInfoService.delete(workout.getId());
         workoutDao.deleteWorkout(userId, workout.getId());
-        auditService.saveAction(userId, "Пользователь удалил тренировку: " + workout.getDate());
     }
 
     @Override
@@ -276,8 +242,6 @@ public class WorkoutServiceImpl implements WorkoutService {
         for (Workout workout : workoutList) {
             totalCalories += workout.getCalorie();
         }
-        auditService.saveAction(authorizedUserId,
-                "Пользователь просмотрел статистику по тренировкам за период " + beginStr + " -- " + endStr);
         return new StatisticsDto(totalCalories);
     }
 

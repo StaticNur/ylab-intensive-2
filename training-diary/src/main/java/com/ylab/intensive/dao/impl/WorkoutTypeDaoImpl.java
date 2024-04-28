@@ -60,15 +60,15 @@ public class WorkoutTypeDaoImpl implements WorkoutTypeDao {
     }
 
     @Override
-    public void updateType(int workoutId, String oldType, String newType) {
-        String UPDATE_TYPE = "UPDATE internal.workout_type SET type = ? WHERE workout_id = ? AND type = ?";
+    public void updateType(int userId, String oldType, String newType) {
+        String UPDATE_TYPE = "UPDATE internal.workout_type SET type = ? WHERE user_id = ? AND type = ?";
 
         try (Connection connection = ConnectionManager.get()) {
             connection.setAutoCommit(false);
 
             try (PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_TYPE)) {
                 preparedStatement.setString(1, newType);
-                preparedStatement.setInt(2, workoutId);
+                preparedStatement.setInt(2, userId);
                 preparedStatement.setString(3, oldType);
 
                 int affectedRows = preparedStatement.executeUpdate();
@@ -108,14 +108,14 @@ public class WorkoutTypeDaoImpl implements WorkoutTypeDao {
     }
 
     @Override
-    public void delete(int workoutId) {
-        String DELETE_WORKOUT = "DELETE FROM internal.workout_type WHERE workout_id = ?";
+    public void delete(int user_id) {
+        String DELETE_WORKOUT = "DELETE FROM internal.workout_type WHERE user_id = ?";
 
         try (Connection connection = ConnectionManager.get()) {
             connection.setAutoCommit(false);
 
             try (PreparedStatement preparedStatement = connection.prepareStatement(DELETE_WORKOUT)) {
-                preparedStatement.setInt(1, workoutId);
+                preparedStatement.setInt(1, user_id);
 
                 preparedStatement.executeUpdate();
             } catch (SQLException exc) {

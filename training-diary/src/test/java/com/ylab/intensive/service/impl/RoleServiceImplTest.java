@@ -1,4 +1,3 @@
-/*
 package com.ylab.intensive.service.impl;
 
 import com.ylab.intensive.dao.RoleDao;
@@ -39,4 +38,3 @@ public class RoleServiceImplTest {
         assertThat(result).isEqualTo(expectedId);
     }
 }
-*/

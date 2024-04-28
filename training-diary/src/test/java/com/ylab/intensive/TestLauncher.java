@@ -1,4 +1,3 @@
-/*
 package com.ylab.intensive;
 
 import org.junit.platform.engine.discovery.DiscoverySelectors;
@@ -38,4 +37,3 @@ public class TestLauncher {
 }
 
 
-*/

@@ -52,8 +52,8 @@ public class WorkoutTypeServiceImpl implements WorkoutTypeService {
     @Override
     @Timed
     @Loggable
-    public void updateType(int workoutId, String oldType, String newType) {
-        workoutTypeDao.updateType(workoutId, oldType, newType);
+    public void updateType(int userId, String oldType, String newType) {
+        workoutTypeDao.updateType(userId, oldType, newType);
     }
 
     @Override
@@ -62,5 +62,11 @@ public class WorkoutTypeServiceImpl implements WorkoutTypeService {
     public WorkoutType findById(int id) {
         return workoutTypeDao.findById(id)
                 .orElseThrow(() -> new NotFoundException("Такой тип тренировок не существует в базе данных."));
+    }
+    @Override
+    @Timed
+    @Loggable
+    public void delete(int userId) {
+        workoutTypeDao.delete(userId);
     }
 }
