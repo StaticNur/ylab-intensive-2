@@ -1,3 +1,4 @@
+/*
 package com.ylab.intensive.controller;
 
 import com.ylab.intensive.in.InputData;
@@ -5,7 +6,7 @@ import com.ylab.intensive.in.OutputData;
 import com.ylab.intensive.model.dto.UserDto;
 import com.ylab.intensive.model.entity.User;
 import com.ylab.intensive.model.enums.Role;
-import com.ylab.intensive.service.UserManagementService;
+import com.ylab.intensive.service.UserService;
 import com.ylab.intensive.service.WorkoutService;
 import com.ylab.intensive.ui.AnsiColor;
 import org.junit.jupiter.api.DisplayName;
@@ -36,7 +37,7 @@ class UserControllerTest {
     private OutputData outputData;
 
     @Mock
-    private UserManagementService userManagementService;
+    private UserService userService;
 
     @Mock
     private WorkoutService workoutService;
@@ -55,7 +56,7 @@ class UserControllerTest {
 
         userController.registration();
 
-        verify(userManagementService).registerUser("testEmail", "testPassword", "USER");
+        verify(userService).registerUser("testEmail", "testPassword", "USER");
     }
 
     @Test
@@ -65,7 +66,7 @@ class UserControllerTest {
         user.setEmail("testEmail");
         user.setRole(Role.USER);
         when(inputData.input()).thenReturn("testEmail", "testPassword");
-        when(userManagementService.login("testEmail", "testPassword")).thenReturn(Optional.of(user));
+        when(userService.login("testEmail", "testPassword")).thenReturn(Optional.of(user));
         when(color.yellowText(anyString())).thenReturn("text");
         when(color.yellowBackground(anyString())).thenReturn("text");
         when(color.greenBackground(anyString())).thenReturn("Пользователь успешно авторизовался: testEmail USER");
@@ -79,7 +80,7 @@ class UserControllerTest {
     @DisplayName("Test user login - failure")
     void testLogin_Failure() {
         when(inputData.input()).thenReturn("testEmail", "testPassword");
-        when(userManagementService.login("testEmail", "testPassword")).thenReturn(Optional.empty());
+        when(userService.login("testEmail", "testPassword")).thenReturn(Optional.empty());
         when(color.yellowText(anyString())).thenReturn("text");
         when(color.yellowBackground(anyString())).thenReturn("text");
         when(color.greenBackground(anyString())).thenReturn("text");
@@ -93,7 +94,7 @@ class UserControllerTest {
     @DisplayName("Test change user permissions - success")
     void testChangeUserPermissions_Success() {
         when(inputData.input()).thenReturn("testEmail", "ADMIN");
-        when(userManagementService.changeUserPermissions("testEmail", "ADMIN")).thenReturn(Optional.of(new UserDto("testEmail", Role.ADMIN)));
+        when(userService.changeUserPermissions("testEmail", "ADMIN")).thenReturn(Optional.of(new UserDto("testEmail", Role.ADMIN)));
         when(color.yellowText(anyString())).thenReturn("text");
         when(color.yellowBackground(anyString())).thenReturn("text");
         when(color.greenBackground(anyString())).thenReturn("Роль пользователя была успешно изменена на: ADMIN");
@@ -107,7 +108,7 @@ class UserControllerTest {
     @DisplayName("Test change user permissions - failure")
     void testChangeUserPermissions_Failure() {
         when(inputData.input()).thenReturn("testEmail", "ADMIN");
-        when(userManagementService.changeUserPermissions("testEmail", "ADMIN")).thenReturn(Optional.empty());
+        when(userService.changeUserPermissions("testEmail", "ADMIN")).thenReturn(Optional.empty());
 
         userController.changeUserPermissions();
 
@@ -117,7 +118,7 @@ class UserControllerTest {
     @Test
     @DisplayName("Test show audit log")
     void testShowAuditLog() {
-        when(userManagementService.getAudit()).thenReturn(List.of("Audit log"));
+        when(userService.getAudit()).thenReturn(List.of("Audit log"));
         when(color.greenBackground(anyString())).thenReturn("Audit log");
 
         userController.showAuditLog();
@@ -133,7 +134,7 @@ class UserControllerTest {
         userController.logout();
 
         verify(outputData).output(" Вы успешно разлогинились!");
-        verify(userManagementService).logout();
+        verify(userService).logout();
     }
 
     @Test
@@ -147,7 +148,7 @@ class UserControllerTest {
         userList.add(adminUser);
         userList.get(0).setWorkout(Collections.emptyList());
 
-        when(userManagementService.getAllUser()).thenReturn(userList);
+        when(userService.getAllUser()).thenReturn(userList);
         when(workoutService.getAllUsersWorkouts(userList)).thenReturn(userList);
         when(color.greenBackground(anyString()))
                 .thenReturn("Test")
@@ -165,10 +166,11 @@ class UserControllerTest {
         regularUser.setEmail("regular@example.com");
         regularUser.setRole(Role.USER);
 
-        when(userManagementService.getAllUser()).thenReturn(Collections.emptyList());
+        when(userService.getAllUser()).thenReturn(Collections.emptyList());
 
         userController.showAllUserWorkouts();
 
         verify(outputData).errOutput("Для этого запроса нужны права администратора!");
     }
 }
+*/

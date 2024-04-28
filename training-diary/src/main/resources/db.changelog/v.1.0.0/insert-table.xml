@@ -43,11 +43,13 @@
         </preConditions>
 
         <insert schemaName="internal" tableName="user">
+            <column name="uuid" value="123e4567-e89b-12d3-a456-426614174000"/>
             <column name="email" value="admin@example.com"/>
             <column name="password" value="adminPassword"/>
             <column name="role_id" value="1"/>
         </insert>
         <insert schemaName="internal" tableName="user">
+            <column name="uuid" value="123e4567-e89b-12d3-a456-426614174001"/>
             <column name="email" value="user@example.com"/>
             <column name="password" value="userPassword"/>
             <column name="role_id" value="2"/>
@@ -66,34 +68,42 @@
             <and>
                 <tableExists schemaName="internal" tableName="workout"/>
                 <sqlCheck expectedResult="0">
-                    SELECT COUNT(*) FROM internal.workout WHERE (user_id = '1' AND date = '2024-04-17') OR
-                    (user_id = '2' AND date = '2024-04-19') OR
-                    (user_id = '2' AND date = '2024-03-19') OR
-                    (user_id = '1' AND date = '2022-02-22')
+                    SELECT COUNT(*) FROM internal.workout WHERE (uuid = '123e4567-e89b-12d3-a456-426614174002') OR
+                    (uuid = '123e4567-e89b-12d3-a456-426614174003') OR
+                    (uuid = '123e4567-e89b-12d3-a456-426614174004') OR
+                    (uuid = '123e4567-e89b-12d3-a456-426614174005')
                 </sqlCheck>
             </and>
         </preConditions>
 
         <insert schemaName="internal" tableName="workout">
+            <column name="uuid" value="123e4567-e89b-12d3-a456-426614174002"/>
             <column name="user_id" value="1"/>
+            <column name="workout_type_id" value="1"/>
             <column name="date" value="2024-04-17"/>
             <column name="duration" value="3600"/>
             <column name="calorie" value="500"/>
         </insert>
         <insert schemaName="internal" tableName="workout">
+            <column name="uuid" value="123e4567-e89b-12d3-a456-426614174003"/>
             <column name="user_id" value="2"/>
+            <column name="workout_type_id" value="2"/>
             <column name="date" value="2024-04-19"/>
             <column name="duration" value="12600"/>
             <column name="calorie" value="1500"/>
         </insert>
         <insert schemaName="internal" tableName="workout">
+            <column name="uuid" value="123e4567-e89b-12d3-a456-426614174004"/>
             <column name="user_id" value="2"/>
+            <column name="workout_type_id" value="3"/>
             <column name="date" value="2024-03-19"/>
             <column name="duration" value="9332"/>
             <column name="calorie" value="1000"/>
         </insert>
         <insert schemaName="internal" tableName="workout">
+            <column name="uuid" value="123e4567-e89b-12d3-a456-426614174005"/>
             <column name="user_id" value="1"/>
+            <column name="workout_type_id" value="4"/>
             <column name="date" value="2022-02-22"/>
             <column name="duration" value="9332"/>
             <column name="calorie" value="1000"/>
@@ -101,10 +111,10 @@
 
         <rollback>
             <delete tableName="workout" schemaName="internal">
-                <where>(user_id = '1' AND date = '2024-04-17') OR
-                    (user_id = '2' AND date = '2024-04-19') OR
-                    (user_id = '2' AND date = '2024-03-19') OR
-                    (user_id = '1' AND date = '2022-02-22')</where>
+                <where>(uuid = '123e4567-e89b-12d3-a456-426614174002') OR
+                    (uuid = '123e4567-e89b-12d3-a456-426614174003') OR
+                    (uuid = '123e4567-e89b-12d3-a456-426614174004') OR
+                    (uuid = '123e4567-e89b-12d3-a456-426614174005')</where>
             </delete>
         </rollback>
     </changeSet>
@@ -115,37 +125,37 @@
             <and>
                 <tableExists schemaName="internal" tableName="workout_type"/>
                 <sqlCheck expectedResult="0">
-                    SELECT COUNT(*) FROM internal.workout_type WHERE (workout_id = '1' AND type = 'cardio') OR
-                    (workout_id = '1' AND type = 'yoga') OR
-                    (workout_id = '2' AND type = 'strength training') OR
-                    (workout_id = '3' AND type = 'yoga')
+                    SELECT COUNT(*) FROM internal.workout_type WHERE (user_id = '1' AND type = 'cardio') OR
+                    (user_id = '1' AND type = 'yoga') OR
+                    (user_id = '2' AND type = 'strength training') OR
+                    (user_id = '3' AND type = 'yoga')
                 </sqlCheck>
             </and>
         </preConditions>
 
         <insert schemaName="internal" tableName="workout_type">
-            <column name="workout_id" value="1"/>
+            <column name="user_id" value="1"/>
             <column name="type" value="cardio"/>
         </insert>
         <insert schemaName="internal" tableName="workout_type">
-            <column name="workout_id" value="1"/>
+            <column name="user_id" value="2"/>
             <column name="type" value="yoga"/>
         </insert>
         <insert schemaName="internal" tableName="workout_type">
-            <column name="workout_id" value="2"/>
+            <column name="user_id" value="2"/>
             <column name="type" value="strength training"/>
         </insert>
         <insert schemaName="internal" tableName="workout_type">
-            <column name="workout_id" value="3"/>
+            <column name="user_id" value="1"/>
             <column name="type" value="yoga"/>
         </insert>
 
         <rollback>
             <delete tableName="workout_type" schemaName="internal">
-                <where>(workout_id = '1' AND type = 'cardio') OR
-                    (workout_id = '1' AND type = 'yoga') OR
-                    (workout_id = '2' AND type = 'strength training') OR
-                    (workout_id = '3' AND type = 'yoga')</where>
+                <where>(user_id = '1' AND type = 'cardio') OR
+                    (user_id = '1' AND type = 'yoga') OR
+                    (user_id = '2' AND type = 'strength training') OR
+                    (user_id = '3' AND type = 'yoga')</where>
             </delete>
         </rollback>
     </changeSet>
@@ -187,25 +197,27 @@
             <and>
                 <tableExists schemaName="internal" tableName="audit"/>
                 <sqlCheck expectedResult="0">
-                    SELECT COUNT(*) FROM internal.audit WHERE (user_id = '1' AND action = 'Login') OR
-                    (user_id = '2' AND action = 'Login')
+                    SELECT COUNT(*) FROM internal.audit WHERE (user_id = '1' AND action = 'Login' AND date_of_action = '2024-02-04 12:34:56') OR
+                    (user_id = '2' AND action = 'Login' AND date_of_action = '2024-02-05 15:35:50')
                 </sqlCheck>
             </and>
         </preConditions>
 
         <insert schemaName="internal" tableName="audit">
             <column name="user_id" value="1"/>
+            <column name="date_of_action" value="2024-02-04 12:34:56"/>
             <column name="action" value="Login"/>
         </insert>
         <insert schemaName="internal" tableName="audit">
             <column name="user_id" value="2"/>
+            <column name="date_of_action" value="2024-02-05 15:35:50"/>
             <column name="action" value="Login"/>
         </insert>
 
         <rollback>
             <delete tableName="audit" schemaName="internal">
-                <where>(user_id = '1' AND action = 'Login') OR
-                    (user_id = '2' AND action = 'Login')</where>
+                <where>(user_id = '1' AND action = 'Login' AND date_of_action = '2024-02-04 12:34:56') OR
+                    (user_id = '2' AND action = 'Login' AND date_of_action = '2024-02-05 15:35:50')</where>
             </delete>
         </rollback>
     </changeSet>

@@ -5,6 +5,8 @@ import com.ylab.intensive.exception.DaoException;
 import com.ylab.intensive.model.enums.Role;
 import com.ylab.intensive.config.ConnectionManager;
 import com.ylab.intensive.util.DaoUtil;
+import jakarta.enterprise.context.ApplicationScoped;
+import lombok.NoArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
 import java.sql.Connection;
@@ -16,6 +18,8 @@ import java.sql.SQLException;
  * Implementation class for {@link RoleDao}.
  */
 @Log4j2
+@ApplicationScoped
+@NoArgsConstructor
 public class RoleDaoImpl implements RoleDao {
     @Override
     public int findByName(Role role) {

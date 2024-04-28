@@ -6,53 +6,58 @@ import com.ylab.intensive.model.entity.User;
 import com.ylab.intensive.model.enums.Role;
 import com.ylab.intensive.config.ConnectionManager;
 import com.ylab.intensive.util.DaoUtil;
+import jakarta.enterprise.context.ApplicationScoped;
+import lombok.NoArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * Implementation of the UserDao interface.
  * This class provides methods to interact with user data in the database.
  */
 @Log4j2
+@ApplicationScoped
+@NoArgsConstructor
 public class UserDaoImpl implements UserDao {
 
     @Override
-    public boolean save(User user, int roleId) {
-        String INSERT_USER = "INSERT INTO internal.user (email, password, role_id) VALUES (?, ?, ?)";
+    public User save(User user, int roleId) {
+        String INSERT_USER = "INSERT INTO internal.user (uuid, email, password, role_id) VALUES (?, ?, ?, ?)";
 
         try (Connection connection = ConnectionManager.get()) {
             connection.setAutoCommit(false);
-            int rowsAffected = 0;
 
             try (PreparedStatement preparedStatement = connection.prepareStatement(INSERT_USER, Statement.RETURN_GENERATED_KEYS)) {
-                preparedStatement.setString(1, user.getEmail());
-                preparedStatement.setString(2, user.getPassword());
-                preparedStatement.setInt(3, roleId);
+                preparedStatement.setObject(1, user.getUuid());
+                preparedStatement.setString(2, user.getEmail());
+                preparedStatement.setString(3, user.getPassword());
+                preparedStatement.setInt(4, roleId);
 
-                rowsAffected = preparedStatement.executeUpdate();
+                preparedStatement.executeUpdate();
 
+                ResultSet generatedKeys = preparedStatement.getGeneratedKeys();
+                if (generatedKeys.next()) {
+                    user.setId(generatedKeys.getInt("id"));
+                } else {
+                    throw new DaoException("Creating user failed, no ID obtained.");
+                }
             } catch (SQLException exc) {
                 connection.rollback();
                 DaoUtil.handleSQLException(exc, log);
             }
-
             connection.commit();
-            return rowsAffected > 0;
         } catch (SQLException exc) {
             DaoUtil.handleSQLException(exc, log);
-            return false;
         }
+        return user;
     }
 
     @Override
     public Optional<User> findByEmail(String email) {
         String FIND_BY_EMAIL = """
-                SELECT u.id as user_id, u.email, u.password, u.role_id
+                SELECT u.id as user_id, u.uuid, u.email, u.password, u.role_id
                 FROM internal.user u
                 WHERE u.email = ?
                 """;
@@ -63,7 +68,7 @@ public class UserDaoImpl implements UserDao {
 
             ResultSet resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
-                return buildUser(resultSet);
+                return Optional.of(buildUser(resultSet));
             }
         } catch (SQLException exc) {
             DaoUtil.handleSQLException(exc, log);
@@ -72,8 +77,8 @@ public class UserDaoImpl implements UserDao {
     }
 
     @Override
-    public boolean updateUserRole(String email, int roleId) {
-        String UPDATE_USER_ROLE = "UPDATE internal.user SET role_id = ? WHERE email = ?";
+    public boolean updateUserRole(UUID uuid, int roleId) {
+        String UPDATE_USER_ROLE = "UPDATE internal.user SET role_id = ? WHERE uuid = ?";
 
         try (Connection connection = ConnectionManager.get()) {
             connection.setAutoCommit(false);
@@ -81,7 +86,7 @@ public class UserDaoImpl implements UserDao {
 
             try (PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_USER_ROLE)) {
                 preparedStatement.setInt(1, roleId);
-                preparedStatement.setString(2, email);
+                preparedStatement.setObject(2, uuid);
 
                 rowsAffected = preparedStatement.executeUpdate();
             } catch (SQLException exc) {
@@ -99,16 +104,14 @@ public class UserDaoImpl implements UserDao {
     @Override
     public List<User> findAll() {
         List<User> userList = new ArrayList<>();
-        String FIND_ALL_USERS = "SELECT u.id as user_id, u.email, u.password, u.role_id FROM internal.user u";
+        String FIND_ALL_USERS = "SELECT u.id as user_id, u.uuid, u.email, u.password, u.role_id FROM internal.user u";
 
         try (Connection connection = ConnectionManager.get();
              PreparedStatement preparedStatement = connection.prepareStatement(FIND_ALL_USERS);
              ResultSet resultSet = preparedStatement.executeQuery()) {
 
             while (resultSet.next()) {
-                User user = buildUser(resultSet).orElseThrow(() -> new DaoException("Error in UserDao"));
-
-                userList.add(user);
+                userList.add(buildUser(resultSet));
             }
         } catch (SQLException exc) {
             DaoUtil.handleSQLException(exc, log);
@@ -117,14 +120,37 @@ public class UserDaoImpl implements UserDao {
         return userList;
     }
 
-    private Optional<User> buildUser(ResultSet resultSet) throws SQLException {
-        Optional<User> user = Optional.of(User.builder().build());
-        user.get().setId(resultSet.getInt("user_id"));
-        user.get().setEmail(resultSet.getString("email"));
-        user.get().setPassword(resultSet.getString("password"));
-        user.get().setWorkout(new ArrayList<>());
-        user.get().setAction(new ArrayList<>());
-        user.get().setRole(Role.fromValue(resultSet.getString("role_id")));
+    @Override
+    public Optional<User> findByUUID(UUID uuid) {
+        String FIND_BY_EMAIL = """
+                SELECT u.id as user_id, u.uuid, u.email, u.password, u.role_id
+                FROM internal.user u
+                WHERE u.uuid = ?
+                """;
+
+        try (Connection connection = ConnectionManager.get();
+             PreparedStatement preparedStatement = connection.prepareStatement(FIND_BY_EMAIL)) {
+            preparedStatement.setObject(1, uuid);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                return Optional.of(buildUser(resultSet));
+            }
+        } catch (SQLException exc) {
+            DaoUtil.handleSQLException(exc, log);
+        }
+        return Optional.empty();
+    }
+
+    private User buildUser(ResultSet resultSet) throws SQLException {
+        User user = new User();
+        user.setId(resultSet.getInt("user_id"));
+        user.setUuid((UUID) resultSet.getObject("uuid"));
+        user.setEmail(resultSet.getString("email"));
+        user.setPassword(resultSet.getString("password"));
+        user.setWorkouts(new ArrayList<>());
+        user.setAction(new ArrayList<>());
+        user.setRole(Role.fromValue(resultSet.getString("role_id")));
         return user;
     }
 }

@@ -9,7 +9,7 @@ import java.sql.SQLException;
 @Log4j2
 public class DaoUtil {
 
-    public static void handleSQLException(SQLException exc, Logger log){
+    public static void handleSQLException(SQLException exc, Logger log) {
         StringBuilder stringBuilder = new StringBuilder();
         while (exc != null) {
             log.error("SQLState: {}", exc.getSQLState());

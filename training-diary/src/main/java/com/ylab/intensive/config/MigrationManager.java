@@ -1,15 +1,15 @@
 package com.ylab.intensive.config;
 
-import com.ylab.intensive.di.annatation.Inject;
-import com.ylab.intensive.in.OutputData;
-import com.ylab.intensive.ui.AnsiColor;
+import com.ylab.intensive.util.DaoUtil;
 import com.ylab.intensive.util.PropertiesUtil;
+import jakarta.enterprise.context.ApplicationScoped;
 import liquibase.Liquibase;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.LiquibaseException;
 import liquibase.resource.ClassLoaderResourceAccessor;
+import lombok.extern.log4j.Log4j2;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -20,20 +20,9 @@ import java.sql.Statement;
  * This class is responsible for migrating data during application startup.
  * It adds some initial users and workouts to the user database.
  */
+@ApplicationScoped
+@Log4j2
 public class MigrationManager {
-    /**
-     * Output data.
-     * Allows outputting data to the user.
-     */
-    @Inject
-    private OutputData outputData;
-
-    /**
-     * ANSI color.
-     * Allows setting the color for console output.
-     */
-    @Inject
-    private AnsiColor ansiColor;
 
     /**
      * Performs database migration using Liquibase.
@@ -52,11 +41,11 @@ public class MigrationManager {
             database.setLiquibaseSchemaName(schemaName);
             Liquibase liquibase = new Liquibase(changeLogFile, new ClassLoaderResourceAccessor(), database);
             liquibase.update();
-            outputData.output(ansiColor.yellowText("Миграция данных успешно завершена!"));
         } catch (LiquibaseException e) {
-            outputData.errOutput("SQL Exception in migration " + e.getMessage());
+            System.out.println("SQL Exception in migration " + e.getMessage());
+            log.error("SQL Exception in migration " + e.getMessage());
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            DaoUtil.handleSQLException(e, log);
         }
     }
 

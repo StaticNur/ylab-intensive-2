@@ -1,5 +1,7 @@
 package com.ylab.intensive.service;
 
+import com.ylab.intensive.model.entity.Audit;
+
 import java.util.List;
 
 /**
@@ -21,5 +23,5 @@ public interface AuditService {
      * @param userId the ID of the user
      * @return a list of audit information
      */
-    List<String> getAudit(int userId);
+    List<Audit> getAudit(int userId);
 }

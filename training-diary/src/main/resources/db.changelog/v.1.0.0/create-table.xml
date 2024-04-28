@@ -47,6 +47,9 @@
             <column name="id" type="INT" defaultValueComputed="nextval('internal.user_sequence')">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
+            <column name="uuid" type="UUID">
+                <constraints nullable="false" unique="true"/>
+            </column>
             <column name="email" type="varchar(255)">
                 <constraints unique="true" nullable="false"/>
             </column>
@@ -80,9 +83,15 @@
             <column name="id" type="INT" defaultValueComputed="nextval('internal.workout_sequence')">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
+            <column name="uuid" type="UUID">
+                <constraints nullable="false" unique="true"/>
+            </column>
             <column name="user_id" type="INT">
                 <constraints nullable="false" referencedTableSchemaName="internal"
                              references="internal.user(id)" foreignKeyName="fk_workout_user"/>
+            </column>
+            <column name="workout_type_id" type="INT">
+                <constraints nullable="false"/>
             </column>
             <column name="date" type="DATE">
                 <constraints nullable="false"/>
@@ -114,9 +123,9 @@
             <column name="id" type="INT" defaultValueComputed="nextval('internal.workout_type_sequence')">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="workout_id" type="INT">
+            <column name="user_id" type="INT">
                 <constraints nullable="false" referencedTableSchemaName="internal"
-                             references="internal.workout(id)" foreignKeyName="fk_workout_type_workout"/>
+                             references="internal.user(id)" foreignKeyName="fk_workout_type_user"/>
             </column>
             <column name="type" type="VARCHAR(255)">
                 <constraints nullable="false"/>
@@ -180,6 +189,9 @@
             <column name="user_id" type="INT">
                 <constraints nullable="false" referencedTableSchemaName="internal"
                              references="internal.user(id)" foreignKeyName="fk_audit_user"/>
+            </column>
+            <column name="date_of_action" type="timestamp">
+                <constraints nullable="false"/>
             </column>
             <column name="action" type="VARCHAR(255)">
                 <constraints nullable="false"/>

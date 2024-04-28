@@ -3,7 +3,10 @@ package com.ylab.intensive.dao.impl;
 import com.ylab.intensive.dao.WorkoutInfoDao;
 import com.ylab.intensive.exception.DaoException;
 import com.ylab.intensive.config.ConnectionManager;
+import com.ylab.intensive.model.entity.WorkoutInfo;
 import com.ylab.intensive.util.DaoUtil;
+import jakarta.enterprise.context.ApplicationScoped;
+import lombok.NoArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
 import java.sql.*;
@@ -14,6 +17,8 @@ import java.util.Map;
  * Implementation class for {@link WorkoutInfoDao}.
  */
 @Log4j2
+@ApplicationScoped
+@NoArgsConstructor
 public class WorkoutInfoDaoImpl implements WorkoutInfoDao {
 
     @Override
@@ -55,7 +60,7 @@ public class WorkoutInfoDaoImpl implements WorkoutInfoDao {
                 int affectedRows = preparedStatement.executeUpdate();
 
                 if (affectedRows == 0) {
-                    throw new DaoException("Updating workout info failed, no rows affected.");
+                    throw new DaoException("Такого заголовка в доп. инфо. тренировки нет! Сначала добавьте ее.");
                 }
             } catch (SQLException exc) {
                 connection.rollback();
@@ -69,9 +74,10 @@ public class WorkoutInfoDaoImpl implements WorkoutInfoDao {
     }
 
     @Override
-    public Map<String, String> findByWorkoutId(int workoutId) {
+    public WorkoutInfo findByWorkoutId(int workoutId) {
+        WorkoutInfo workoutInfo = new WorkoutInfo();
         Map<String, String> workoutInfoMap = new HashMap<>();
-        String FIND_BY_WORKOUT_ID = "SELECT title, info FROM internal.workout_info WHERE workout_id = ?";
+        String FIND_BY_WORKOUT_ID = "SELECT id, title, info FROM internal.workout_info WHERE workout_id = ?";
 
         try (Connection connection = ConnectionManager.get();
              PreparedStatement preparedStatement = connection.prepareStatement(FIND_BY_WORKOUT_ID)) {
@@ -80,6 +86,7 @@ public class WorkoutInfoDaoImpl implements WorkoutInfoDao {
 
             ResultSet resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
+                workoutInfo.setId(resultSet.getInt("id"));
                 String key = resultSet.getString("title");
                 String value = resultSet.getString("info");
                 workoutInfoMap.put(key, value);
@@ -88,7 +95,9 @@ public class WorkoutInfoDaoImpl implements WorkoutInfoDao {
         } catch (SQLException exc) {
             DaoUtil.handleSQLException(exc, log);
         }
-        return workoutInfoMap;
+        workoutInfo.setWorkoutInfo(workoutInfoMap);
+        workoutInfo.setWorkoutId(workoutId);
+        return workoutInfo;
     }
 
     @Override
@@ -112,5 +121,4 @@ public class WorkoutInfoDaoImpl implements WorkoutInfoDao {
             DaoUtil.handleSQLException(exc, log);
         }
     }
-
 }

@@ -1,6 +1,9 @@
 package com.ylab.intensive.dao;
 
-import java.util.Set;
+import com.ylab.intensive.model.entity.WorkoutType;
+
+import java.util.List;
+import java.util.Optional;
 
 /**
  * Interface for workout type data access operations.
@@ -10,10 +13,9 @@ public interface WorkoutTypeDao {
     /**
      * Saves the type of a workout.
      *
-     * @param workoutId The workout ID to save the type for
-     * @param type      The type of the workout to save
+     * @param type The type of the workout to save
      */
-    void saveType(int workoutId, String type);
+    WorkoutType saveType(int userId, String type);
 
     /**
      * Updates the type of a workout.
@@ -27,10 +29,10 @@ public interface WorkoutTypeDao {
     /**
      * Finds workout types by workout ID.
      *
-     * @param workoutId the ID of the workout
+     * @param userId the ID of the workout
      * @return a set of workout types
      */
-    Set<String> findByWorkoutId(int workoutId);
+    List<WorkoutType> findByUserId(int userId);
 
     /**
      * Deletes workout types by workout ID.
@@ -38,4 +40,8 @@ public interface WorkoutTypeDao {
      * @param workoutId the ID of the workout
      */
     void delete(int workoutId);
+
+    Optional<WorkoutType> findById(int id);
+
+    Optional<WorkoutType> findByType(String typeName);
 }

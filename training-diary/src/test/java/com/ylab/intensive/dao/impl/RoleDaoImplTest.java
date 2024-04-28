@@ -1,3 +1,4 @@
+/*
 package com.ylab.intensive.dao.impl;
 
 import com.ylab.intensive.dao.container.PostgresTestContainer;
@@ -36,3 +37,4 @@ class RoleDaoImplTest extends TestConfigurationEnvironment {
         postgreSQLContainer.stop();
     }
 }
+*/

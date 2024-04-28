@@ -1,6 +1,6 @@
 package com.ylab.intensive.service;
 
-import java.util.Map;
+import com.ylab.intensive.model.entity.WorkoutInfo;
 
 /**
  * Service interface for workout information operations.
@@ -31,7 +31,7 @@ public interface WorkoutInfoService {
      * @param workoutId the ID of the workout
      * @return a map containing the workout information
      */
-    Map<String, String> getInfoByWorkoutId(int workoutId);
+    WorkoutInfo getInfoByWorkoutId(int workoutId);
 
     /**
      * Deletes workout information by workout ID.

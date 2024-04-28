@@ -2,17 +2,16 @@ package com.ylab.intensive.model.entity;
 
 import com.ylab.intensive.model.enums.Role;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Represents a user in the system.
  */
 @Data
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class User {
@@ -20,6 +19,8 @@ public class User {
      * The ID of the user
      */
     private int id;
+
+    private UUID uuid;
     /**
      * The email address of the user
      */
@@ -31,11 +32,11 @@ public class User {
     /**
      * The list of workouts associated with the user
      */
-    private List<Workout> workout;
+    private List<Workout> workouts;
     /**
      * The list of actions performed by the user (Audit)
      */
-    private List<String> action;
+    private List<Audit> action;
     /**
      * The role of the user (e.g., ADMIN, USER)
      */

@@ -1,5 +1,7 @@
 package com.ylab.intensive.dao;
 
+import com.ylab.intensive.model.entity.Audit;
+
 import java.util.List;
 
 /**
@@ -13,7 +15,7 @@ public interface AuditDao {
      * @param userId the ID of the user
      * @return a list of user actions
      */
-    List<String> getUserActions(int userId);
+    List<Audit> getUserActions(int userId);
 
     /**
      * Inserts a user action for a given user ID.

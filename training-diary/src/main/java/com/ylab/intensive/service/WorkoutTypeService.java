@@ -1,6 +1,8 @@
 package com.ylab.intensive.service;
 
-import java.util.Set;
+import com.ylab.intensive.model.entity.WorkoutType;
+
+import java.util.List;
 
 /**
  * Service interface for workout type operations.
@@ -10,18 +12,17 @@ public interface WorkoutTypeService {
     /**
      * Saves a workout type.
      *
-     * @param workoutId the ID of the workout
-     * @param typeName  the name of the workout type to save
+     * @param userId   the ID of the workout
+     * @param typeName the name of the workout type to save
      */
-    void saveType(int workoutId, String typeName);
+    WorkoutType saveType(int userId, String typeName);
 
     /**
      * Finds workout types by workout ID.
      *
-     * @param workoutId the ID of the workout
      * @return a set of workout types
      */
-    Set<String> findByWorkoutId(int workoutId);
+    List<WorkoutType> findByUserId(int userId);
 
     /**
      * Updates a workout type.
@@ -32,10 +33,5 @@ public interface WorkoutTypeService {
      */
     void updateType(int workoutId, String oldType, String newType);
 
-    /**
-     * Deletes workout types by workout ID.
-     *
-     * @param workoutId the ID of the workout
-     */
-    void delete(int workoutId);
+    WorkoutType findById(int id);
 }

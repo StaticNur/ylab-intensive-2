@@ -1,14 +1,13 @@
 package com.ylab.intensive.model.entity;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.Duration;
 import java.time.LocalDate;
 import java.util.Map;
-import java.util.Set;
+import java.util.UUID;
 
 /**
  * Represents a workout.
@@ -16,24 +15,23 @@ import java.util.Set;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class Workout {
     /**
      * The ID of the workout
      */
     private int id;
+
+    private UUID uuid;
     /**
      * The ID of the workout
      */
     private int userId;
+
+    private String type;
     /**
      * The date of the workout
      */
     private LocalDate date;
-    /**
-     * The type(s) of the workout
-     */
-    private Set<String> type;
     /**
      * The duration of the workout
      */
@@ -45,5 +43,5 @@ public class Workout {
     /**
      * Additional information about the workout
      */
-    private Map<String, String> info;
+    private Map<String, String> workoutInfo;
 }

@@ -6,6 +6,7 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * The WorkoutDao interface provides methods to interact with workout data in the database.
@@ -18,7 +19,6 @@ public interface WorkoutDao {
      * @param date The date of the workout to find
      * @return An Optional containing the workout if found, otherwise empty
      */
-
     Optional<Workout> findByDate(LocalDate date, int userId);
 
     /**
@@ -26,7 +26,6 @@ public interface WorkoutDao {
      *
      * @param workout The workout to save
      */
-
     Workout saveWorkout(Workout workout);
 
     /**
@@ -39,10 +38,8 @@ public interface WorkoutDao {
 
     /**
      * Deletes a workout from the database by its date.
-     *
-     * @param date The date of the workout to delete
      */
-    void deleteWorkout(LocalDate date, int userId);
+    void deleteWorkout(int userId, int id);
 
     /**
      * Updates the calorie of a workout.
@@ -68,4 +65,8 @@ public interface WorkoutDao {
      * @return A list of workouts within the specified date range
      */
     List<Workout> findByDuration(int userId, LocalDate begin, LocalDate end);
+
+    Optional<Workout> findByUUID(UUID uuid);
+
+    void updateType(int workoutId, int typeId);
 }

@@ -5,18 +5,20 @@ import com.ylab.intensive.model.entity.User;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * The UserDao interface provides methods to interact with user data in the database.
  */
 public interface UserDao {
+
     /**
      * Saves a user to the database.
      *
      * @param user The user to save
      * @return true if the user was successfully saved, false otherwise
      */
-    boolean save(User user, int roleId);
+    User save(User user, int roleId);
 
     /**
      * Finds a user by their email.
@@ -29,12 +31,12 @@ public interface UserDao {
     /**
      * Updates the user's role in the database by the specified identifier.
      *
-     * @param email  the user email
+     * @param uuid
      * @param roleId the role id
      * @return the updated user
      * @throws DaoException if an SQL exception occurs
      */
-    boolean updateUserRole(String email, int roleId);
+    boolean updateUserRole(UUID uuid, int roleId);
 
     /**
      * Finds all users in the database.
@@ -42,4 +44,6 @@ public interface UserDao {
      * @return A list of all workouts in the database
      */
     List<User> findAll();
+
+    Optional<User> findByUUID(UUID uuid);
 }
