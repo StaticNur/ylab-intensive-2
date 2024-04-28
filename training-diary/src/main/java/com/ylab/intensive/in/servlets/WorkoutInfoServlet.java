@@ -60,10 +60,14 @@ public class WorkoutInfoServlet extends HttpServlet {
             resp.getWriter()
                     .append(converter.convertObjectToJson(workoutMapper.toDto(workout)));
         } else {
-            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            resp.getWriter()
-                    .append(converter.convertObjectToJson(new ExceptionResponse("Not found endpoint."
-                                                                                + " Maybe the 'uuid' is not correct")));
+            sendErrorMessage(resp);
         }
+    }
+
+    private void sendErrorMessage(HttpServletResponse resp) throws IOException {
+        resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        resp.getWriter()
+                .append(converter.convertObjectToJson(new ExceptionResponse("Not found endpoint."
+                                                                            + " Maybe the 'uuid' is not correct")));
     }
 }

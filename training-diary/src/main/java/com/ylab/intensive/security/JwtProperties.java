@@ -1,4 +1,4 @@
-package com.ylab.intensive.util;
+package com.ylab.intensive.security;
 
 import lombok.Data;
 

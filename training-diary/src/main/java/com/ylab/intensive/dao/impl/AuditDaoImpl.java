@@ -3,7 +3,7 @@ package com.ylab.intensive.dao.impl;
 import com.ylab.intensive.dao.AuditDao;
 import com.ylab.intensive.config.ConnectionManager;
 import com.ylab.intensive.model.entity.Audit;
-import com.ylab.intensive.util.DaoUtil;
+import com.ylab.intensive.util.SQLExceptionUtil;
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.NoArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -49,7 +49,7 @@ public class AuditDaoImpl implements AuditDao {
                 actions.add(audit);
             }
         } catch (SQLException exc) {
-            DaoUtil.handleSQLException(exc, log);
+            SQLExceptionUtil.handleSQLException(exc, log);
         }
         return actions;
     }
@@ -69,12 +69,12 @@ public class AuditDaoImpl implements AuditDao {
                 preparedStatement.executeUpdate();
             } catch (SQLException exc) {
                 connection.rollback();
-                DaoUtil.handleSQLException(exc, log);
+                SQLExceptionUtil.handleSQLException(exc, log);
             }
 
             connection.commit();
         } catch (SQLException exc) {
-            DaoUtil.handleSQLException(exc, log);
+            SQLExceptionUtil.handleSQLException(exc, log);
         }
     }
 }

@@ -7,7 +7,7 @@ import org.apache.logging.log4j.Logger;
 import java.sql.SQLException;
 
 @Log4j2
-public class DaoUtil {
+public class SQLExceptionUtil {
 
     public static void handleSQLException(SQLException exc, Logger log) {
         StringBuilder stringBuilder = new StringBuilder();

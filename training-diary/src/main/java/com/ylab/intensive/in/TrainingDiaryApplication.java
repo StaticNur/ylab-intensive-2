@@ -28,7 +28,6 @@ public class TrainingDiaryApplication implements ServletContextListener {
         migrationManager.migrate();
     }
 
-
     /**
      * Destroys the application context when the servlet context is destroyed.
      *

@@ -29,6 +29,7 @@ public class AuditServiceImpl implements AuditService {
     }
 
     @Override
+    @Timed
     public void saveAction(int userId, String action) {
         auditDao.insertUserAction(userId, action);
     }

@@ -1,6 +1,6 @@
 package com.ylab.intensive.config;
 
-import com.ylab.intensive.util.DaoUtil;
+import com.ylab.intensive.util.SQLExceptionUtil;
 import com.ylab.intensive.util.PropertiesUtil;
 import jakarta.enterprise.context.ApplicationScoped;
 import liquibase.Liquibase;
@@ -45,7 +45,7 @@ public class MigrationManager {
             System.out.println("SQL Exception in migration " + e.getMessage());
             log.error("SQL Exception in migration " + e.getMessage());
         } catch (SQLException e) {
-            DaoUtil.handleSQLException(e, log);
+            SQLExceptionUtil.handleSQLException(e, log);
         }
     }
 

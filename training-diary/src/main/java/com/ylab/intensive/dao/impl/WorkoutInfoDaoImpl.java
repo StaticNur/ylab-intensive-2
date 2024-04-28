@@ -4,7 +4,7 @@ import com.ylab.intensive.dao.WorkoutInfoDao;
 import com.ylab.intensive.exception.DaoException;
 import com.ylab.intensive.config.ConnectionManager;
 import com.ylab.intensive.model.entity.WorkoutInfo;
-import com.ylab.intensive.util.DaoUtil;
+import com.ylab.intensive.util.SQLExceptionUtil;
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.NoArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -36,12 +36,12 @@ public class WorkoutInfoDaoImpl implements WorkoutInfoDao {
                 preparedStatement.executeUpdate();
             } catch (SQLException exc) {
                 connection.rollback();
-                DaoUtil.handleSQLException(exc, log);
+                SQLExceptionUtil.handleSQLException(exc, log);
             }
 
             connection.commit();
         } catch (SQLException exc) {
-            DaoUtil.handleSQLException(exc, log);
+            SQLExceptionUtil.handleSQLException(exc, log);
         }
     }
 
@@ -64,12 +64,12 @@ public class WorkoutInfoDaoImpl implements WorkoutInfoDao {
                 }
             } catch (SQLException exc) {
                 connection.rollback();
-                DaoUtil.handleSQLException(exc, log);
+                SQLExceptionUtil.handleSQLException(exc, log);
             }
 
             connection.commit();
         } catch (SQLException exc) {
-            DaoUtil.handleSQLException(exc, log);
+            SQLExceptionUtil.handleSQLException(exc, log);
         }
     }
 
@@ -93,7 +93,7 @@ public class WorkoutInfoDaoImpl implements WorkoutInfoDao {
             }
 
         } catch (SQLException exc) {
-            DaoUtil.handleSQLException(exc, log);
+            SQLExceptionUtil.handleSQLException(exc, log);
         }
         workoutInfo.setWorkoutInfo(workoutInfoMap);
         workoutInfo.setWorkoutId(workoutId);
@@ -113,12 +113,12 @@ public class WorkoutInfoDaoImpl implements WorkoutInfoDao {
                 preparedStatement.executeUpdate();
             } catch (SQLException exc) {
                 connection.rollback();
-                DaoUtil.handleSQLException(exc, log);
+                SQLExceptionUtil.handleSQLException(exc, log);
             }
 
             connection.commit();
         } catch (SQLException exc) {
-            DaoUtil.handleSQLException(exc, log);
+            SQLExceptionUtil.handleSQLException(exc, log);
         }
     }
 }

@@ -4,7 +4,7 @@ import com.ylab.intensive.dao.WorkoutDao;
 import com.ylab.intensive.exception.DaoException;
 import com.ylab.intensive.model.entity.Workout;
 import com.ylab.intensive.config.ConnectionManager;
-import com.ylab.intensive.util.DaoUtil;
+import com.ylab.intensive.util.SQLExceptionUtil;
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.NoArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -42,7 +42,7 @@ public class WorkoutDaoImpl implements WorkoutDao {
                 return Optional.of(buildWorkout(rs));
             }
         } catch (SQLException exc) {
-            DaoUtil.handleSQLException(exc, log);
+            SQLExceptionUtil.handleSQLException(exc, log);
         }
         return Optional.empty();
     }
@@ -76,13 +76,13 @@ public class WorkoutDaoImpl implements WorkoutDao {
                 }
             } catch (SQLException exc) {
                 connection.rollback();
-                DaoUtil.handleSQLException(exc, log);
+                SQLExceptionUtil.handleSQLException(exc, log);
             }
 
             connection.commit();
             return workout;
         } catch (SQLException exc) {
-            DaoUtil.handleSQLException(exc, log);
+            SQLExceptionUtil.handleSQLException(exc, log);
             return new Workout();
         }
     }
@@ -105,7 +105,7 @@ public class WorkoutDaoImpl implements WorkoutDao {
                 workoutList.add(buildWorkout(rs));
             }
         } catch (SQLException exc) {
-            DaoUtil.handleSQLException(exc, log);
+            SQLExceptionUtil.handleSQLException(exc, log);
         }
         return workoutList;
     }
@@ -124,12 +124,12 @@ public class WorkoutDaoImpl implements WorkoutDao {
                 preparedStatement.executeUpdate();
             } catch (SQLException exc) {
                 connection.rollback();
-                DaoUtil.handleSQLException(exc, log);
+                SQLExceptionUtil.handleSQLException(exc, log);
             }
 
             connection.commit();
         } catch (SQLException exc) {
-            DaoUtil.handleSQLException(exc, log);
+            SQLExceptionUtil.handleSQLException(exc, log);
         }
     }
 
@@ -147,12 +147,12 @@ public class WorkoutDaoImpl implements WorkoutDao {
                 preparedStatement.executeUpdate();
             } catch (SQLException exc) {
                 connection.rollback();
-                DaoUtil.handleSQLException(exc, log);
+                SQLExceptionUtil.handleSQLException(exc, log);
             }
 
             connection.commit();
         } catch (SQLException exc) {
-            DaoUtil.handleSQLException(exc, log);
+            SQLExceptionUtil.handleSQLException(exc, log);
         }
     }
 
@@ -170,12 +170,12 @@ public class WorkoutDaoImpl implements WorkoutDao {
                 preparedStatement.executeUpdate();
             } catch (SQLException exc) {
                 connection.rollback();
-                DaoUtil.handleSQLException(exc, log);
+                SQLExceptionUtil.handleSQLException(exc, log);
             }
 
             connection.commit();
         } catch (SQLException exc) {
-            DaoUtil.handleSQLException(exc, log);
+            SQLExceptionUtil.handleSQLException(exc, log);
         }
     }
 
@@ -198,7 +198,7 @@ public class WorkoutDaoImpl implements WorkoutDao {
                 workouts.add(buildWorkout(rs));
             }
         } catch (SQLException exc) {
-            DaoUtil.handleSQLException(exc, log);
+            SQLExceptionUtil.handleSQLException(exc, log);
         }
 
         return workouts;
@@ -221,7 +221,7 @@ public class WorkoutDaoImpl implements WorkoutDao {
                 return Optional.of(buildWorkout(rs));
             }
         } catch (SQLException exc) {
-            DaoUtil.handleSQLException(exc, log);
+            SQLExceptionUtil.handleSQLException(exc, log);
         }
         return Optional.empty();
     }
@@ -240,12 +240,12 @@ public class WorkoutDaoImpl implements WorkoutDao {
                 preparedStatement.executeUpdate();
             } catch (SQLException exc) {
                 connection.rollback();
-                DaoUtil.handleSQLException(exc, log);
+                SQLExceptionUtil.handleSQLException(exc, log);
             }
 
             connection.commit();
         } catch (SQLException exc) {
-            DaoUtil.handleSQLException(exc, log);
+            SQLExceptionUtil.handleSQLException(exc, log);
         }
     }
 

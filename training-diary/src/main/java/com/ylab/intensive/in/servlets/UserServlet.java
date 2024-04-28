@@ -8,6 +8,7 @@ import com.ylab.intensive.model.dto.*;
 import com.ylab.intensive.model.entity.User;
 import com.ylab.intensive.model.enums.Role;
 import com.ylab.intensive.service.UserService;
+import com.ylab.intensive.service.ValidationService;
 import com.ylab.intensive.service.WorkoutService;
 import com.ylab.intensive.util.Converter;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -28,14 +29,17 @@ import java.util.regex.Pattern;
 @NoArgsConstructor
 public class UserServlet extends HttpServlet {
     private UserService userService;
+    private ValidationService validationService;
     private WorkoutService workoutService;
     private Converter converter;
     private UserMapper userMapper;
 
     @Inject
-    public void inject(UserService userService, WorkoutService workoutService,
-                       Converter converter, UserMapper userMapper) {
+    public void inject(UserService userService, ValidationService validationService,
+                       WorkoutService workoutService, Converter converter,
+                       UserMapper userMapper) {
         this.userService = userService;
+        this.validationService = validationService;
         this.workoutService = workoutService;
         this.converter = converter;
         this.userMapper = userMapper;
@@ -67,9 +71,7 @@ public class UserServlet extends HttpServlet {
             resp.getWriter()
                     .append(converter.convertObjectToJson(userWithWorkouts.stream().map(userMapper::toDto).toList()));
         } else {
-            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            resp.getWriter()
-                    .append(converter.convertObjectToJson(new ExceptionResponse("Not found endpoint.")));
+            sendErrorMessage(resp, new ExceptionResponse("Not found endpoint."));
         }
     }
 
@@ -85,21 +87,28 @@ public class UserServlet extends HttpServlet {
             && "access".equals(pathParts[pathParts.length - 1])) {
 
             ChangeUserRightsDto changeUserRightsDto = converter.getRequestBody(req, ChangeUserRightsDto.class);
-            User user = userService.changeUserPermissions(pathParts[pathParts.length - 2], changeUserRightsDto);
+            List<ValidationError> validationErrors = validationService.validateAndReturnErrors(changeUserRightsDto);
 
-            //JwtResponse response = userService.login(new LoginDto(user.getEmail(), user.getPassword()));
+            if (validationErrors.isEmpty()) {
+                User user = userService.changeUserPermissions(pathParts[pathParts.length - 2], changeUserRightsDto);
 
-            resp.setStatus(HttpServletResponse.SC_OK);
-            resp.getWriter()
-                    .append(converter
-                            .convertObjectToJson(new SuccessResponse("Права доступа успешно изменена! " +
-                                                                     "Теперь для данного пользователя " + user.getEmail()
-                                                                     + " требуется повторная авторизация для обновления токена.")));
+                resp.setStatus(HttpServletResponse.SC_OK);
+                resp.getWriter()
+                        .append(converter
+                                .convertObjectToJson(new SuccessResponse("Права доступа успешно изменена! " +
+                                                                         "Теперь для данного пользователя " + user.getEmail()
+                                                                         + " требуется повторная авторизация для обновления токена.")));
+            } else {
+                sendErrorMessage(resp, validationErrors);
+            }
         } else {
-            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            resp.getWriter()
-                    .append(converter.convertObjectToJson(new ExceptionResponse("Not found endpoint."
-                                                                                + " Maybe the 'uuid' is not correct")));
+            sendErrorMessage(resp, new ExceptionResponse("Not found endpoint. Maybe the 'uuid' is not correct"));
         }
+    }
+
+    private void sendErrorMessage(HttpServletResponse resp, Object object) throws IOException {
+        resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        resp.getWriter()
+                .append(converter.convertObjectToJson(object));
     }
 }

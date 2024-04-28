@@ -5,7 +5,7 @@ import com.ylab.intensive.exception.DaoException;
 import com.ylab.intensive.model.entity.User;
 import com.ylab.intensive.model.enums.Role;
 import com.ylab.intensive.config.ConnectionManager;
-import com.ylab.intensive.util.DaoUtil;
+import com.ylab.intensive.util.SQLExceptionUtil;
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.NoArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -45,11 +45,11 @@ public class UserDaoImpl implements UserDao {
                 }
             } catch (SQLException exc) {
                 connection.rollback();
-                DaoUtil.handleSQLException(exc, log);
+                SQLExceptionUtil.handleSQLException(exc, log);
             }
             connection.commit();
         } catch (SQLException exc) {
-            DaoUtil.handleSQLException(exc, log);
+            SQLExceptionUtil.handleSQLException(exc, log);
         }
         return user;
     }
@@ -71,7 +71,7 @@ public class UserDaoImpl implements UserDao {
                 return Optional.of(buildUser(resultSet));
             }
         } catch (SQLException exc) {
-            DaoUtil.handleSQLException(exc, log);
+            SQLExceptionUtil.handleSQLException(exc, log);
         }
         return Optional.empty();
     }
@@ -91,12 +91,12 @@ public class UserDaoImpl implements UserDao {
                 rowsAffected = preparedStatement.executeUpdate();
             } catch (SQLException exc) {
                 connection.rollback();
-                DaoUtil.handleSQLException(exc, log);
+                SQLExceptionUtil.handleSQLException(exc, log);
             }
             connection.commit();
             return rowsAffected > 0;
         } catch (SQLException exc) {
-            DaoUtil.handleSQLException(exc, log);
+            SQLExceptionUtil.handleSQLException(exc, log);
             return false;
         }
     }
@@ -114,7 +114,7 @@ public class UserDaoImpl implements UserDao {
                 userList.add(buildUser(resultSet));
             }
         } catch (SQLException exc) {
-            DaoUtil.handleSQLException(exc, log);
+            SQLExceptionUtil.handleSQLException(exc, log);
             return Collections.emptyList();
         }
         return userList;
@@ -137,7 +137,7 @@ public class UserDaoImpl implements UserDao {
                 return Optional.of(buildUser(resultSet));
             }
         } catch (SQLException exc) {
-            DaoUtil.handleSQLException(exc, log);
+            SQLExceptionUtil.handleSQLException(exc, log);
         }
         return Optional.empty();
     }

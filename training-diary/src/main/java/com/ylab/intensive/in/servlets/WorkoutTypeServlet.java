@@ -3,9 +3,11 @@ package com.ylab.intensive.in.servlets;
 import com.ylab.intensive.aspects.annotation.Auditable;
 import com.ylab.intensive.aspects.annotation.Loggable;
 import com.ylab.intensive.mapper.WorkoutTypeMapper;
+import com.ylab.intensive.model.dto.ValidationError;
 import com.ylab.intensive.model.dto.WorkoutTypeDto;
 import com.ylab.intensive.model.entity.WorkoutType;
 import com.ylab.intensive.security.Authentication;
+import com.ylab.intensive.service.ValidationService;
 import com.ylab.intensive.service.WorkoutService;
 import com.ylab.intensive.util.Converter;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -30,13 +32,15 @@ import java.util.List;
 @NoArgsConstructor
 public class WorkoutTypeServlet extends HttpServlet {
     private WorkoutService workoutService;
+    private ValidationService validationService;
     private WorkoutTypeMapper workoutTypeMapper;
     private Converter converter;
 
     @Inject
-    public void inject(WorkoutService workoutService, WorkoutTypeMapper workoutTypeMapper,
-                       Converter converter) {
+    public void inject(WorkoutService workoutService, ValidationService validationService,
+                       WorkoutTypeMapper workoutTypeMapper, Converter converter) {
         this.workoutService = workoutService;
+        this.validationService = validationService;
         this.workoutTypeMapper = workoutTypeMapper;
         this.converter = converter;
     }
@@ -67,10 +71,17 @@ public class WorkoutTypeServlet extends HttpServlet {
         Authentication authentication = (Authentication) (req.getServletContext()).getAttribute("authentication");
         WorkoutTypeDto workoutTypeDto = converter.getRequestBody(req, WorkoutTypeDto.class);
 
-        WorkoutType workoutType = workoutService.saveWorkoutType(authentication.getLogin(), workoutTypeDto.getType());
-        resp.setStatus(HttpServletResponse.SC_CREATED);
-        resp.getWriter()
-                .append(converter.convertObjectToJson(workoutTypeMapper.toDto(workoutType)));
+        List<ValidationError> validationErrors = validationService.validateAndReturnErrors(workoutTypeDto);
 
+        if (validationErrors.isEmpty()){
+            WorkoutType workoutType = workoutService.saveWorkoutType(authentication.getLogin(), workoutTypeDto.getType());
+            resp.setStatus(HttpServletResponse.SC_CREATED);
+            resp.getWriter()
+                    .append(converter.convertObjectToJson(workoutTypeMapper.toDto(workoutType)));
+        }else {
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            resp.getWriter()
+                    .append(converter.convertObjectToJson(validationErrors));
+        }
     }
 }

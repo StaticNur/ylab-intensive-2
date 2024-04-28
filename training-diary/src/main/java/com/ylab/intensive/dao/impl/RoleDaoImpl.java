@@ -4,7 +4,7 @@ import com.ylab.intensive.dao.RoleDao;
 import com.ylab.intensive.exception.DaoException;
 import com.ylab.intensive.model.enums.Role;
 import com.ylab.intensive.config.ConnectionManager;
-import com.ylab.intensive.util.DaoUtil;
+import com.ylab.intensive.util.SQLExceptionUtil;
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.NoArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -40,7 +40,7 @@ public class RoleDaoImpl implements RoleDao {
                 throw new DaoException("Role not found.");
             }
         } catch (SQLException exc) {
-            DaoUtil.handleSQLException(exc, log);
+            SQLExceptionUtil.handleSQLException(exc, log);
             return -1;
         }
     }

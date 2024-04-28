@@ -15,7 +15,6 @@ public class TestLauncher {
     public static void main(String[] args) {
         Launcher launcher = LauncherFactory.create();
         SummaryGeneratingListener listener = new SummaryGeneratingListener();
-
         AnsiColor ansiColor = new AnsiColor();
 
         LauncherDiscoveryRequest request = LauncherDiscoveryRequestBuilder.request()

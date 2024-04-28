@@ -202,8 +202,8 @@ class WorkoutServiceImplTest {
     void testGetWorkoutStatistics_Success() {
         Workout workout = getWorkout();
         String email = "test@email.com";
-        String begin = "01-01-2022";
-        String end = "02-01-2022";
+        String begin = "2022-01-01";
+        String end = "2022-01-02";
         User user = new User();
         user.setId(1);
 

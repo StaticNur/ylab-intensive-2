@@ -1,6 +1,5 @@
 package com.ylab.intensive.service.impl;
 
-import com.ylab.intensive.aspects.annotation.Auditable;
 import com.ylab.intensive.aspects.annotation.Loggable;
 import com.ylab.intensive.aspects.annotation.Timed;
 import com.ylab.intensive.dao.UserDao;
@@ -15,10 +14,14 @@ import com.ylab.intensive.service.RoleService;
 import com.ylab.intensive.service.UserService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -66,7 +69,7 @@ public class UserServiceImpl implements UserService {
     public User registerUser(RegistrationDto registrationDto) {
         userDao.findByEmail(registrationDto.getEmail())
                 .ifPresent(u -> {
-                    throw new RegisterException("Такой пользователь уже существует!");
+                    throw new RegistrationException("Такой пользователь уже существует!");
                 });
         int roleId = roleService.getIdByName(registrationDto.getRole());
         User user = new User();
@@ -80,8 +83,10 @@ public class UserServiceImpl implements UserService {
     @Override
     @Timed
     @Loggable
-    @Auditable
     public JwtResponse login(LoginDto loginDto) {
+        if (loginDto.getEmail() == null || loginDto.getPassword() == null) {
+            throw new InvalidInputException("Обязательно должны быть поля email и password");
+        }
         User user = userDao.findByEmail(loginDto.getEmail())
                 .orElseThrow(() -> new NotFoundException("There is no user with this login in the database."));
 
@@ -144,19 +149,6 @@ public class UserServiceImpl implements UserService {
     @Loggable
     public Optional<User> findByEmail(String email) {
         return userDao.findByEmail(email);
-    }
-
-    /**
-     * Retrieves the ID of the currently authorized user.
-     *
-     * @return the ID of the authorized user
-     * @throws NotFoundException if the authorized user is not found
-     */
-    private int getAuthorizedUserId(String email) {
-        User user = userDao.findByEmail(email)
-                .orElseThrow(() -> new NotFoundException("User with email = "
-                                                         + email + " does not exist!"));
-        return user.getId();
     }
 
     private UUID convertToUUID(String uuidStr) {

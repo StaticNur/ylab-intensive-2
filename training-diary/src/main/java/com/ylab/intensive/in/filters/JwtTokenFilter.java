@@ -46,33 +46,25 @@ public class JwtTokenFilter implements Filter {
                          FilterChain filterChain) throws IOException, ServletException {
         HttpServletRequest httpRequest = (HttpServletRequest) servletRequest;
         HttpServletResponse httpResponse = (HttpServletResponse) servletResponse;
-        String bearerToken = httpRequest.getHeader("Authorization");
+
         if (isPublicPath(httpRequest.getRequestURI())) {
             filterChain.doFilter(servletRequest, servletResponse);
             return;
         }
-        try {
-            if (bearerToken != null && bearerToken.startsWith("Bearer ")
-                && jwtTokenService.validateToken(bearerToken.substring(7))) {
 
-                Authentication authentication = jwtTokenService.authentication(bearerToken.substring(7));
-                servletContext.setAttribute("authentication", authentication);
+        String bearerToken = httpRequest.getHeader("Authorization");
+        if (bearerToken != null && bearerToken.startsWith("Bearer ")
+            && jwtTokenService.validateToken(bearerToken.substring(7))) {
 
-                filterChain.doFilter(servletRequest, servletResponse);
-            } else {
-                servletContext.setAttribute("authentication",
-                        new Authentication(null, null, false));
-                httpResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                httpResponse.getWriter()
-                        .append(converter.convertObjectToJson(
-                                new ExceptionResponse("Authentication was denied for this request.")));
-            }
-        } catch (RuntimeException e) {
-            servletContext.setAttribute("authentication",
-                    new Authentication(null, null, false));
+            Authentication authentication = jwtTokenService.authentication(bearerToken.substring(7));
+            servletContext.setAttribute("authentication", authentication);
 
-            httpResponse.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            httpResponse.getWriter().append(converter.convertObjectToJson(new ExceptionResponse(e.getMessage())));
+            filterChain.doFilter(servletRequest, servletResponse);
+        } else {
+            httpResponse.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            httpResponse.getWriter()
+                    .append(converter.convertObjectToJson(
+                            new ExceptionResponse("Authentication was denied for this request.")));
         }
     }
 

@@ -4,7 +4,7 @@ import com.ylab.intensive.dao.UserDao;
 import com.ylab.intensive.exception.AuthorizeException;
 import com.ylab.intensive.exception.ChangeUserPermissionsException;
 import com.ylab.intensive.exception.NotFoundException;
-import com.ylab.intensive.exception.RegisterException;
+import com.ylab.intensive.exception.RegistrationException;
 import com.ylab.intensive.model.dto.*;
 import com.ylab.intensive.model.entity.User;
 import com.ylab.intensive.model.enums.Role;
@@ -21,7 +21,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
-import org.mockito.stubbing.OngoingStubbing;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -83,7 +82,7 @@ class UserServiceImplTest {
         when(userDao.findByEmail(email)).thenReturn(Optional.of(new User()));
 
         assertThatThrownBy(() -> userManagementService.registerUser(new RegistrationDto(email, password, role)))
-                .isInstanceOf(RegisterException.class)
+                .isInstanceOf(RegistrationException.class)
                 .hasMessage("Такой пользователь уже существует!");
     }
 
@@ -94,7 +93,7 @@ class UserServiceImplTest {
         Role role = Role.USER;
 
         when(roleService.getIdByName(role)).thenReturn(1);
-        when(userDao.updateUserRole(UUID.fromString(""),1)).thenReturn(false);
+        when(userDao.updateUserRole(UUID.fromString(uuid),1)).thenReturn(false);
 
         assertThatThrownBy(() -> userManagementService.changeUserPermissions(uuid, new ChangeUserRightsDto(role)))
                 .isInstanceOf(ChangeUserPermissionsException.class)

@@ -2,15 +2,15 @@ package com.ylab.intensive.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ylab.intensive.exception.InvalidInputException;
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j2;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Optional;
 
-@Slf4j
+@Log4j2
 public class Converter {
 
     private final ObjectMapper objectMapper;
@@ -20,9 +20,6 @@ public class Converter {
     }
 
     public <T> T getRequestBody(HttpServletRequest request, Class<T> valueType) {
-        if (!request.getContentType().equals("application/json")) {
-            throw new RuntimeException("not supported content type");
-        }
         StringBuilder requestBody = new StringBuilder();
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(request.getInputStream()))) {
             String line;
@@ -34,7 +31,7 @@ public class Converter {
             }
             return objectMapper.readValue(requestBody.toString(), valueType);
         } catch (IOException e) {
-            throw new RuntimeException("Not correct input!");
+            throw new InvalidInputException("Not correct input! "+e.getMessage());
         }
     }
 
@@ -42,31 +39,7 @@ public class Converter {
         try {
             return objectMapper.writeValueAsString(object);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e); //TODO
+            throw new RuntimeException(e.getMessage());
         }
     }
-
-    public int getInteger(HttpServletRequest req, String paramName) {
-        return Optional.ofNullable(req.getParameter(paramName)).map(p -> {
-            try {
-                return Integer.parseInt(p);
-            } catch (NumberFormatException e) {
-                log.info("wrong value of {}: {}", paramName, p);
-            }
-            return 0;
-        }).orElse(0);
-    }
-
-    public long getLong(HttpServletRequest req, String paramName) {
-        return Optional.ofNullable(req.getParameter(paramName)).map(p -> {
-            try {
-                return Long.parseLong(p);
-            } catch (NumberFormatException e) {
-                log.info("wrong value of {}: {}", paramName, p);
-            }
-            return 0L;
-        }).orElse(0L);
-    }
-
-
 }

@@ -2,6 +2,10 @@ package com.ylab.intensive.model.dto;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.ylab.intensive.util.DurationDeserializer;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -23,11 +27,17 @@ public class WorkoutDto {
     /**
      * The date of the workout
      */
+    @NotNull(message = "Обязательное поля!")
+    @NotBlank(message = "Не должен быть пустым!")
+    @Pattern(regexp = "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$",
+            message = "Incorrect date format. Should be yyyy-MM-dd")
     private String date;
 
     /**
      * The type(s) of the workout
      */
+    @NotNull(message = "Обязательное поля!")
+    @NotBlank(message = "Не должен быть пустым!")
     private String type;
 
     /**
@@ -39,6 +49,8 @@ public class WorkoutDto {
     /**
      * The calorie burned during the workout
      */
+    @NotNull(message = "Значение не может быть пустым")
+    @DecimalMin(value = "0.0", inclusive = false, message = "Число не должно быть отрицательным")
     private Float calorie;
 
     /**

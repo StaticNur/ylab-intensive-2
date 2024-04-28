@@ -47,8 +47,8 @@ public class StatisticsServlet extends HttpServlet {
     @Loggable
     @Auditable
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        String begin = req.getParameter("begin") == null ? "01-01-1970" : req.getParameter("begin");
-        String end = req.getParameter("end") == null ? "01-01-2030" : req.getParameter("end");
+        String begin = req.getParameter("begin") == null ? "1970-01-01" : req.getParameter("begin");
+        String end = req.getParameter("end") == null ? "2030-01-01" : req.getParameter("end");
         Authentication authentication = (Authentication) (req.getServletContext()).getAttribute("authentication");
         StatisticsDto statistics = workoutService.getWorkoutStatistics(authentication.getLogin(), begin, end);
         resp.setStatus(HttpServletResponse.SC_OK);

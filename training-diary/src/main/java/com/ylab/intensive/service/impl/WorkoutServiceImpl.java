@@ -116,9 +116,11 @@ public class WorkoutServiceImpl implements WorkoutService {
         WorkoutType workoutType = workoutTypeService.findById(Integer.parseInt(workout.getType()));
         workout.setType(workoutType.getType());
 
-        for (Map.Entry<String, String> infoMap : workoutInfoDto.getWorkoutInfo().entrySet()) {
-            workoutInfoService.saveWorkoutInfo(workout.getId(), infoMap.getKey(), infoMap.getValue());
-            workout.getWorkoutInfo().put(infoMap.getKey(), infoMap.getValue());
+        if(workoutInfoDto.getWorkoutInfo() != null){
+            for (Map.Entry<String, String> infoMap : workoutInfoDto.getWorkoutInfo().entrySet()) {
+                workoutInfoService.saveWorkoutInfo(workout.getId(), infoMap.getKey(), infoMap.getValue());
+                workout.getWorkoutInfo().put(infoMap.getKey(), infoMap.getValue());
+            }
         }
         return workout;
     }
@@ -187,6 +189,7 @@ public class WorkoutServiceImpl implements WorkoutService {
     }
 
     @Override
+    @Timed
     public void updateType(int userId, int workoutId, String type) {
         List<WorkoutType> types = workoutTypeService.findByUserId(userId);
 
@@ -200,16 +203,19 @@ public class WorkoutServiceImpl implements WorkoutService {
     }
 
     @Override
+    @Timed
     public void updateDuration(int userId, int workoutId, Duration duration) {
         workoutDao.updateDuration(workoutId, duration);
     }
 
     @Override
+    @Timed
     public void updateCalories(int userId, int workoutId, Float calories) {
         workoutDao.updateCalorie(workoutId, calories);
     }
 
     @Override
+    @Timed
     public void updateAdditionalInfo(int userId, int workoutId, Map<String, String> workoutInfo) {
         for (Map.Entry<String, String> infoMap : workoutInfo.entrySet()) {
             workoutInfoService.updateWorkoutInfo(workoutId, infoMap.getKey(), infoMap.getValue());
@@ -287,12 +293,11 @@ public class WorkoutServiceImpl implements WorkoutService {
      */
 
     private LocalDate getDate(String dateStr) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
         LocalDate date;
         try {
-            date = LocalDate.parse(dateStr, formatter);
+            date = LocalDate.parse(dateStr);
         } catch (DateTimeParseException e) {
-            throw new DateFormatException("Incorrect date format. Should be dd-MM-yyyy");
+            throw new DateFormatException("Incorrect date format. Should be yyyy-MM-dd");
         }
         return date;
     }

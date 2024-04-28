@@ -3,12 +3,10 @@ package com.ylab.intensive.in.servlets;
 import com.ylab.intensive.aspects.annotation.Auditable;
 import com.ylab.intensive.aspects.annotation.Loggable;
 import com.ylab.intensive.mapper.WorkoutMapper;
-import com.ylab.intensive.model.dto.EditWorkout;
-import com.ylab.intensive.model.dto.ExceptionResponse;
-import com.ylab.intensive.model.dto.SuccessResponse;
-import com.ylab.intensive.model.dto.WorkoutDto;
+import com.ylab.intensive.model.dto.*;
 import com.ylab.intensive.model.entity.Workout;
 import com.ylab.intensive.security.Authentication;
+import com.ylab.intensive.service.ValidationService;
 import com.ylab.intensive.service.WorkoutService;
 import com.ylab.intensive.util.Converter;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -35,13 +33,15 @@ import java.util.regex.Pattern;
 @NoArgsConstructor
 public class WorkoutServlet extends HttpServlet {
     private WorkoutService workoutService;
+    private ValidationService validationService;
     private WorkoutMapper workoutMapper;
     private Converter converter;
 
     @Inject
-    public void inject(WorkoutService workoutService, WorkoutMapper workoutMapper,
-                       Converter converter) {
+    public void inject(WorkoutService workoutService, ValidationService validationService,
+                       WorkoutMapper workoutMapper, Converter converter) {
         this.workoutService = workoutService;
+        this.validationService = validationService;
         this.workoutMapper = workoutMapper;
         this.converter = converter;
     }
@@ -62,7 +62,6 @@ public class WorkoutServlet extends HttpServlet {
         resp.setStatus(HttpServletResponse.SC_OK);
         resp.getWriter()
                 .append(converter.convertObjectToJson(workouts));
-
     }
 
     @Override
@@ -72,11 +71,17 @@ public class WorkoutServlet extends HttpServlet {
         Authentication authentication = (Authentication) (req.getServletContext()).getAttribute("authentication");
         WorkoutDto workoutDto = converter.getRequestBody(req, WorkoutDto.class);
 
-        WorkoutDto workoutDtoSaved = workoutService.addWorkout(authentication.getLogin(), workoutDto);
+        List<ValidationError> validationErrors = validationService.validateAndReturnErrors(workoutDto);
 
-        resp.setStatus(HttpServletResponse.SC_OK);
-        resp.getWriter()
-                .append(converter.convertObjectToJson(workoutDtoSaved));
+        if (validationErrors.isEmpty()) {
+            WorkoutDto workoutDtoSaved = workoutService.addWorkout(authentication.getLogin(), workoutDto);
+
+            resp.setStatus(HttpServletResponse.SC_OK);
+            resp.getWriter()
+                    .append(converter.convertObjectToJson(workoutDtoSaved));
+        } else {
+            sendErrorMessage(resp, validationErrors);
+        }
     }
 
     @Override
@@ -84,33 +89,34 @@ public class WorkoutServlet extends HttpServlet {
     @Auditable
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         Authentication authentication = (Authentication) (req.getServletContext()).getAttribute("authentication");
-        String pathInfo = req.getPathInfo(); // "/workouts/{uuid}"
-        String uuid = pathInfo.substring(1, pathInfo.length()); // "{uuid}"
+        String pathInfo = req.getPathInfo();
+        String uuid = pathInfo.substring(1, pathInfo.length());
         Pattern pattern = Pattern.compile("[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}");
 
         if (pattern.matcher(uuid).matches()) {
             EditWorkout editWorkout = converter.getRequestBody(req, EditWorkout.class);
-            Workout workout = workoutService.updateWorkout(authentication.getLogin(), uuid, editWorkout);
+            List<ValidationError> validationErrors = validationService.validateAndReturnErrors(editWorkout);
 
-            resp.setStatus(HttpServletResponse.SC_OK);
-            resp.getWriter()
-                    .append(converter.convertObjectToJson(workoutMapper.toDto(workout)));
+            if (validationErrors.isEmpty()) {
+                Workout workout = workoutService.updateWorkout(authentication.getLogin(), uuid, editWorkout);
+
+                resp.setStatus(HttpServletResponse.SC_OK);
+                resp.getWriter()
+                        .append(converter.convertObjectToJson(workoutMapper.toDto(workout)));
+            } else {
+                sendErrorMessage(resp, validationErrors);
+            }
         } else {
-            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            resp.getWriter()
-                    .append(converter.convertObjectToJson(new ExceptionResponse("Not found endpoint."
-                                                                                + " Maybe the 'uuid' is not correct")));
+            sendErrorMessage(resp, new ExceptionResponse("Not found endpoint. Maybe the 'uuid' is not correct"));
         }
-
     }
 
     @Override
     @Loggable
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         Authentication authentication = (Authentication) (req.getServletContext()).getAttribute("authentication");
-        String pathInfo = req.getPathInfo(); // "/workouts/{uuid}"
-        String[] pathParts = pathInfo.split("/");
-        String uuid = pathParts[pathParts.length - 1]; // "{uuid}"
+        String pathInfo = req.getPathInfo();
+        String uuid = pathInfo.substring(1, pathInfo.length());
         Pattern pattern = Pattern.compile("[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}");
 
         if (pattern.matcher(uuid).matches()) {
@@ -120,32 +126,14 @@ public class WorkoutServlet extends HttpServlet {
             resp.getWriter()
                     .append(converter.convertObjectToJson(new SuccessResponse("Данные успешно удалены!")));
         } else {
-            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            resp.getWriter()
-                    .append(converter.convertObjectToJson(new ExceptionResponse("Not found endpoint."
-                                                                                + " Maybe the 'uuid' is not correct")));
+            sendErrorMessage(resp, new ExceptionResponse("Not found endpoint. Maybe the 'uuid' is not correct"));
         }
     }
+
+    private void sendErrorMessage(HttpServletResponse resp, Object object) throws IOException {
+        resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        resp.getWriter()
+                .append(converter.convertObjectToJson(object));
+    }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
