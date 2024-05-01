@@ -1,0 +1,38 @@
+{
+  id : "2ccd8223-8389-4903-a436-32968485f660",
+  name : "type workout",
+  icon : "FOLDER",
+  sortWeight : 7000000,
+  auth : {
+    type : "BEARER",
+    bearer : {
+      token : "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbkBleGFtcGxlLmNvbSIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTcxNDU2ODM5OCwiZXhwIjoxNzE0NTcxOTk4fQ.rS1sU_aOC06xUaLHQ3c0mdyj5ea4kNihKeh93e8BPwu5SvReH1e5kTBpb9Ko9u1v663sp8FPThjxaQx-L5QGNg"
+    }
+  },
+  requests : [
+    {
+      id : "4bb1fb6e-0f4c-4070-bbb9-257cfe123445",
+      name : "save workout type",
+      method : "POST",
+      url : "http://localhost:8080/training-diary/workouts/type",
+      headers : [
+        {
+          key : "Content-Type",
+          value : "application/json"
+        }
+      ],
+      body : {
+        type : "JSON",
+        raw : '{\
+          "type": "swim"\
+        }'
+      }
+    },
+    {
+      id : "48600d90-501f-4312-9400-e8280070691b",
+      name : "view all workout types",
+      method : "GET",
+      url : "http://localhost:8080/training-diary/workouts/type"
+    }
+  ]
+}
