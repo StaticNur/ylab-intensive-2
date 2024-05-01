@@ -1,7 +1,5 @@
 package com.ylab.intensive.service.impl;
 
-import com.ylab.intensive.aspects.annotation.Loggable;
-import com.ylab.intensive.aspects.annotation.Timed;
 import com.ylab.intensive.dao.WorkoutInfoDao;
 import jakarta.inject.Inject;
 import com.ylab.intensive.model.entity.WorkoutInfo;
@@ -27,29 +25,21 @@ public class WorkoutInfoServiceImpl implements WorkoutInfoService {
     }
 
     @Override
-    @Timed
-    @Loggable
     public void saveWorkoutInfo(int workoutId, String title, String info) {
         workoutInfoDao.saveWorkoutInfo(workoutId, title, info);
     }
 
     @Override
-    @Timed
-    @Loggable
     public void updateWorkoutInfo(int workoutId, String title, String info) {
         workoutInfoDao.updateWorkoutInfo(workoutId, title, info);
     }
 
     @Override
-    @Timed
-    @Loggable
     public WorkoutInfo getInfoByWorkoutId(int workoutId) {
         return workoutInfoDao.findByWorkoutId(workoutId);
     }
 
     @Override
-    @Timed
-    @Loggable
     public void delete(int workoutId) {
         workoutInfoDao.delete(workoutId);
     }

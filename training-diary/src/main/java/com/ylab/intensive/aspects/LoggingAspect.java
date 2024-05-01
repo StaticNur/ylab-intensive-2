@@ -9,6 +9,16 @@ import org.aspectj.lang.annotation.Pointcut;
 
 import java.util.Arrays;
 
+/**
+ * The LoggableAspect class defines an aspect that handles logging for methods or types
+ * annotated with the Loggable annotation.
+ * <p>
+ * This aspect intercepts method invocations of methods annotated with @Loggable
+ * and logs information about their execution, including method name and execution time.
+ * <p>
+ * The logging behavior is defined using the Around advice, which intercepts the method
+ * execution and executes custom logging code before and after the method call.
+ */
 @Aspect
 @Log4j2
 public class LoggingAspect {

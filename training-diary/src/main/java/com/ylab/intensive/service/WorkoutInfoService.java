@@ -29,7 +29,7 @@ public interface WorkoutInfoService {
      * Retrieves workout information by workout ID.
      *
      * @param workoutId the ID of the workout
-     * @return a map containing the workout information
+     * @return a WorkoutInfo containing the workout information
      */
     WorkoutInfo getInfoByWorkoutId(int workoutId);
 

@@ -21,6 +21,7 @@ import java.sql.SQLException;
 @ApplicationScoped
 @NoArgsConstructor
 public class RoleDaoImpl implements RoleDao {
+
     @Override
     public int findByName(Role role) {
         String FIND_BY_NAME = """

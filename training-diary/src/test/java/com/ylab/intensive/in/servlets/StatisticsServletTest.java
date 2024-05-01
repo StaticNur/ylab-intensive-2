@@ -1,7 +1,7 @@
 package com.ylab.intensive.in.servlets;
 
 import com.ylab.intensive.model.dto.StatisticsDto;
-import com.ylab.intensive.security.Authentication;
+import com.ylab.intensive.model.Authentication;
 import com.ylab.intensive.service.WorkoutService;
 import com.ylab.intensive.util.Converter;
 import jakarta.servlet.ServletContext;

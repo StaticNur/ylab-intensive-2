@@ -10,7 +10,6 @@ import jakarta.servlet.*;
 import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.annotation.WebInitParam;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.ValidationException;
 import lombok.extern.log4j.Log4j2;
 import lombok.extern.slf4j.Slf4j;
 
@@ -45,7 +44,7 @@ import java.util.zip.DataFormatException;
  * @see Filter
  * @see WebFilter
  * @see ApplicationScoped
- * @see Slf4j
+ * @see Log4j2
  * @see Loggable
  */
 @WebFilter(filterName = "a_exception_handler", urlPatterns = "/*",

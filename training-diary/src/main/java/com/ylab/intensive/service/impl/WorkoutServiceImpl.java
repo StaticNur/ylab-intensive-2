@@ -1,6 +1,5 @@
 package com.ylab.intensive.service.impl;
 
-import com.ylab.intensive.aspects.annotation.Loggable;
 import com.ylab.intensive.aspects.annotation.Timed;
 import com.ylab.intensive.dao.WorkoutDao;
 import com.ylab.intensive.exception.*;
@@ -16,7 +15,6 @@ import lombok.NoArgsConstructor;
 
 import java.time.Duration;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.*;
 
@@ -26,7 +24,6 @@ import java.util.*;
 @ApplicationScoped
 @NoArgsConstructor
 public class WorkoutServiceImpl implements WorkoutService {
-
     /**
      * Workout DAO.
      * This DAO is responsible for data access operations related to workouts.
@@ -38,12 +35,6 @@ public class WorkoutServiceImpl implements WorkoutService {
      * This service provides functionality for managing user-related operations.
      */
     private UserService userService;
-
-    /**
-     * Audit Service.
-     * This service provides functionality for audit-related operations.
-     */
-    private AuditService auditService;
 
     /**
      * Workout Information Service.
@@ -59,18 +50,15 @@ public class WorkoutServiceImpl implements WorkoutService {
 
     @Inject
     public WorkoutServiceImpl(WorkoutDao workoutDao, UserService userService,
-                              AuditService auditService, WorkoutInfoService workoutInfoService,
+                              WorkoutInfoService workoutInfoService,
                               WorkoutTypeService workoutTypeService) {
         this.workoutDao = workoutDao;
         this.userService = userService;
-        this.auditService = auditService;
         this.workoutInfoService = workoutInfoService;
         this.workoutTypeService = workoutTypeService;
     }
 
     @Override
-    @Timed
-    @Loggable
     public WorkoutDto addWorkout(String email, WorkoutDto workoutDto) {
         int userId = getAuthorizedUserId(email);
         String type = workoutDto.getType();
@@ -89,7 +77,7 @@ public class WorkoutServiceImpl implements WorkoutService {
             Workout workout = new Workout();
             workout.setUuid(UUID.randomUUID());
             workout.setUserId(userId);
-            workout.setType(String.valueOf(typeOptional.get().getId()));
+            workout.setType(typeOptional.get().getType());
             workout.setDate(date);
             workout.setDuration(workoutDto.getDuration());
             workout.setCalorie(workoutDto.getCalorie());
@@ -99,24 +87,21 @@ public class WorkoutServiceImpl implements WorkoutService {
                 workoutInfoService.saveWorkoutInfo(savedWorkout.getId(), infoMap.getKey(), infoMap.getValue());
             }
             workoutDto.setUuid(savedWorkout.getUuid());
-            //auditService.saveAction(userId, "Пользователь добавил новую тренировку. Добавлено: " + workout);
             return workoutDto;
         } else throw new WorkoutException("Тренировка типа " + type
                                           + " не существует для данного пользователя, с начала добавьте ее.");
     }
 
     @Override
-    @Timed
-    @Loggable
     public Workout addWorkoutInfo(String uuidStr, WorkoutInfoDto workoutInfoDto) {
         UUID uuid = convertToUUID(uuidStr);
         Workout workout = workoutDao.findByUUID(uuid)
                 .orElseThrow(() -> new NotFoundException("Тренировка с uuid = " + uuid +
                                                          " нет в базе данных! Сначала добавьте ее."));
-        WorkoutType workoutType = workoutTypeService.findById(Integer.parseInt(workout.getType()));
+        WorkoutType workoutType = workoutTypeService.findByName(workout.getType());
         workout.setType(workoutType.getType());
 
-        if(workoutInfoDto.getWorkoutInfo() != null){
+        if (workoutInfoDto.getWorkoutInfo() != null) {
             for (Map.Entry<String, String> infoMap : workoutInfoDto.getWorkoutInfo().entrySet()) {
                 workoutInfoService.saveWorkoutInfo(workout.getId(), infoMap.getKey(), infoMap.getValue());
                 workout.getWorkoutInfo().put(infoMap.getKey(), infoMap.getValue());
@@ -126,8 +111,6 @@ public class WorkoutServiceImpl implements WorkoutService {
     }
 
     @Override
-    @Timed
-    @Loggable
     public List<WorkoutDto> getAllUserWorkouts(String login) {
         int userId = getAuthorizedUserId(login);
         List<Workout> workoutList = workoutDao.findByUserId(userId);
@@ -136,10 +119,7 @@ public class WorkoutServiceImpl implements WorkoutService {
             WorkoutDto workoutDto = new WorkoutDto();
             workoutDto.setUuid(workout.getUuid());
             workoutDto.setDate(workout.getDate().toString());
-
-            WorkoutTypeDto workoutTypeDto = new WorkoutTypeDto(workoutTypeService
-                    .findById(Integer.parseInt(workout.getType())).getType());
-            workoutDto.setType(workoutTypeDto.getType());
+            workoutDto.setType(workout.getType());
             workoutDto.setDuration(workout.getDuration());
             workoutDto.setCalorie(workout.getCalorie());
 
@@ -154,8 +134,6 @@ public class WorkoutServiceImpl implements WorkoutService {
     }
 
     @Override
-    @Timed
-    @Loggable
     public Workout updateWorkout(String email, String uuidStr, EditWorkout editWorkout) {
         UUID uuid = convertToUUID(uuidStr);
         Workout workout = workoutDao.findByUUID(uuid)
@@ -163,11 +141,11 @@ public class WorkoutServiceImpl implements WorkoutService {
                                                          " нет в базе данных! Сначала добавьте ее."));
         int userId = getAuthorizedUserId(email);
         if (editWorkout.getCalorie() != null) {
-            updateCalories(userId, workout.getId(), editWorkout.getCalorie());
+            updateCalories(workout.getId(), editWorkout.getCalorie());
             workout.setCalorie(editWorkout.getCalorie());
         }
         if (editWorkout.getWorkoutInfo() != null) {
-            updateAdditionalInfo(userId, workout.getId(), editWorkout.getWorkoutInfo());
+            updateAdditionalInfo(workout.getId(), editWorkout.getWorkoutInfo());
             workout.setWorkoutInfo(editWorkout.getWorkoutInfo());
         } else {
             WorkoutInfo infoByWorkoutId = workoutInfoService.getInfoByWorkoutId(workout.getId());
@@ -177,54 +155,39 @@ public class WorkoutServiceImpl implements WorkoutService {
             updateType(userId, workout.getId(), editWorkout.getType());
             workout.setType(editWorkout.getType());
         } else {
-            WorkoutTypeDto workoutTypeDto = new WorkoutTypeDto(workoutTypeService
-                    .findById(Integer.parseInt(workout.getType())).getType());
-            workout.setType(workoutTypeDto.getType());
+            workout.setType(workout.getType());
         }
         if (editWorkout.getDuration() != null) {
-            updateDuration(userId, workout.getId(), editWorkout.getDuration());
+            updateDuration(workout.getId(), editWorkout.getDuration());
             workout.setDuration(editWorkout.getDuration());
         }
         return workout;
     }
 
     @Override
-    @Timed
     public void updateType(int userId, int workoutId, String type) {
-        List<WorkoutType> types = workoutTypeService.findByUserId(userId);
-
-        Optional<WorkoutType> typeOptional = types.stream()
-                .filter(t -> t.getType().equals(type))
-                .findFirst();
-
-        if (typeOptional.isPresent()) {
-            workoutDao.updateType(workoutId, typeOptional.get().getId());
-        } else throw new WorkoutInfoException("Такой тип тренировки " + type + " нет в базе данных!");
+        WorkoutType workoutType = workoutTypeService.findByName(type.trim());
+        workoutDao.updateType(workoutId, workoutType.getType());
     }
 
     @Override
-    @Timed
-    public void updateDuration(int userId, int workoutId, Duration duration) {
+    public void updateDuration(int workoutId, Duration duration) {
         workoutDao.updateDuration(workoutId, duration);
     }
 
     @Override
-    @Timed
-    public void updateCalories(int userId, int workoutId, Float calories) {
+    public void updateCalories(int workoutId, Float calories) {
         workoutDao.updateCalorie(workoutId, calories);
     }
 
-    @Override
     @Timed
-    public void updateAdditionalInfo(int userId, int workoutId, Map<String, String> workoutInfo) {
+    public void updateAdditionalInfo(int workoutId, Map<String, String> workoutInfo) {
         for (Map.Entry<String, String> infoMap : workoutInfo.entrySet()) {
             workoutInfoService.updateWorkoutInfo(workoutId, infoMap.getKey(), infoMap.getValue());
         }
     }
 
     @Override
-    @Timed
-    @Loggable
     public void deleteWorkout(String email, String uuidStr) {
         UUID uuid = convertToUUID(uuidStr);
         int userId = getAuthorizedUserId(email);
@@ -236,8 +199,6 @@ public class WorkoutServiceImpl implements WorkoutService {
     }
 
     @Override
-    @Timed
-    @Loggable
     public StatisticsDto getWorkoutStatistics(String email, String beginStr, String endStr) {
         LocalDate begin = getDate(beginStr);
         LocalDate end = getDate(endStr);
@@ -252,14 +213,11 @@ public class WorkoutServiceImpl implements WorkoutService {
     }
 
     @Override
-    @Timed
-    @Loggable
     public List<User> getAllUsersWorkouts(List<User> userList) {
         for (User user : userList) {
             List<Workout> workoutList = workoutDao.findByUserId(user.getId());
             for (Workout workout : workoutList) {
-                WorkoutType workoutType = workoutTypeService.findById(Integer.parseInt(workout.getType()));
-                workout.setType(workoutType.getType());
+                workout.setType(workout.getType());
                 WorkoutInfo workoutInfo = workoutInfoService.getInfoByWorkoutId(workout.getId());
                 workout.setWorkoutInfo(workoutInfo.getWorkoutInfo());
             }
@@ -269,16 +227,12 @@ public class WorkoutServiceImpl implements WorkoutService {
     }
 
     @Override
-    @Timed
-    @Loggable
     public List<WorkoutType> getAllType(String login) {
         int userId = getAuthorizedUserId(login);
         return workoutTypeService.findByUserId(userId);
     }
 
     @Override
-    @Timed
-    @Loggable
     public WorkoutType saveWorkoutType(String login, String typeName) {
         int userId = getAuthorizedUserId(login);
         return workoutTypeService.saveType(userId, typeName);
@@ -291,7 +245,6 @@ public class WorkoutServiceImpl implements WorkoutService {
      * @return the parsed LocalDate object
      * @throws DateFormatException if the date string has an incorrect format
      */
-
     private LocalDate getDate(String dateStr) {
         LocalDate date;
         try {
@@ -308,7 +261,6 @@ public class WorkoutServiceImpl implements WorkoutService {
      * @return the ID of the authorized user
      * @throws NotFoundException if the authorized user is not found
      */
-
     private int getAuthorizedUserId(String email) {
         User user = userService.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException("User with email = "
@@ -316,6 +268,13 @@ public class WorkoutServiceImpl implements WorkoutService {
         return user.getId();
     }
 
+    /**
+     * Converts the provided string representation of a UUID into a UUID object.
+     *
+     * @param uuidStr The string representation of the UUID to convert.
+     * @return The UUID object corresponding to the input string.
+     * @throws InvalidUUIDException If the input string is not a valid UUID format.
+     */
     private UUID convertToUUID(String uuidStr) {
         try {
             return UUID.fromString(uuidStr);

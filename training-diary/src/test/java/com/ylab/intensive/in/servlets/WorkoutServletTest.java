@@ -5,7 +5,7 @@ import com.ylab.intensive.model.dto.EditWorkout;
 import com.ylab.intensive.model.dto.SuccessResponse;
 import com.ylab.intensive.model.dto.WorkoutDto;
 import com.ylab.intensive.model.entity.Workout;
-import com.ylab.intensive.security.Authentication;
+import com.ylab.intensive.model.Authentication;
 import com.ylab.intensive.service.ValidationService;
 import com.ylab.intensive.service.WorkoutService;
 import com.ylab.intensive.util.Converter;

@@ -1,11 +1,9 @@
 package com.ylab.intensive.in.servlets;
 
-import com.ylab.intensive.aspects.annotation.Auditable;
-import com.ylab.intensive.aspects.annotation.Loggable;
 import com.ylab.intensive.mapper.WorkoutMapper;
 import com.ylab.intensive.model.dto.*;
 import com.ylab.intensive.model.entity.Workout;
-import com.ylab.intensive.security.Authentication;
+import com.ylab.intensive.model.Authentication;
 import com.ylab.intensive.service.ValidationService;
 import com.ylab.intensive.service.WorkoutService;
 import com.ylab.intensive.util.Converter;
@@ -23,10 +21,14 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 /**
- * The AuditServlet class is a servlet responsible for retrieving and displaying audit logs of user actions.
+ * Servlet for handling workout-related operations.
  * <p>
- * This servlet allows users to view audit logs of their actions by sending a GET request to the "/user/audit" endpoint.
- * The servlet retrieves the audit logs from the AuditService, converts them to DTOs, and returns them in JSON format.
+ * This servlet handles HTTP GET, POST, PUT, and DELETE requests for managing workouts.
+ * It injects dependencies such as the workout service, validation service,
+ * workout mapper, and converter for processing the requests.
+ * </p>
+ *
+ * @since 1.0
  */
 @WebServlet("/training-diary/workouts/*")
 @ApplicationScoped
@@ -37,6 +39,14 @@ public class WorkoutServlet extends HttpServlet {
     private WorkoutMapper workoutMapper;
     private Converter converter;
 
+    /**
+     * Injects dependencies into the servlet.
+     *
+     * @param workoutService    the service for workout-related operations.
+     * @param validationService the service for validating user input.
+     * @param workoutMapper     the mapper for mapping workout entities to DTOs.
+     * @param converter         the converter for converting objects to JSON.
+     */
     @Inject
     public void inject(WorkoutService workoutService, ValidationService validationService,
                        WorkoutMapper workoutMapper, Converter converter) {
@@ -47,15 +57,13 @@ public class WorkoutServlet extends HttpServlet {
     }
 
     /**
-     * Handles GET requests to show audit logs of user actions.
+     * Handles HTTP GET requests to retrieve all workouts for the authenticated user.
      *
-     * @param req  the HTTP servlet request
-     * @param resp the HTTP servlet response
-     * @throws IOException if an I/O error occurs during request processing
+     * @param req  the HTTP servlet request.
+     * @param resp the HTTP servlet response.
+     * @throws IOException if an I/O error occurs while handling the request.
      */
     @Override
-    @Loggable
-    @Auditable
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         Authentication authentication = (Authentication) (req.getServletContext()).getAttribute("authentication");
         List<WorkoutDto> workouts = workoutService.getAllUserWorkouts(authentication.getLogin());
@@ -64,9 +72,14 @@ public class WorkoutServlet extends HttpServlet {
                 .append(converter.convertObjectToJson(workouts));
     }
 
+    /**
+     * Handles HTTP POST requests to add a new workout for the authenticated user.
+     *
+     * @param req  the HTTP servlet request.
+     * @param resp the HTTP servlet response.
+     * @throws IOException if an I/O error occurs while handling the request.
+     */
     @Override
-    @Loggable
-    @Auditable
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         Authentication authentication = (Authentication) (req.getServletContext()).getAttribute("authentication");
         WorkoutDto workoutDto = converter.getRequestBody(req, WorkoutDto.class);
@@ -84,16 +97,20 @@ public class WorkoutServlet extends HttpServlet {
         }
     }
 
+    /**
+     * Handles HTTP PUT requests to update an existing workout for the authenticated user.
+     *
+     * @param req  the HTTP servlet request.
+     * @param resp the HTTP servlet response.
+     * @throws IOException if an I/O error occurs while handling the request.
+     */
     @Override
-    @Loggable
-    @Auditable
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         Authentication authentication = (Authentication) (req.getServletContext()).getAttribute("authentication");
         String pathInfo = req.getPathInfo();
         String uuid = pathInfo.substring(1, pathInfo.length());
-        Pattern pattern = Pattern.compile("[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}");
 
-        if (pattern.matcher(uuid).matches()) {
+        if (isValidUUID(uuid)) {
             EditWorkout editWorkout = converter.getRequestBody(req, EditWorkout.class);
             List<ValidationError> validationErrors = validationService.validateAndReturnErrors(editWorkout);
 
@@ -111,15 +128,20 @@ public class WorkoutServlet extends HttpServlet {
         }
     }
 
+    /**
+     * Handles HTTP DELETE requests to delete an existing workout for the authenticated user.
+     *
+     * @param req  the HTTP servlet request.
+     * @param resp the HTTP servlet response.
+     * @throws IOException if an I/O error occurs while handling the request.
+     */
     @Override
-    @Loggable
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         Authentication authentication = (Authentication) (req.getServletContext()).getAttribute("authentication");
         String pathInfo = req.getPathInfo();
         String uuid = pathInfo.substring(1, pathInfo.length());
-        Pattern pattern = Pattern.compile("[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}");
 
-        if (pattern.matcher(uuid).matches()) {
+        if (isValidUUID(uuid)) {
             workoutService.deleteWorkout(authentication.getLogin(), uuid);
 
             resp.setStatus(HttpServletResponse.SC_OK);
@@ -130,6 +152,24 @@ public class WorkoutServlet extends HttpServlet {
         }
     }
 
+    /**
+     * Checks if the provided UUID is in a valid format.
+     *
+     * @param uuid the UUID string to validate.
+     * @return true if the UUID is in a valid format; false otherwise.
+     */
+    private boolean isValidUUID(String uuid) {
+        Pattern pattern = Pattern.compile("[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}");
+        return pattern.matcher(uuid).matches();
+    }
+
+    /**
+     * Sends error message as response.
+     *
+     * @param resp   the HTTP servlet response.
+     * @param object the object representing the error response.
+     * @throws IOException if an I/O error occurs while sending the response.
+     */
     private void sendErrorMessage(HttpServletResponse resp, Object object) throws IOException {
         resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         resp.getWriter()

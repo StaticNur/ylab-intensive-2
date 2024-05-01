@@ -6,6 +6,15 @@ import jakarta.servlet.annotation.WebInitParam;
 
 import java.io.IOException;
 
+/**
+ * Filter for encoding and setting response content type for all requests.
+ * <p>
+ * This filter ensures that all requests are encoded with UTF-8 and sets the response
+ * content type to JSON with UTF-8 encoding.
+ * </p>
+ *
+ * @since 1.0
+ */
 @WebFilter(urlPatterns = "/*", initParams = @WebInitParam(name = "order", value = "0"))
 public class GlobalFilter implements Filter {
 

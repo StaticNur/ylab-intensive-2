@@ -9,7 +9,7 @@ import com.ylab.intensive.model.dto.*;
 import com.ylab.intensive.model.entity.User;
 import com.ylab.intensive.model.enums.Role;
 import com.ylab.intensive.mapper.UserMapper;
-import com.ylab.intensive.security.Authentication;
+import com.ylab.intensive.model.Authentication;
 import com.ylab.intensive.security.JwtTokenService;
 import com.ylab.intensive.service.AuditService;
 import com.ylab.intensive.service.RoleService;

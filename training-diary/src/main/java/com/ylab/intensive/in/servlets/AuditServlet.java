@@ -1,9 +1,8 @@
 package com.ylab.intensive.in.servlets;
 
-import com.ylab.intensive.aspects.annotation.Auditable;
-import com.ylab.intensive.aspects.annotation.Loggable;
+import com.ylab.intensive.model.Pageable;
 import com.ylab.intensive.model.dto.AuditDto;
-import com.ylab.intensive.security.Authentication;
+import com.ylab.intensive.model.Authentication;
 import com.ylab.intensive.service.UserService;
 import com.ylab.intensive.util.Converter;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -45,11 +44,12 @@ public class AuditServlet extends HttpServlet {
      * @throws IOException if an I/O error occurs during request processing
      */
     @Override
-    @Loggable
-    @Auditable
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        int page = converter.getInteger(req, "page");
+        int count = converter.getInteger(req, "count");
+        if (count == 0) count = 10;
         Authentication authentication = (Authentication) (req.getServletContext()).getAttribute("authentication");
-        AuditDto audit = userService.getAudit(authentication.getLogin());
+        AuditDto audit = userService.getAudit(authentication.getLogin(), new Pageable(page, count));
         resp.setStatus(HttpServletResponse.SC_OK);
         resp.getWriter()
                 .append(converter.convertObjectToJson(audit));

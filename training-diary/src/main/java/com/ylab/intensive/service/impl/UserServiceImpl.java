@@ -1,9 +1,8 @@
 package com.ylab.intensive.service.impl;
 
-import com.ylab.intensive.aspects.annotation.Loggable;
-import com.ylab.intensive.aspects.annotation.Timed;
 import com.ylab.intensive.dao.UserDao;
 import com.ylab.intensive.exception.*;
+import com.ylab.intensive.model.Pageable;
 import com.ylab.intensive.model.dto.*;
 import com.ylab.intensive.model.entity.Audit;
 import com.ylab.intensive.model.entity.User;
@@ -14,14 +13,10 @@ import com.ylab.intensive.service.RoleService;
 import com.ylab.intensive.service.UserService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.Validation;
-import jakarta.validation.Validator;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -31,7 +26,6 @@ import java.util.stream.Collectors;
 @ApplicationScoped
 @NoArgsConstructor
 public class UserServiceImpl implements UserService {
-
     /**
      * User DAO.
      * This DAO is responsible for data access operations related to users.
@@ -64,8 +58,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Timed
-    @Loggable
     public User registerUser(RegistrationDto registrationDto) {
         userDao.findByEmail(registrationDto.getEmail())
                 .ifPresent(u -> {
@@ -81,8 +73,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Timed
-    @Loggable
     public JwtResponse login(LoginDto loginDto) {
         if (loginDto.getEmail() == null || loginDto.getPassword() == null) {
             throw new InvalidInputException("Обязательно должны быть поля email и password");
@@ -102,8 +92,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Timed
-    @Loggable
     public User changeUserPermissions(String uuidStr, ChangeUserRightsDto changeUserRightsDto) {
         Role role = changeUserRightsDto.newRole();//getRole(roleStr);
         int roleId = roleService.getIdByName(role);
@@ -118,13 +106,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Timed
-    @Loggable
-    public AuditDto getAudit(String email) {
+    public AuditDto getAudit(String email, Pageable pageable) {
         User user = userDao.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException("There is no user with this login in the database."));
         AuditDto auditDto = new AuditDto();
-        List<Audit> audit = auditService.getAudit(user.getId());
+        List<Audit> audit = auditService.getAudit(user.getId(), pageable);
         auditDto.setUuid(user.getUuid());
         auditDto.setEmail(user.getEmail());
         auditDto.setRole(user.getRole());
@@ -137,20 +123,22 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Timed
-    @Loggable
-    public List<User> getAllUser() {//TODO id
-        auditService.saveAction(1, "Пользователь просмотрел все тренировки всех людей.");
+    public List<User> getAllUser() {
         return userDao.findAll();
     }
 
     @Override
-    @Timed
-    @Loggable
     public Optional<User> findByEmail(String email) {
         return userDao.findByEmail(email);
     }
 
+    /**
+     * Converts the provided string representation of a UUID into a UUID object.
+     *
+     * @param uuidStr The string representation of the UUID to convert.
+     * @return The UUID object corresponding to the input string.
+     * @throws InvalidUUIDException If the input string is not a valid UUID format.
+     */
     private UUID convertToUUID(String uuidStr) {
         try {
             return UUID.fromString(uuidStr);

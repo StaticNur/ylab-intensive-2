@@ -2,6 +2,7 @@ package com.ylab.intensive.dao.impl;
 
 import com.ylab.intensive.dao.AuditDao;
 import com.ylab.intensive.config.ConnectionManager;
+import com.ylab.intensive.model.Pageable;
 import com.ylab.intensive.model.entity.Audit;
 import com.ylab.intensive.util.SQLExceptionUtil;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -25,19 +26,23 @@ import java.util.List;
 public class AuditDaoImpl implements AuditDao {
 
     @Override
-    public List<Audit> getUserActions(int userId) {
+    public List<Audit> getUserActions(int userId, Pageable pageable) {
         List<Audit> actions = new ArrayList<>();
-
+        int offset = pageable.getPage() * pageable.getCount();
         String FIND_ALL_AUDIT = """
                     SELECT a.id, a.user_id, a.date_of_action, a.action
                     FROM internal.audit a
                     WHERE a.user_id = ?
+                    ORDER BY a.id
+                    LIMIT ? OFFSET ?
                 """;
 
         try (Connection connection = ConnectionManager.get();
              PreparedStatement preparedStatement = connection.prepareStatement(FIND_ALL_AUDIT)) {
 
             preparedStatement.setInt(1, userId);
+            preparedStatement.setInt(2, pageable.getCount());
+            preparedStatement.setInt(3, offset);
 
             ResultSet resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {

@@ -79,7 +79,7 @@
         <insert schemaName="internal" tableName="workout">
             <column name="uuid" value="123e4567-e89b-12d3-a456-426614174002"/>
             <column name="user_id" value="1"/>
-            <column name="workout_type_id" value="1"/>
+            <column name="workout_type" value="cardio"/>
             <column name="date" value="2024-04-17"/>
             <column name="duration" value="3600"/>
             <column name="calorie" value="500"/>
@@ -87,7 +87,7 @@
         <insert schemaName="internal" tableName="workout">
             <column name="uuid" value="123e4567-e89b-12d3-a456-426614174003"/>
             <column name="user_id" value="2"/>
-            <column name="workout_type_id" value="2"/>
+            <column name="workout_type" value="yoga"/>
             <column name="date" value="2024-04-19"/>
             <column name="duration" value="12600"/>
             <column name="calorie" value="1500"/>
@@ -95,7 +95,7 @@
         <insert schemaName="internal" tableName="workout">
             <column name="uuid" value="123e4567-e89b-12d3-a456-426614174004"/>
             <column name="user_id" value="2"/>
-            <column name="workout_type_id" value="3"/>
+            <column name="workout_type" value="strength training"/>
             <column name="date" value="2024-03-19"/>
             <column name="duration" value="9332"/>
             <column name="calorie" value="1000"/>
@@ -103,7 +103,7 @@
         <insert schemaName="internal" tableName="workout">
             <column name="uuid" value="123e4567-e89b-12d3-a456-426614174005"/>
             <column name="user_id" value="1"/>
-            <column name="workout_type_id" value="4"/>
+            <column name="workout_type" value="yoga"/>
             <column name="date" value="2022-02-22"/>
             <column name="duration" value="9332"/>
             <column name="calorie" value="1000"/>

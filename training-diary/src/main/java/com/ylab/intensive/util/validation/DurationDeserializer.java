@@ -1,4 +1,4 @@
-package com.ylab.intensive.util;
+package com.ylab.intensive.util.validation;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
@@ -9,8 +9,23 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.regex.Pattern;
 
+/**
+ * Deserializes a JSON string representing a duration into a Duration object.
+ * The expected format of the JSON string is "H:M:S" where H represents hours, M represents minutes, and S represents seconds.
+ * Hours can be any positive integer, while minutes and seconds must be between 0 and 59.
+ * If the input JSON string does not match the expected format, an InvalidInputException is thrown.
+ */
 public class DurationDeserializer extends JsonDeserializer<Duration> {
 
+    /**
+     * Deserializes the JSON string representing a duration into a Duration object.
+     *
+     * @param jsonParser             The JSON parser.
+     * @param deserializationContext The deserialization context.
+     * @return A Duration object representing the parsed duration.
+     * @throws IOException            If an I/O error occurs while reading the JSON string.
+     * @throws InvalidInputException If the input JSON string does not match the expected format.
+     */
     @Override
     public Duration deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
         String durationStr = jsonParser.getText().trim();

@@ -1,7 +1,6 @@
 package com.ylab.intensive.aspects;
 
 import lombok.extern.log4j.Log4j2;
-import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -9,6 +8,15 @@ import org.aspectj.lang.annotation.Pointcut;
 
 import java.util.Arrays;
 
+/**
+ * Aspect for measuring the execution time of annotated methods.
+ * <p>
+ * This aspect intercepts method calls annotated with {@code Timed} and measures
+ * the time taken for their execution. It logs the execution time for each method.
+ * </p>
+ *
+ * @since 1.0
+ */
 @Aspect
 @Log4j2
 public class TimedAspect {

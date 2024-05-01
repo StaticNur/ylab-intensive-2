@@ -3,6 +3,7 @@ package com.ylab.intensive.dao.impl;
 import com.ylab.intensive.dao.container.PostgresTestContainer;
 import com.ylab.intensive.dao.container.TestConfigurationEnvironment;
 import com.ylab.intensive.exception.DaoException;
+import com.ylab.intensive.model.Pageable;
 import com.ylab.intensive.model.entity.Audit;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -29,7 +30,7 @@ class AuditMapperDaoImplTest extends TestConfigurationEnvironment {
     void testGetUserActions_UserExists() {
         int userId = 1;
 
-        List<Audit> actions = auditDao.getUserActions(userId);
+        List<Audit> actions = auditDao.getUserActions(userId, new Pageable(0,10));
 
         assertThat(actions).isNotEmpty();
     }
@@ -39,7 +40,7 @@ class AuditMapperDaoImplTest extends TestConfigurationEnvironment {
     void testGetUserActions_UserDoesNotExist() {
         int userId = 9999;
 
-        List<Audit> actions = auditDao.getUserActions(userId);
+        List<Audit> actions = auditDao.getUserActions(userId, new Pageable(0,10));
 
         assertThat(actions).isEmpty();
     }
@@ -49,9 +50,10 @@ class AuditMapperDaoImplTest extends TestConfigurationEnvironment {
     void testInsertUserAction_Success() {
         int userId = 1;
         String action = "Test Action";
-        auditDao.insertUserAction(userId, action);
 
-        List<Audit> actions = auditDao.getUserActions(userId);
+        auditDao.insertUserAction(userId, action);
+        List<Audit> actions = auditDao.getUserActions(userId, new Pageable(0,10));
+
         assertThat(actions)
                 .map(Audit::getAction)
                 .contains(action);

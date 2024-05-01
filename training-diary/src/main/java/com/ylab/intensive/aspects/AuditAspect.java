@@ -3,7 +3,7 @@ package com.ylab.intensive.aspects;
 import com.ylab.intensive.dao.AuditDao;
 import com.ylab.intensive.exception.NotFoundException;
 import com.ylab.intensive.model.entity.User;
-import com.ylab.intensive.security.Authentication;
+import com.ylab.intensive.model.Authentication;
 import com.ylab.intensive.service.UserService;
 import com.ylab.intensive.util.ContextManager;
 import jakarta.servlet.http.HttpServletRequest;
@@ -14,6 +14,19 @@ import org.aspectj.lang.annotation.Pointcut;
 
 import java.util.Arrays;
 
+/**
+ * The AuditAspect class defines an aspect responsible for auditing method executions.
+ * <p>
+ * This aspect intercepts method invocations of methods annotated with the @Auditable annotation
+ * and logs information about their execution based on the specific method being called.
+ * It distinguishes different actions based on the method name and logs appropriate audit messages.
+ * <p>
+ * Audit messages are logged before the method execution after
+ * the method execution (in the @AfterReturning advice).
+ * <p>
+ * Note that the actual logging behavior is dependent on the AuditService, which is responsible
+ * for inserting audit log entries into a database.
+ */
 @Aspect
 public class AuditAspect {
 
@@ -32,7 +45,7 @@ public class AuditAspect {
         this.userService = userService;
     }
 
-    @Pointcut(value = "@annotation(com.ylab.intensive.aspects.annotation.AllowedRoles) && execution(* *(..))")
+    @Pointcut(value = "@annotation(com.ylab.intensive.aspects.annotation.Auditable) && execution(* *(..))")
     public void callAuditableMethod() {
     }
 

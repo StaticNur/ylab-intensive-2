@@ -1,12 +1,10 @@
 package com.ylab.intensive.in.servlets;
 
-import com.ylab.intensive.aspects.annotation.Auditable;
-import com.ylab.intensive.aspects.annotation.Loggable;
 import com.ylab.intensive.mapper.WorkoutTypeMapper;
 import com.ylab.intensive.model.dto.ValidationError;
 import com.ylab.intensive.model.dto.WorkoutTypeDto;
 import com.ylab.intensive.model.entity.WorkoutType;
-import com.ylab.intensive.security.Authentication;
+import com.ylab.intensive.model.Authentication;
 import com.ylab.intensive.service.ValidationService;
 import com.ylab.intensive.service.WorkoutService;
 import com.ylab.intensive.util.Converter;
@@ -22,10 +20,13 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- * The AuditServlet class is a servlet responsible for retrieving and displaying audit logs of user actions.
+ * Servlet for handling workout type-related operations.
  * <p>
- * This servlet allows users to view audit logs of their actions by sending a GET request to the "/user/audit" endpoint.
- * The servlet retrieves the audit logs from the AuditService, converts them to DTOs, and returns them in JSON format.
+ * This servlet handles HTTP GET and POST requests for managing workout types.
+ * It injects dependencies such as the workout service, validation service, workout type mapper, and converter for processing the requests.
+ * </p>
+ *
+ * @since 1.0
  */
 @WebServlet("/training-diary/workouts/type")
 @ApplicationScoped
@@ -36,6 +37,14 @@ public class WorkoutTypeServlet extends HttpServlet {
     private WorkoutTypeMapper workoutTypeMapper;
     private Converter converter;
 
+    /**
+     * Injects dependencies into the servlet.
+     *
+     * @param workoutService     the service for workout-related operations.
+     * @param validationService  the service for validating user input.
+     * @param workoutTypeMapper  the mapper for mapping workout types to DTOs.
+     * @param converter          the converter for converting objects to JSON.
+     */
     @Inject
     public void inject(WorkoutService workoutService, ValidationService validationService,
                        WorkoutTypeMapper workoutTypeMapper, Converter converter) {
@@ -46,15 +55,13 @@ public class WorkoutTypeServlet extends HttpServlet {
     }
 
     /**
-     * Handles GET requests to show audit logs of user actions.
+     * Handles HTTP GET requests to retrieve all workout types for the authenticated user.
      *
-     * @param req  the HTTP servlet request
-     * @param resp the HTTP servlet response
-     * @throws IOException if an I/O error occurs during request processing
+     * @param req  the HTTP servlet request.
+     * @param resp the HTTP servlet response.
+     * @throws IOException if an I/O error occurs while handling the request.
      */
     @Override
-    @Loggable
-    @Auditable
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         Authentication authentication = (Authentication) (req.getServletContext()).getAttribute("authentication");
         List<WorkoutType> workoutTypes = workoutService.getAllType(authentication.getLogin());
@@ -64,21 +71,26 @@ public class WorkoutTypeServlet extends HttpServlet {
 
     }
 
+    /**
+     * Handles HTTP POST requests to add a new workout type for the authenticated user.
+     *
+     * @param req  the HTTP servlet request.
+     * @param resp the HTTP servlet response.
+     * @throws IOException if an I/O error occurs while handling the request.
+     */
     @Override
-    @Loggable
-    @Auditable
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         Authentication authentication = (Authentication) (req.getServletContext()).getAttribute("authentication");
         WorkoutTypeDto workoutTypeDto = converter.getRequestBody(req, WorkoutTypeDto.class);
 
         List<ValidationError> validationErrors = validationService.validateAndReturnErrors(workoutTypeDto);
 
-        if (validationErrors.isEmpty()){
+        if (validationErrors.isEmpty()) {
             WorkoutType workoutType = workoutService.saveWorkoutType(authentication.getLogin(), workoutTypeDto.getType());
             resp.setStatus(HttpServletResponse.SC_CREATED);
             resp.getWriter()
                     .append(converter.convertObjectToJson(workoutTypeMapper.toDto(workoutType)));
-        }else {
+        } else {
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             resp.getWriter()
                     .append(converter.convertObjectToJson(validationErrors));

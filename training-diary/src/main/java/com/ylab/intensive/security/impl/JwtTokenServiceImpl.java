@@ -1,14 +1,12 @@
 package com.ylab.intensive.security.impl;
 
-import com.ylab.intensive.aspects.annotation.Loggable;
-import com.ylab.intensive.aspects.annotation.Timed;
 import com.ylab.intensive.exception.AccessDeniedException;
 import com.ylab.intensive.exception.InvalidTokenException;
 import com.ylab.intensive.model.dto.JwtResponse;
 import com.ylab.intensive.model.enums.Role;
-import com.ylab.intensive.security.Authentication;
+import com.ylab.intensive.model.Authentication;
 import com.ylab.intensive.security.JwtTokenService;
-import com.ylab.intensive.security.JwtProperties;
+import com.ylab.intensive.model.JwtProperties;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
@@ -19,17 +17,36 @@ import java.security.Key;
 import java.util.Date;
 import java.util.Optional;
 
+/**
+ * Implementation of the {@link JwtTokenService} interface for managing JWT tokens.
+ * <p>
+ * This class provides methods for creating access and refresh tokens, refreshing user tokens,
+ * validating tokens, and extracting user information from tokens.
+ * </p>
+ *
+ * @since 1.0
+ */
 public class JwtTokenServiceImpl implements JwtTokenService {
+    /**
+     * The properties for JWT token configuration.
+     */
     private final JwtProperties properties;
+
+    /**
+     * The key used for signing JWT tokens.
+     */
     private final Key key;
 
+    /**
+     * Constructs a new JwtTokenServiceImpl with the specified JWT properties.
+     *
+     * @param properties the JWT properties for token configuration
+     */
     public JwtTokenServiceImpl(JwtProperties properties) {
         this.properties = properties;
         this.key = Keys.hmacShaKeyFor(properties.getSecret().getBytes());
     }
 
-    @Timed
-    @Loggable
     @Override
     public String createAccessToken(String login, Role role) {
         Claims claims = Jwts.claims().setSubject(login);
@@ -44,8 +61,6 @@ public class JwtTokenServiceImpl implements JwtTokenService {
                 .compact();
     }
 
-    @Timed
-    @Loggable
     @Override
     public String createRefreshToken(String login, Role role) {
         Claims claims = Jwts.claims().setSubject(login);
@@ -60,8 +75,6 @@ public class JwtTokenServiceImpl implements JwtTokenService {
                 .compact();
     }
 
-    @Timed
-    @Loggable
     @Override
     public JwtResponse refreshUserTokens(String refreshToken) {
         if (!validateToken(refreshToken)) {
@@ -74,8 +87,6 @@ public class JwtTokenServiceImpl implements JwtTokenService {
         return new JwtResponse(login, createAccessToken(login, role), createRefreshToken(login, role));
     }
 
-    @Timed
-    @Loggable
     @Override
     public Authentication authentication(String token) {
         if (!validateToken(token)) {
@@ -87,8 +98,6 @@ public class JwtTokenServiceImpl implements JwtTokenService {
         return new Authentication(email, role, true);
     }
 
-    @Timed
-    @Loggable
     @Override
     public boolean validateToken(String token) {
         try {
@@ -102,8 +111,6 @@ public class JwtTokenServiceImpl implements JwtTokenService {
         }
     }
 
-    @Timed
-    @Loggable
     @Override
     public String extractEmail(String token) {
         Optional<Claims> claims = extractAllClaims(token);
@@ -113,8 +120,6 @@ public class JwtTokenServiceImpl implements JwtTokenService {
         return claims.get().getSubject();
     }
 
-    @Timed
-    @Loggable
     @Override
     public Role extractRoles(String token) {
         Optional<Claims> claims = extractAllClaims(token);

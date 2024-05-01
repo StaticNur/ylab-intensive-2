@@ -11,37 +11,51 @@ import java.util.Optional;
 public interface WorkoutTypeDao {
 
     /**
-     * Saves the type of a workout.
+     * Saves a new workout type for a user.
      *
-     * @param type The type of the workout to save
+     * @param userId the ID of the user.
+     * @param type   the name of the workout type to save.
+     * @return the saved workout type object.
      */
     WorkoutType saveType(int userId, String type);
 
     /**
-     * Updates the type of a workout.
+     * Updates the name of an existing workout type.
      *
-     * @param userId The user ID containing the type to update
-     * @param oldType   The old type of the workout
-     * @param newType   The new type of the workout
+     * @param userId  the ID of the user.
+     * @param oldType the old name of the workout type.
+     * @param newType the new name of the workout type.
      */
     void updateType(int userId, String oldType, String newType);
 
     /**
-     * Finds workout types by workout ID.
+     * Retrieves all workout types associated with a user.
      *
-     * @param userId the ID of the workout
-     * @return a set of workout types
+     * @param userId the ID of the user.
+     * @return a list of workout types associated with the user.
      */
     List<WorkoutType> findByUserId(int userId);
 
     /**
-     * Deletes workout types by workout ID.
+     * Deletes all workout types associated with a user.
      *
-     * @param userId the ID of the user
+     * @param userId the ID of the user.
      */
     void delete(int userId);
 
+    /**
+     * Retrieves a workout type by its ID.
+     *
+     * @param id the ID of the workout type.
+     * @return an optional containing the workout type if found, or empty if not found.
+     */
     Optional<WorkoutType> findById(int id);
 
+    /**
+     * Retrieves a workout type by its name.
+     *
+     * @param typeName the name of the workout type.
+     * @return an optional containing the workout type if found, or empty if not found.
+     */
     Optional<WorkoutType> findByType(String typeName);
 }

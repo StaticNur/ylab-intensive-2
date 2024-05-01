@@ -1,7 +1,8 @@
 package com.ylab.intensive.in.servlets;
 
+import com.ylab.intensive.model.Pageable;
 import com.ylab.intensive.model.dto.AuditDto;
-import com.ylab.intensive.security.Authentication;
+import com.ylab.intensive.model.Authentication;
 import com.ylab.intensive.service.UserService;
 import com.ylab.intensive.util.Converter;
 import jakarta.servlet.ServletContext;
@@ -66,12 +67,12 @@ class AuditServletTest {
         String login = "testUser";
         when(authentication.getLogin()).thenReturn(login);
         AuditDto auditDto = new AuditDto();
-        when(userService.getAudit(login)).thenReturn(auditDto);
+        when(userService.getAudit(login, new Pageable(0,10))).thenReturn(auditDto);
         when(converter.convertObjectToJson(auditDto)).thenReturn("{\"audit\":\"data\"}");
 
         auditServlet.doGet(request, response);
 
-        verify(userService).getAudit(login);
+        verify(userService).getAudit(login, new Pageable(0,10));
         verify(converter).convertObjectToJson(auditDto);
         verify(response).setStatus(HttpServletResponse.SC_OK);
         assert stringWriter.toString().equals("{\"audit\":\"data\"}");

@@ -90,7 +90,7 @@
                 <constraints nullable="false" referencedTableSchemaName="internal"
                              references="internal.user(id)" foreignKeyName="fk_workout_user"/>
             </column>
-            <column name="workout_type_id" type="INT">
+            <column name="workout_type" type="VARCHAR(255)">
                 <constraints nullable="false"/>
             </column>
             <column name="date" type="DATE">

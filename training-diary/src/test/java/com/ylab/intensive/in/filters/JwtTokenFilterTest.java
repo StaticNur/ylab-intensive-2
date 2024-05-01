@@ -2,7 +2,7 @@ package com.ylab.intensive.in.filters;
 
 import com.ylab.intensive.model.dto.ExceptionResponse;
 import com.ylab.intensive.model.enums.Role;
-import com.ylab.intensive.security.Authentication;
+import com.ylab.intensive.model.Authentication;
 import com.ylab.intensive.security.JwtTokenService;
 import com.ylab.intensive.util.Converter;
 import jakarta.servlet.FilterChain;

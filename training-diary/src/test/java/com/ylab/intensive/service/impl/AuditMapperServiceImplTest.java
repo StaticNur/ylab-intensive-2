@@ -1,6 +1,7 @@
 package com.ylab.intensive.service.impl;
 
 import com.ylab.intensive.dao.AuditDao;
+import com.ylab.intensive.model.Pageable;
 import com.ylab.intensive.model.entity.Audit;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -49,9 +50,9 @@ public class AuditMapperServiceImplTest {
         List<Audit> mockActions = Arrays.asList(new Audit(1,2, LocalDateTime.now(), "User login"),
                 new Audit(1,2, LocalDateTime.now(), "User login"));
 
-        when(auditDao.getUserActions(userId)).thenReturn(mockActions);
+        when(auditDao.getUserActions(userId, new Pageable(0,10))).thenReturn(mockActions);
 
-        List<Audit> result = auditService.getAudit(userId);
+        List<Audit> result = auditService.getAudit(userId, new Pageable(0,10));
 
         assertThat(result).isEqualTo(mockActions);
     }

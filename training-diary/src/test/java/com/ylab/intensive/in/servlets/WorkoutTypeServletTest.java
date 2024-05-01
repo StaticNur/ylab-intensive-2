@@ -3,7 +3,7 @@ package com.ylab.intensive.in.servlets;
 import com.ylab.intensive.mapper.WorkoutTypeMapper;
 import com.ylab.intensive.model.dto.WorkoutTypeDto;
 import com.ylab.intensive.model.entity.WorkoutType;
-import com.ylab.intensive.security.Authentication;
+import com.ylab.intensive.model.Authentication;
 import com.ylab.intensive.service.ValidationService;
 import com.ylab.intensive.service.WorkoutService;
 import com.ylab.intensive.util.Converter;

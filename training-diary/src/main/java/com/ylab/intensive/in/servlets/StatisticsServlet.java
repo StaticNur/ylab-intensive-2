@@ -1,9 +1,7 @@
 package com.ylab.intensive.in.servlets;
 
-import com.ylab.intensive.aspects.annotation.Auditable;
-import com.ylab.intensive.aspects.annotation.Loggable;
 import com.ylab.intensive.model.dto.StatisticsDto;
-import com.ylab.intensive.security.Authentication;
+import com.ylab.intensive.model.Authentication;
 import com.ylab.intensive.service.WorkoutService;
 import com.ylab.intensive.util.Converter;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -17,10 +15,13 @@ import lombok.NoArgsConstructor;
 import java.io.IOException;
 
 /**
- * The AuditServlet class is a servlet responsible for retrieving and displaying audit logs of user actions.
+ * Servlet for retrieving workout statistics.
  * <p>
- * This servlet allows users to view audit logs of their actions by sending a GET request to the "/user/audit" endpoint.
- * The servlet retrieves the audit logs from the AuditService, converts them to DTOs, and returns them in JSON format.
+ * This servlet handles HTTP GET requests to retrieve workout statistics within a specified date range.
+ * It injects dependencies such as the workout service and converter for processing the requests.
+ * </p>
+ *
+ * @since 1.0
  */
 @WebServlet("/training-diary/statistics")
 @ApplicationScoped
@@ -30,6 +31,12 @@ public class StatisticsServlet extends HttpServlet {
     private WorkoutService workoutService;
     private Converter converter;
 
+    /**
+     * Injects dependencies into the servlet.
+     *
+     * @param workoutService the service for workout-related operations.
+     * @param converter      the converter for converting objects to JSON.
+     */
     @Inject
     public void inject(WorkoutService workoutService, Converter converter) {
         this.workoutService = workoutService;
@@ -37,15 +44,13 @@ public class StatisticsServlet extends HttpServlet {
     }
 
     /**
-     * Handles GET requests to show audit logs of user actions.
+     * Handles HTTP GET requests.
      *
-     * @param req  the HTTP servlet request
-     * @param resp the HTTP servlet response
-     * @throws IOException if an I/O error occurs during request processing
+     * @param req  the HTTP servlet request.
+     * @param resp the HTTP servlet response.
+     * @throws IOException if an I/O error occurs while handling the request.
      */
     @Override
-    @Loggable
-    @Auditable
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String begin = req.getParameter("begin") == null ? "1970-01-01" : req.getParameter("begin");
         String end = req.getParameter("end") == null ? "2030-01-01" : req.getParameter("end");

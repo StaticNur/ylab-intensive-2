@@ -27,7 +27,7 @@ public class WorkoutDaoImpl implements WorkoutDao {
     @Override
     public Optional<Workout> findByDate(LocalDate date, int userId) {
         String FIND_BY_DATE = """
-                SELECT w.id, w.uuid, w.user_id, w.workout_type_id, w.date, w.duration, w.calorie
+                SELECT w.id, w.uuid, w.user_id, w.workout_type, w.date, w.duration, w.calorie
                 FROM internal.workout w
                 WHERE w.date = ? and w.user_id = ?
                 """;
@@ -49,7 +49,7 @@ public class WorkoutDaoImpl implements WorkoutDao {
 
     @Override
     public Workout saveWorkout(Workout workout) {
-        String INSERT_WORKOUT = "INSERT INTO internal.workout (uuid, user_id, workout_type_id, date, duration, calorie) VALUES (?, ?, ?, ?, ?, ?)";
+        String INSERT_WORKOUT = "INSERT INTO internal.workout (uuid, user_id, workout_type, date, duration, calorie) VALUES (?, ?, ?, ?, ?, ?)";
 
         try (Connection connection = ConnectionManager.get()) {
             connection.setAutoCommit(false);
@@ -57,7 +57,7 @@ public class WorkoutDaoImpl implements WorkoutDao {
             try (PreparedStatement preparedStatement = connection.prepareStatement(INSERT_WORKOUT, Statement.RETURN_GENERATED_KEYS)) {
                 preparedStatement.setObject(1, workout.getUuid());
                 preparedStatement.setInt(2, workout.getUserId());
-                preparedStatement.setInt(3, Integer.parseInt(workout.getType()));
+                preparedStatement.setString(3, workout.getType());
                 preparedStatement.setDate(4, Date.valueOf(workout.getDate()));
                 preparedStatement.setInt(5, (int) workout.getDuration().getSeconds());
                 preparedStatement.setFloat(6, workout.getCalorie());
@@ -91,7 +91,7 @@ public class WorkoutDaoImpl implements WorkoutDao {
     public List<Workout> findByUserId(int userId) {
         List<Workout> workoutList = new ArrayList<>();
         String FIND_ALL_WORKOUT = """
-                SELECT w.id, w.uuid, w.user_id, w.workout_type_id, w.date, w.duration, w.calorie
+                SELECT w.id, w.uuid, w.user_id, w.workout_type, w.date, w.duration, w.calorie
                 FROM internal.workout w where w.user_id = ? ORDER BY w.date
                 """;
 
@@ -183,7 +183,7 @@ public class WorkoutDaoImpl implements WorkoutDao {
     public List<Workout> findByDuration(int userId, LocalDate begin, LocalDate end) {
         List<Workout> workouts = new ArrayList<>();
         String FIND_BY_DURATION = """
-                SELECT w.id, w.uuid, w.user_id, workout_type_id, w.date, w.duration, w.calorie
+                SELECT w.id, w.uuid, w.user_id, workout_type, w.date, w.duration, w.calorie
                 FROM internal.workout w WHERE w.user_id = ? and w.date BETWEEN ? AND ?
                 """;
 
@@ -207,7 +207,7 @@ public class WorkoutDaoImpl implements WorkoutDao {
     @Override
     public Optional<Workout> findByUUID(UUID uuid) {
         String FIND_ALL_WORKOUT = """
-                SELECT w.id, w.uuid, w.user_id, w.workout_type_id, w.date, w.duration, w.calorie
+                SELECT w.id, w.uuid, w.user_id, w.workout_type, w.date, w.duration, w.calorie
                 FROM internal.workout w where w.uuid = ?
                 """;
 
@@ -227,14 +227,14 @@ public class WorkoutDaoImpl implements WorkoutDao {
     }
 
     @Override
-    public void updateType(int workoutId, int typeId) {
-        String UPDATE_TYPE = "UPDATE internal.workout SET workout_type_id = ? WHERE id = ?";
+    public void updateType(int workoutId, String newType) {
+        String UPDATE_TYPE = "UPDATE internal.workout SET workout_type = ? WHERE id = ?";
 
         try (Connection connection = ConnectionManager.get()) {
             connection.setAutoCommit(false);
 
             try (PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_TYPE)) {
-                preparedStatement.setInt(1, typeId);
+                preparedStatement.setString(1, newType);
                 preparedStatement.setInt(2, workoutId);
 
                 preparedStatement.executeUpdate();
@@ -254,7 +254,7 @@ public class WorkoutDaoImpl implements WorkoutDao {
         workout.setId(rs.getInt("id"));
         workout.setUuid((UUID) rs.getObject("uuid"));
         workout.setUserId(rs.getInt("user_id"));
-        workout.setType(String.valueOf(rs.getInt("workout_type_id")));
+        workout.setType(rs.getString("workout_type"));
         workout.setDate(rs.getDate("date").toLocalDate());
 
         Duration durationFromDB = Duration.ofSeconds(rs.getInt("duration"));

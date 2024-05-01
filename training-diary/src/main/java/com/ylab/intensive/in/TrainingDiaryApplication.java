@@ -9,7 +9,14 @@ import jakarta.servlet.annotation.WebListener;
 import lombok.NoArgsConstructor;
 
 /**
- * The main entry point for the application.
+ * Application listener for initializing and destroying the servlet context.
+ * <p>
+ * This listener is responsible for initializing the application context by performing database migrations
+ * when the servlet context is initialized. It also handles cleanup tasks, such as closing database connections,
+ * when the servlet context is destroyed.
+ * </p>
+ *
+ * @since 1.0
  */
 @WebListener
 @ApplicationScoped
@@ -17,10 +24,9 @@ import lombok.NoArgsConstructor;
 public class TrainingDiaryApplication implements ServletContextListener {
 
     /**
-     * Initializes the application context when the servlet context is initialized.
-     * And performs database migration
+     * Performs database migrations during application initialization.
      *
-     * @param sce the servlet context event
+     * @param sce the servlet context event.
      */
     @Override
     public void contextInitialized(ServletContextEvent sce) {
@@ -29,9 +35,9 @@ public class TrainingDiaryApplication implements ServletContextListener {
     }
 
     /**
-     * Destroys the application context when the servlet context is destroyed.
+     * Closes database connections during application shutdown.
      *
-     * @param sce the servlet context event
+     * @param sce the servlet context event.
      */
     @Override
     public void contextDestroyed(ServletContextEvent sce) {

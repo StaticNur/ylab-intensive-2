@@ -6,7 +6,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
 /**
- * Mapper class to convert Workout entity to WorkoutDto.
+ * Mapper class to convert WorkoutInfo entity to WorkoutInfoDto.
  */
 @Mapper
 public interface WorkoutInfoMapper {

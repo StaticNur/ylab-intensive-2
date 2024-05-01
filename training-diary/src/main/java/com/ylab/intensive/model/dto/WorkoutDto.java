@@ -1,7 +1,7 @@
 package com.ylab.intensive.model.dto;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.ylab.intensive.util.DurationDeserializer;
+import com.ylab.intensive.util.validation.DurationDeserializer;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -21,7 +21,9 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class WorkoutDto {
-
+    /**
+     * The UUID of the workout
+     */
     private UUID uuid;
 
     /**

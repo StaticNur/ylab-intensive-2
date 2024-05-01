@@ -76,7 +76,7 @@ class WorkoutServiceImplTest {
         workoutMy.setType("1");
 
         when(workoutDao.findByUUID(UUID.fromString(uuid))).thenReturn(Optional.of(workoutMy));
-        when(workoutTypeService.findById(1)).thenReturn(new WorkoutType());
+        when(workoutTypeService.findByName(anyString())).thenReturn(new WorkoutType());
         doNothing().when(workoutInfoService).saveWorkoutInfo(anyInt(), anyString(), anyString());
 
         Workout workout = workoutService.addWorkoutInfo(uuid, workoutInfo);
@@ -115,7 +115,7 @@ class WorkoutServiceImplTest {
 
         when(userService.findByEmail(email)).thenReturn(Optional.of(user));
         when(workoutDao.findByUserId(1)).thenReturn(mockWorkouts);
-        when(workoutTypeService.findById(anyInt())).thenReturn(workoutType);
+        when(workoutTypeService.findByName(anyString())).thenReturn(workoutType);
         when(workoutInfoService.getInfoByWorkoutId(anyInt())).thenReturn(new WorkoutInfo());
 
         List<WorkoutDto> result = workoutService.getAllUserWorkouts(email);
@@ -127,18 +127,15 @@ class WorkoutServiceImplTest {
     @DisplayName("Update type - success")
     void testUpdateType_Success() {
         WorkoutType workout = new WorkoutType();
-        workout.setId(2);
-        workout.setType("cardio");
-        WorkoutType workout2 = new WorkoutType();
-        workout2.setId(1);
+        workout.setId(1);
         String newType = "NewType";
-        workout2.setType(newType);
+        workout.setType(newType);
 
-        when(workoutTypeService.findByUserId(1)).thenReturn(List.of(workout,workout2));
+        when(workoutTypeService.findByName(anyString())).thenReturn(workout);
 
         workoutService.updateType(1, 1, newType);
 
-        verify(workoutDao).updateType(1, 1);
+        verify(workoutDao).updateType(1, newType);
     }
 
     @Test
@@ -149,7 +146,7 @@ class WorkoutServiceImplTest {
                 .plusSeconds(1);
         doNothing().when(workoutDao).updateDuration(1,duration);
 
-        workoutService.updateDuration(1,1, duration);
+        workoutService.updateDuration(1, duration);
 
         verify(workoutDao).updateDuration(1,duration);
     }
@@ -159,7 +156,7 @@ class WorkoutServiceImplTest {
     void testUpdateCalories_Success() {
         doNothing().when(workoutDao).updateCalorie(anyInt(), anyFloat());
 
-        workoutService.updateCalories(1,1,1f);
+        workoutService.updateCalories(1,1f);
 
         verify(workoutDao).updateCalorie(anyInt(), anyFloat());
     }
@@ -169,7 +166,7 @@ class WorkoutServiceImplTest {
     void testUpdateAdditionalInfo_Success() {
         doNothing().when(workoutInfoService).updateWorkoutInfo(anyInt(), anyString(), anyString());
 
-        workoutService.updateAdditionalInfo(1, 1, Map.of("title","info"));
+        workoutService.updateAdditionalInfo(1, Map.of("title","info"));
 
         verify(workoutInfoService).updateWorkoutInfo(anyInt(), anyString(), anyString());
     }
@@ -232,13 +229,12 @@ class WorkoutServiceImplTest {
         workoutInfo.setWorkoutInfo(Map.of("title","key"));
 
         when(workoutDao.findByUserId(1)).thenReturn(mockWorkouts);
-        when(workoutTypeService.findById(1)).thenReturn(workoutType);
         when(workoutInfoService.getInfoByWorkoutId(1)).thenReturn(workoutInfo);
 
         List<User> result = workoutService.getAllUsersWorkouts(mockUsers);
 
-        verify(workoutTypeService,times(4)).findById(1);
         verify(workoutInfoService,times(4)).getInfoByWorkoutId(1);
+        assertThat(result.size()).isEqualTo(mockWorkouts.size());
     }
 
     private Workout getWorkout() {
