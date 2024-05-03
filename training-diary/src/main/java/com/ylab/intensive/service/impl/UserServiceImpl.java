@@ -1,5 +1,8 @@
 package com.ylab.intensive.service.impl;
 
+import com.ylab.intensive.aspects.annotation.Auditable;
+import com.ylab.intensive.aspects.annotation.Loggable;
+import com.ylab.intensive.aspects.annotation.Timed;
 import com.ylab.intensive.dao.UserDao;
 import com.ylab.intensive.exception.*;
 import com.ylab.intensive.model.Pageable;
@@ -58,6 +61,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Timed
+    @Loggable
     public User registerUser(RegistrationDto registrationDto) {
         userDao.findByEmail(registrationDto.getEmail())
                 .ifPresent(u -> {
@@ -73,6 +78,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Auditable
+    @Loggable
+    @Timed
     public JwtResponse login(LoginDto loginDto) {
         if (loginDto.getEmail() == null || loginDto.getPassword() == null) {
             throw new InvalidInputException("Обязательно должны быть поля email и password");
@@ -92,6 +100,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Auditable
+    @Loggable
+    @Timed
     public User changeUserPermissions(String uuidStr, ChangeUserRightsDto changeUserRightsDto) {
         Role role = changeUserRightsDto.newRole();//getRole(roleStr);
         int roleId = roleService.getIdByName(role);
@@ -106,6 +117,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Auditable
+    @Loggable
+    @Timed
     public AuditDto getAudit(String email, Pageable pageable) {
         User user = userDao.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException("There is no user with this login in the database."));
@@ -123,11 +137,16 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Auditable
+    @Loggable
+    @Timed
     public List<User> getAllUser() {
         return userDao.findAll();
     }
 
     @Override
+    @Loggable
+    @Timed
     public Optional<User> findByEmail(String email) {
         return userDao.findByEmail(email);
     }

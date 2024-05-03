@@ -1,5 +1,8 @@
 package com.ylab.intensive.service.impl;
 
+import com.ylab.intensive.aspects.annotation.Auditable;
+import com.ylab.intensive.aspects.annotation.Loggable;
+import com.ylab.intensive.aspects.annotation.Timed;
 import com.ylab.intensive.dao.WorkoutTypeDao;
 import com.ylab.intensive.exception.NotFoundException;
 import com.ylab.intensive.exception.WorkoutTypeException;
@@ -30,6 +33,9 @@ public class WorkoutTypeServiceImpl implements WorkoutTypeService {
     }
 
     @Override
+    @Auditable
+    @Loggable
+    @Timed
     public WorkoutType saveType(int userId, String typeName) {
         Optional<WorkoutType> workoutType = workoutTypeDao.findByType(typeName);
         if (workoutType.isPresent()) {

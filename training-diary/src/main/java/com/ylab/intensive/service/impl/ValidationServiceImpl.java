@@ -1,5 +1,8 @@
 package com.ylab.intensive.service.impl;
 
+import com.ylab.intensive.aspects.annotation.Auditable;
+import com.ylab.intensive.aspects.annotation.Loggable;
+import com.ylab.intensive.aspects.annotation.Timed;
 import com.ylab.intensive.model.dto.ValidationError;
 import com.ylab.intensive.service.ValidationService;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -33,6 +36,9 @@ public class ValidationServiceImpl implements ValidationService {
      */
     private static final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 
+    @Override
+    @Loggable
+    @Timed
     public List<ValidationError> validateAndReturnErrors(Object object) {
         Set<ConstraintViolation<Object>> violations = validator.validate(object);
         if (!violations.isEmpty()) {

@@ -118,7 +118,6 @@ public class AuthServlet extends HttpServlet {
      * @param resp the HTTP servlet response.
      * @throws IOException if an I/O error occurs while handling the request.
      */
-    @Timed
     private void login(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         LoginDto loginDto = converter.getRequestBody(req, LoginDto.class);
         List<ValidationError> validationErrors = validationService.validateAndReturnErrors(loginDto);

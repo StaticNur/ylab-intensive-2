@@ -1,5 +1,7 @@
 package com.ylab.intensive.service.impl;
 
+import com.ylab.intensive.aspects.annotation.Auditable;
+import com.ylab.intensive.aspects.annotation.Loggable;
 import com.ylab.intensive.aspects.annotation.Timed;
 import com.ylab.intensive.dao.WorkoutDao;
 import com.ylab.intensive.exception.*;
@@ -59,6 +61,9 @@ public class WorkoutServiceImpl implements WorkoutService {
     }
 
     @Override
+    @Auditable
+    @Loggable
+    @Timed
     public WorkoutDto addWorkout(String email, WorkoutDto workoutDto) {
         int userId = getAuthorizedUserId(email);
         String type = workoutDto.getType();
@@ -93,6 +98,9 @@ public class WorkoutServiceImpl implements WorkoutService {
     }
 
     @Override
+    @Auditable
+    @Loggable
+    @Timed
     public Workout addWorkoutInfo(String uuidStr, WorkoutInfoDto workoutInfoDto) {
         UUID uuid = convertToUUID(uuidStr);
         Workout workout = workoutDao.findByUUID(uuid)
@@ -111,6 +119,9 @@ public class WorkoutServiceImpl implements WorkoutService {
     }
 
     @Override
+    @Auditable
+    @Loggable
+    @Timed
     public List<WorkoutDto> getAllUserWorkouts(String login) {
         int userId = getAuthorizedUserId(login);
         List<Workout> workoutList = workoutDao.findByUserId(userId);
@@ -165,21 +176,32 @@ public class WorkoutServiceImpl implements WorkoutService {
     }
 
     @Override
+    @Auditable
+    @Loggable
+    @Timed
     public void updateType(int userId, int workoutId, String type) {
         WorkoutType workoutType = workoutTypeService.findByName(type.trim());
         workoutDao.updateType(workoutId, workoutType.getType());
     }
 
     @Override
+    @Auditable
+    @Loggable
+    @Timed
     public void updateDuration(int workoutId, Duration duration) {
         workoutDao.updateDuration(workoutId, duration);
     }
 
     @Override
+    @Auditable
+    @Loggable
+    @Timed
     public void updateCalories(int workoutId, Float calories) {
         workoutDao.updateCalorie(workoutId, calories);
     }
 
+    @Auditable
+    @Loggable
     @Timed
     public void updateAdditionalInfo(int workoutId, Map<String, String> workoutInfo) {
         for (Map.Entry<String, String> infoMap : workoutInfo.entrySet()) {
@@ -188,6 +210,9 @@ public class WorkoutServiceImpl implements WorkoutService {
     }
 
     @Override
+    @Auditable
+    @Loggable
+    @Timed
     public void deleteWorkout(String email, String uuidStr) {
         UUID uuid = convertToUUID(uuidStr);
         int userId = getAuthorizedUserId(email);
@@ -199,6 +224,9 @@ public class WorkoutServiceImpl implements WorkoutService {
     }
 
     @Override
+    @Auditable
+    @Loggable
+    @Timed
     public StatisticsDto getWorkoutStatistics(String email, String beginStr, String endStr) {
         LocalDate begin = getDate(beginStr);
         LocalDate end = getDate(endStr);
@@ -213,6 +241,9 @@ public class WorkoutServiceImpl implements WorkoutService {
     }
 
     @Override
+    @Auditable
+    @Loggable
+    @Timed
     public List<User> getAllUsersWorkouts(List<User> userList) {
         for (User user : userList) {
             List<Workout> workoutList = workoutDao.findByUserId(user.getId());
@@ -227,12 +258,18 @@ public class WorkoutServiceImpl implements WorkoutService {
     }
 
     @Override
+    @Auditable
+    @Loggable
+    @Timed
     public List<WorkoutType> getAllType(String login) {
         int userId = getAuthorizedUserId(login);
         return workoutTypeService.findByUserId(userId);
     }
 
     @Override
+    @Auditable
+    @Loggable
+    @Timed
     public WorkoutType saveWorkoutType(String login, String typeName) {
         int userId = getAuthorizedUserId(login);
         return workoutTypeService.saveType(userId, typeName);
