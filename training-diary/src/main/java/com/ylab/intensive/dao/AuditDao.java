@@ -1,5 +1,8 @@
 package com.ylab.intensive.dao;
 
+import com.ylab.intensive.model.Pageable;
+import com.ylab.intensive.model.entity.Audit;
+
 import java.util.List;
 
 /**
@@ -8,12 +11,17 @@ import java.util.List;
 public interface AuditDao {
 
     /**
-     * Retrieves a list of user actions by user ID.
+     * Retrieves a list of audit actions performed by a userId.
+     * <p>
+     * This method fetches a list of audit actions associated with the specified user ID,
+     * optionally paginated using the provided {@link Pageable} object.
+     * </p>
      *
-     * @param userId the ID of the user
-     * @return a list of user actions
+     * @param userId   the ID of the user whose audit actions are to be retrieved.
+     * @param pageable the pagination information for the result set.
+     * @return a list of {@link Audit} objects representing the user's audit actions.
      */
-    List<String> getUserActions(int userId);
+    List<Audit> getUserActions(int userId, Pageable pageable);
 
     /**
      * Inserts a user action for a given user ID.

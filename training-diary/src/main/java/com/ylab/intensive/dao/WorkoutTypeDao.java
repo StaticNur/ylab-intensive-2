@@ -1,6 +1,9 @@
 package com.ylab.intensive.dao;
 
-import java.util.Set;
+import com.ylab.intensive.model.entity.WorkoutType;
+
+import java.util.List;
+import java.util.Optional;
 
 /**
  * Interface for workout type data access operations.
@@ -8,34 +11,51 @@ import java.util.Set;
 public interface WorkoutTypeDao {
 
     /**
-     * Saves the type of a workout.
+     * Saves a new workout type for a user.
      *
-     * @param workoutId The workout ID to save the type for
-     * @param type      The type of the workout to save
+     * @param userId the ID of the user.
+     * @param type   the name of the workout type to save.
+     * @return the saved workout type object.
      */
-    void saveType(int workoutId, String type);
+    WorkoutType saveType(int userId, String type);
 
     /**
-     * Updates the type of a workout.
+     * Updates the name of an existing workout type.
      *
-     * @param workoutId The workout ID containing the type to update
-     * @param oldType   The old type of the workout
-     * @param newType   The new type of the workout
+     * @param userId  the ID of the user.
+     * @param oldType the old name of the workout type.
+     * @param newType the new name of the workout type.
      */
-    void updateType(int workoutId, String oldType, String newType);
+    void updateType(int userId, String oldType, String newType);
 
     /**
-     * Finds workout types by workout ID.
+     * Retrieves all workout types associated with a user.
      *
-     * @param workoutId the ID of the workout
-     * @return a set of workout types
+     * @param userId the ID of the user.
+     * @return a list of workout types associated with the user.
      */
-    Set<String> findByWorkoutId(int workoutId);
+    List<WorkoutType> findByUserId(int userId);
 
     /**
-     * Deletes workout types by workout ID.
+     * Deletes all workout types associated with a user.
      *
-     * @param workoutId the ID of the workout
+     * @param userId the ID of the user.
      */
-    void delete(int workoutId);
+    void delete(int userId);
+
+    /**
+     * Retrieves a workout type by its ID.
+     *
+     * @param id the ID of the workout type.
+     * @return an optional containing the workout type if found, or empty if not found.
+     */
+    Optional<WorkoutType> findById(int id);
+
+    /**
+     * Retrieves a workout type by its name.
+     *
+     * @param typeName the name of the workout type.
+     * @return an optional containing the workout type if found, or empty if not found.
+     */
+    Optional<WorkoutType> findByType(String typeName);
 }

@@ -21,6 +21,7 @@ import java.sql.Statement;
 public class PostgresTestContainer extends PostgreSQLContainer<PostgresTestContainer> {
 
     private static final String IMAGE_VERSION = "postgres:15-alpine";
+
     @Container
     private static PostgresTestContainer container;
 
@@ -41,20 +42,19 @@ public class PostgresTestContainer extends PostgreSQLContainer<PostgresTestConta
     }
 
     public static PostgresTestContainer getInstance() {
-        if (container == null) {
-            container = new PostgresTestContainer()
-                    .withDatabaseName("fake_db")
-                    .withUsername("test_user")
-                    .withPassword("test_psw")
-                    .withCreateContainerCmdModifier(cmd -> cmd.withPortBindings(new PortBinding(Ports.
-                            Binding.bindPort(5435), new ExposedPort(5432))));
-            container.start();
-        }
+        container = new PostgresTestContainer()
+                .withDatabaseName("fake_db")
+                .withUsername("test_user")
+                .withPassword("test_psw")
+                .withCreateContainerCmdModifier(cmd -> cmd.withPortBindings(new PortBinding(Ports.
+                        Binding.bindPort(5434), new ExposedPort(5432))));
+        container.start();
         return container;
     }
 
     private void migration() {
-        try (Connection connection = ConnectionManager.get()) {
+        try {
+            Connection connection = ConnectionManager.get();
             Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection));
 
             String changeLogFile = PropertiesUtil.get("liquibase.changeLogFile");

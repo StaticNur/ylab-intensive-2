@@ -2,12 +2,11 @@ package com.ylab.intensive.dao.impl;
 
 import com.ylab.intensive.dao.container.PostgresTestContainer;
 import com.ylab.intensive.dao.container.TestConfigurationEnvironment;
+import com.ylab.intensive.model.entity.WorkoutInfo;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -31,9 +30,9 @@ class WorkoutInfoDaoImplTest extends TestConfigurationEnvironment {
 
         workoutInfoDao.saveWorkoutInfo(workoutId, title, info);
 
-        Map<String, String> workoutInfoMap = workoutInfoDao.findByWorkoutId(workoutId);
+        WorkoutInfo workoutInfoMap = workoutInfoDao.findByWorkoutId(workoutId);
 
-        assertThat(workoutInfoMap)
+        assertThat(workoutInfoMap.getWorkoutInfo())
                 .isNotEmpty()
                 .containsEntry(title, info);
     }
@@ -47,9 +46,9 @@ class WorkoutInfoDaoImplTest extends TestConfigurationEnvironment {
 
         workoutInfoDao.updateWorkoutInfo(workoutId, title, newInfo);
 
-        Map<String, String> workoutInfoMap = workoutInfoDao.findByWorkoutId(workoutId);
+        WorkoutInfo workoutInfoMap = workoutInfoDao.findByWorkoutId(workoutId);
 
-        assertThat(workoutInfoMap)
+        assertThat(workoutInfoMap.getWorkoutInfo())
                 .isNotEmpty()
                 .containsEntry(title, newInfo);
     }
@@ -59,9 +58,9 @@ class WorkoutInfoDaoImplTest extends TestConfigurationEnvironment {
     void testFindByWorkoutId() {
         int workoutId = 1;
 
-        Map<String, String> workoutInfoMap = workoutInfoDao.findByWorkoutId(workoutId);
+        WorkoutInfo workoutInfoMap = workoutInfoDao.findByWorkoutId(workoutId);
 
-        assertThat(workoutInfoMap).isNotEmpty();
+        assertThat(workoutInfoMap.getWorkoutInfo()).isNotEmpty();
     }
 
     @Test
@@ -71,9 +70,9 @@ class WorkoutInfoDaoImplTest extends TestConfigurationEnvironment {
 
         workoutInfoDao.delete(workoutId);
 
-        Map<String, String> workoutInfoMap = workoutInfoDao.findByWorkoutId(workoutId);
+        WorkoutInfo workoutInfoMap = workoutInfoDao.findByWorkoutId(workoutId);
 
-        assertThat(workoutInfoMap).isEmpty();
+        assertThat(workoutInfoMap.getWorkoutInfo()).isEmpty();
     }
 
     @AfterAll

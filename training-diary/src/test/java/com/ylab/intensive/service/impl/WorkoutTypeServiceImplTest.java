@@ -1,6 +1,7 @@
 package com.ylab.intensive.service.impl;
 
 import com.ylab.intensive.dao.WorkoutTypeDao;
+import com.ylab.intensive.model.entity.WorkoutType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -10,8 +11,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
@@ -43,13 +44,13 @@ public class WorkoutTypeServiceImplTest {
     @DisplayName("Find types by workout ID - success")
     void testFindByWorkoutId_Success() {
         int workoutId = 1;
-        Set<String> expectedTypes = new HashSet<>();
-        expectedTypes.add("Cardio");
-        expectedTypes.add("Strength");
+        List<WorkoutType> expectedTypes = new ArrayList<>();
+        expectedTypes.add(new WorkoutType());
+        expectedTypes.add(new WorkoutType());
 
-        when(workoutTypeDao.findByWorkoutId(workoutId)).thenReturn(expectedTypes);
+        when(workoutTypeDao.findByUserId(workoutId)).thenReturn(expectedTypes);
 
-        Set<String> result = workoutTypeService.findByWorkoutId(workoutId);
+        List<WorkoutType> result = workoutTypeService.findByUserId(workoutId);
 
         assertThat(result).isEqualTo(expectedTypes);
     }
@@ -69,10 +70,10 @@ public class WorkoutTypeServiceImplTest {
     @Test
     @DisplayName("Delete workout types - success")
     void testDelete_Success() {
-        int workoutId = 1;
+        int userId = 1;
 
-        workoutTypeService.delete(workoutId);
+        workoutTypeService.delete(userId);
 
-        verify(workoutTypeDao).delete(workoutId);
+        verify(workoutTypeDao).delete(userId);
     }
 }

@@ -15,7 +15,6 @@ public class TestLauncher {
     public static void main(String[] args) {
         Launcher launcher = LauncherFactory.create();
         SummaryGeneratingListener listener = new SummaryGeneratingListener();
-
         AnsiColor ansiColor = new AnsiColor();
 
         LauncherDiscoveryRequest request = LauncherDiscoveryRequestBuilder.request()
@@ -30,7 +29,7 @@ public class TestLauncher {
         try (PrintWriter writer = new PrintWriter(System.out)) {
             summary.printTo(writer);
             writer.println(ansiColor.green("Successful Tests: " + summary.getTestsSucceededCount()));
-            writer.println(ansiColor.red("Failed Tests: " + summary.getTestsFailedCount()+ ansiColor.yellow(" <- maybe it's regression testing using containers")));
+            writer.println(ansiColor.red("Failed Tests: " + summary.getTestsFailedCount()));
             writer.println("Total Tests: " + summary.getTestsFoundCount());
         }
     }

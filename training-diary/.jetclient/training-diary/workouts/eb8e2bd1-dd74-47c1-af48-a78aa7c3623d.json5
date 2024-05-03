@@ -1,0 +1,69 @@
+{
+  id : "eb8e2bd1-dd74-47c1-af48-a78aa7c3623d",
+  name : "workouts",
+  icon : "FOLDER",
+  sortWeight : 5000000,
+  auth : {
+    type : "BEARER",
+    bearer : {
+      token : "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbkBleGFtcGxlLmNvbSIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTcxNDU2ODM5OCwiZXhwIjoxNzE0NTcxOTk4fQ.rS1sU_aOC06xUaLHQ3c0mdyj5ea4kNihKeh93e8BPwu5SvReH1e5kTBpb9Ko9u1v663sp8FPThjxaQx-L5QGNg"
+    }
+  },
+  requests : [
+    {
+      id : "8a4943b7-30e6-4ddb-a842-41b8a1118742",
+      name : "save workout",
+      method : "POST",
+      url : "http://localhost:8080/training-diary/workouts",
+      headers : [
+        {
+          key : "Content-Type",
+          value : "application/json"
+        }
+      ],
+      body : {
+        type : "JSON",
+        raw : '{\
+          "date": "2028-12-22",\
+          "type": "cardio",\
+          "duration": "1:0:0",\
+          "calorie": 1000.0,\
+          "workoutInfo": {}\
+        }'
+      }
+    },
+    {
+      id : "de8fa585-8019-471a-8090-41e14a5f4a40",
+      name : "view workouts",
+      method : "GET",
+      url : "http://localhost:8080/training-diary/workouts"
+    },
+    {
+      id : "63dc8b88-6b64-411c-a77f-21b9ff0c973c",
+      name : "edit workout",
+      method : "PUT",
+      url : "http://localhost:8080/training-diary/workouts/123e4567-e89b-12d3-a456-426614174002",
+      headers : [
+        {
+          key : "Content-Type",
+          value : "application/json"
+        }
+      ],
+      body : {
+        type : "JSON",
+        raw : '{\
+          "type": "yoga",\
+          "duration": "765:45:34",\
+          "calorie": 1000.0,\
+          "workoutInfo": {}\
+        }'
+      }
+    },
+    {
+      id : "b17a3cf5-1d98-4430-a662-25063f594e7a",
+      name : "delete workout",
+      method : "DELETE",
+      url : "http://localhost:8080/training-diary/workouts/7178b5c0-c7ff-4eec-ae7d-b70d7ad49e95"
+    }
+  ]
+}

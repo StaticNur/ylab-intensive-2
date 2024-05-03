@@ -1,0 +1,34 @@
+{
+  id: "8340e04b-fc01-470f-ac6d-a8f6cf2f2cc2",
+  name: "additional information",
+  icon: "FOLDER",
+  sortWeight: 6000000,
+  auth: {
+    type: "BEARER",
+    bearer: {
+      token: "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0ZXN0MTIzNDU2Nzg5QGV4YW1wbGUuY29tIiwicm9sZSI6IlVTRVIiLCJpYXQiOjE3MTQ1NjU3MjUsImV4cCI6MTcxNDU2OTMyNX0.o3ON6VzzP6lJeGswf2kGeXiSfflSERcCj49clpYyzAW5Q88jF5ciruRnbfalemmRnfTFCTkyDBVidC0tMYuVxg"
+    }
+  },
+  requests: [
+    {
+      id: "b7d0e43d-e86b-4381-9244-37def27f1af0",
+      name: "save workout info",
+      method: "POST",
+      url: "http://localhost:8080/training-diary/workout-info/14982bac-681d-4058-95df-8a767ce0326f",
+      headers: [
+        {
+          key: "Content-Type",
+          value: "application/json"
+        }
+      ],
+      body: {
+        type: "JSON",
+        raw: '{\
+                "workoutInfo": {\
+                  "title": "info"\
+                }\
+              }'
+      }
+    }
+  ]
+}

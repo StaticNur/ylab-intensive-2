@@ -9,6 +9,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.util.UUID;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayName("User Database Operations Testing")
@@ -25,12 +27,15 @@ class UserDaoImplTest extends TestConfigurationEnvironment {
     @Test
     @DisplayName("Save user successfully")
     void testSave() {
-        User user = User.builder().email("test@email.com").password("password").build();
+        User user = new User();
+        user.setUuid(UUID.fromString("622e0957-e81b-19d3-a446-426614879357"));
+        user.setEmail("test@email.com");
+        user.setPassword("password");
         int roleId = Role.USER.getValue();
 
-        boolean result = userDao.save(user, roleId);
+        User userSaved = userDao.save(user, roleId);
 
-        assertThat(result).isTrue();
+        assertThat(userSaved.getId() != 0).isTrue();
     }
 
     @Test
@@ -54,10 +59,14 @@ class UserDaoImplTest extends TestConfigurationEnvironment {
     void testUpdateUserRole_Success() {
         String email = "test23@email.com";
         int roleId = Role.ADMIN.getValue();
-        User userToSave = User.builder().email(email).password("password").build();
-        userDao.save(userToSave, Role.USER.getValue());
+        User user = new User();
+        user.setUuid(UUID.fromString("123e4567-e89b-12d3-a456-426614174012"));
+        user.setEmail(email);
+        user.setPassword("password");
 
-        boolean result = userDao.updateUserRole(email, roleId);
+        User userSaved = userDao.save(user, Role.USER.getValue());
+
+        boolean result = userDao.updateUserRole(userSaved.getUuid(), roleId);
 
         assertThat(result).isTrue();
     }
@@ -65,7 +74,8 @@ class UserDaoImplTest extends TestConfigurationEnvironment {
     @Test
     @DisplayName("Update user role - user does not exist")
     void testUpdateUserRole_UserDoesNotExist() {
-        boolean result = userDao.updateUserRole("nonexistent@email.com", Role.ADMIN.getValue());
+        boolean result = userDao.updateUserRole(UUID.fromString("123e4567-e89b-12d3-a456-426614174029"),
+                Role.ADMIN.getValue());
         assertThat(result).isFalse();
     }
 

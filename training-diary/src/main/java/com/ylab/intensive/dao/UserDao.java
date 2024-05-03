@@ -1,45 +1,54 @@
 package com.ylab.intensive.dao;
 
-import com.ylab.intensive.exception.DaoException;
 import com.ylab.intensive.model.entity.User;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * The UserDao interface provides methods to interact with user data in the database.
  */
 public interface UserDao {
-    /**
-     * Saves a user to the database.
-     *
-     * @param user The user to save
-     * @return true if the user was successfully saved, false otherwise
-     */
-    boolean save(User user, int roleId);
 
     /**
-     * Finds a user by their email.
+     * Saves a user along with their associated role.
      *
-     * @param email The email of the user to find
-     * @return An Optional containing the user if found, otherwise empty
+     * @param user   the user to be saved.
+     * @param roleId the ID of the role associated with the user.
+     * @return the saved user object.
+     */
+    User save(User user, int roleId);
+
+    /**
+     * Retrieves a user by their email address.
+     *
+     * @param email the email address of the user to retrieve.
+     * @return an optional containing the user if found, or empty if not found.
      */
     Optional<User> findByEmail(String email);
 
     /**
-     * Updates the user's role in the database by the specified identifier.
+     * Updates the role of a user specified by their UUID.
      *
-     * @param email  the user email
-     * @param roleId the role id
-     * @return the updated user
-     * @throws DaoException if an SQL exception occurs
+     * @param uuid   the UUID of the user whose role is to be updated.
+     * @param roleId the ID of the new role.
+     * @return {@code true} if the role was updated successfully, {@code false} otherwise.
      */
-    boolean updateUserRole(String email, int roleId);
+    boolean updateUserRole(UUID uuid, int roleId);
 
     /**
-     * Finds all users in the database.
+     * Retrieves a list of all users.
      *
-     * @return A list of all workouts in the database
+     * @return a list of all users in the system.
      */
     List<User> findAll();
+
+    /**
+     * Retrieves a user by their UUID.
+     *
+     * @param uuid the UUID of the user to retrieve.
+     * @return an optional containing the user if found, or empty if not found.
+     */
+    Optional<User> findByUUID(UUID uuid);
 }

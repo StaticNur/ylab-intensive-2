@@ -1,5 +1,8 @@
 package com.ylab.intensive.service;
 
+import com.ylab.intensive.model.Pageable;
+import com.ylab.intensive.model.entity.Audit;
+
 import java.util.List;
 
 /**
@@ -18,8 +21,9 @@ public interface AuditService {
     /**
      * Retrieves audit information for a user.
      *
-     * @param userId the ID of the user
+     * @param userId   the ID of the user
+     * @param pageable Represents pagination information for retrieving a page of data.
      * @return a list of audit information
      */
-    List<String> getAudit(int userId);
+    List<Audit> getAudit(int userId, Pageable pageable);
 }

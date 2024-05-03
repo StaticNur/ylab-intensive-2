@@ -1,4 +1,3 @@
-
 package com.ylab.intensive.dao.container;
 
 import org.testcontainers.containers.PostgreSQLContainer;

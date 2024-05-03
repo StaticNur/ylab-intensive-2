@@ -27,18 +27,52 @@ public final class ConnectionManager {
     }
 
     /**
+     * Retrieves a database connection from the connection pool.
+     * If the connection pool is not initialized, it initializes it first.
      *
-     * Static initialization block for loading the database driver and initializing the connection pool
+     * @return a database connection from the pool
+     * @throws RuntimeException if the connection pool is not initialized
      */
-    static {
-        loadDriver();
-        initConnectionPool();
+    public static Connection get() {
+        if (pool == null) {
+            loadDriver();
+            initConnectionPool();
+        }
+        try {
+            return pool.take();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
-     * Initializes the connection pool based on configuration
+     * Closes the connection pool and releases all database connections.
+     * Clears the internal lists of connections and resets the pool to null.
+     *
+     * @throws RuntimeException if an SQL exception occurs while closing connections
      */
-    private static void initConnectionPool() {
+    public static void closePool() {
+        try {
+            for (Connection connection : sourcesConnections) {
+                if (connection != null && !connection.isClosed()) {
+                    connection.close();
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        sourcesConnections.clear();
+        pool.clear();
+        pool = null;
+    }
+
+    /**
+     * Initializes the connection pool based on the configured pool size.
+     * Creates a fixed-size blocking queue to hold the database connections and populates it.
+     *
+     * @throws RuntimeException if there is an error initializing the connection pool
+     */
+    private static synchronized void initConnectionPool() {
         String poolSize = PropertiesUtil.get(POOL_SIZE);
         int size = poolSize == null ? POOL_SIZE_DEFAULT : Integer.parseInt(poolSize);
         pool = new ArrayBlockingQueue<>(size);
@@ -56,18 +90,10 @@ public final class ConnectionManager {
     }
 
     /**
-     * Retrieves a connection from the pool
-     */
-    public static Connection get() {
-        try {
-            return pool.take();
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    /**
-     * Opens a new database connection
+     * Opens a new database connection using the connection properties retrieved from the properties file.
+     *
+     * @return a new database connection
+     * @throws RuntimeException if a database connection cannot be established
      */
     private static Connection open() {
         try {
@@ -80,26 +106,15 @@ public final class ConnectionManager {
     }
 
     /**
-     * Loads the database driver
+     * Loads the PostgreSQL JDBC driver.
+     *
+     * @throws RuntimeException if the JDBC driver class cannot be found
      */
     private static void loadDriver() {
         try {
             Class.forName("org.postgresql.Driver");
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
-        }
-    }
-
-    /**
-     * Closes the connection pool
-     */
-    public static void closePool() {
-        try {
-            for (Connection connection : sourcesConnections) {
-                connection.close();
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException();
         }
     }
 }

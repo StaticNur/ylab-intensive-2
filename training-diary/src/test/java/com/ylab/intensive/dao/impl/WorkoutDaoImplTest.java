@@ -12,6 +12,7 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -50,7 +51,9 @@ class WorkoutDaoImplTest extends TestConfigurationEnvironment {
     @DisplayName("Save workout - success")
     void testSaveWorkout_Success() {
         Workout workout = new Workout();
+        workout.setUuid(UUID.randomUUID());
         workout.setUserId(1);
+        workout.setType("1");
         workout.setDate(LocalDate.now());
         workout.setDuration(Duration.ofMinutes(30));
         workout.setCalorie(300.0f);
@@ -75,7 +78,7 @@ class WorkoutDaoImplTest extends TestConfigurationEnvironment {
     void testDeleteWorkout_Success() {
         LocalDate date = LocalDate.of(2022, 2, 22);
 
-        workoutDao.deleteWorkout(date, 1);
+        workoutDao.deleteWorkout(1, 4);
 
         Optional<Workout> deletedWorkout = workoutDao.findByDate(date, 1);
 

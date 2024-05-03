@@ -1,0 +1,47 @@
+{
+  id : "d92fb86d-9509-4baf-9382-33af55132f68",
+  name : "auth",
+  icon : "FOLDER",
+  sortWeight : 1000000,
+  requests : [
+    {
+      id : "34d2601a-b9dd-4d84-bec2-bc30a1a17065",
+      name : "authorization",
+      method : "POST",
+      url : "http://localhost:8080/training-diary/auth/login",
+      headers : [
+        {
+          key : "Content-Type",
+          value : "application/json"
+        }
+      ],
+      body : {
+        type : "JSON",
+        raw : '{\
+          "email": "admin@example.com",\
+          "password": "adminPassword"\
+        }'
+      }
+    },
+    {
+      id : "e1c66bd8-142a-49f7-a7e3-0f473631cfee",
+      name : "registration",
+      method : "POST",
+      url : "http://localhost:8080/training-diary/auth/registration",
+      headers : [
+        {
+          key : "Content-Type",
+          value : "application/json"
+        }
+      ],
+      body : {
+        type : "JSON",
+        raw : '{\
+          "email": "test123456789@example.com",\
+          "password": "psw",\
+          "role": "USER"\
+        }'
+      }
+    }
+  ]
+}

@@ -3,112 +3,175 @@ package com.ylab.intensive.dao.impl;
 import com.ylab.intensive.dao.WorkoutTypeDao;
 import com.ylab.intensive.exception.DaoException;
 import com.ylab.intensive.config.ConnectionManager;
+import com.ylab.intensive.model.entity.WorkoutType;
+import com.ylab.intensive.util.SQLExceptionUtil;
+import jakarta.enterprise.context.ApplicationScoped;
+import lombok.NoArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.HashSet;
-import java.util.Set;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * Implementation class for {@link WorkoutTypeDao}.
  */
+@Log4j2
+@ApplicationScoped
+@NoArgsConstructor
 public class WorkoutTypeDaoImpl implements WorkoutTypeDao {
 
     @Override
-    public void saveType(int workoutId, String type) {
-        String INSERT_TYPE = "INSERT INTO internal.workout_type (workout_id, type) VALUES (?, ?)";
-
+    public WorkoutType saveType(int userId, String type) {
+        String INSERT_TYPE = "INSERT INTO internal.workout_type (user_id, type) VALUES (?, ?)";
+        WorkoutType workoutType = new WorkoutType();
         try (Connection connection = ConnectionManager.get()) {
             connection.setAutoCommit(false);
 
-            try (PreparedStatement preparedStatement = connection.prepareStatement(INSERT_TYPE)) {
-                preparedStatement.setInt(1, workoutId);
+            try (PreparedStatement preparedStatement = connection.prepareStatement(INSERT_TYPE, Statement.RETURN_GENERATED_KEYS)) {
+                preparedStatement.setInt(1, userId);
                 preparedStatement.setString(2, type);
 
-                preparedStatement.executeUpdate();
-            } catch (SQLException e) {
+                int affectedRows = preparedStatement.executeUpdate();
+
+                if (affectedRows == 0) {
+                    throw new DaoException("Creating workout type failed, no rows affected.");
+                }
+
+                ResultSet generatedKeys = preparedStatement.getGeneratedKeys();
+                if (generatedKeys.next()) {
+                    workoutType.setId(generatedKeys.getInt("id"));
+                    workoutType.setUserId(userId);
+                    workoutType.setType(type);
+                } else {
+                    throw new DaoException("Creating workout type failed, no ID obtained.");
+                }
+            } catch (SQLException exc) {
                 connection.rollback();
-                throw new DaoException(e.getMessage());
+                SQLExceptionUtil.handleSQLException(exc, log);
             }
 
             connection.commit();
-        } catch (SQLException e) {
-            throw new DaoException("Error saving workout type. " + e.getMessage());
+        } catch (SQLException exc) {
+            SQLExceptionUtil.handleSQLException(exc, log);
         }
+        return workoutType;
     }
 
     @Override
-    public void updateType(int workoutId, String oldType, String newType) {
-        String UPDATE_TYPE = "UPDATE internal.workout_type SET type = ? WHERE workout_id = ? AND type = ?";
+    public void updateType(int userId, String oldType, String newType) {
+        String UPDATE_TYPE = "UPDATE internal.workout_type SET type = ? WHERE user_id = ? AND type = ?";
 
         try (Connection connection = ConnectionManager.get()) {
             connection.setAutoCommit(false);
 
             try (PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_TYPE)) {
                 preparedStatement.setString(1, newType);
-                preparedStatement.setInt(2, workoutId);
+                preparedStatement.setInt(2, userId);
                 preparedStatement.setString(3, oldType);
 
                 int affectedRows = preparedStatement.executeUpdate();
 
                 if (affectedRows == 0) {
-                    throw new SQLException("Updating workout type failed, no rows affected.");
+                    throw new DaoException("Updating workout type failed, no rows affected.");
                 }
-            } catch (SQLException e) {
+            } catch (SQLException exc) {
                 connection.rollback();
-                throw new DaoException(e.getMessage());
+                SQLExceptionUtil.handleSQLException(exc, log);
             }
 
             connection.commit();
-        } catch (SQLException e) {
-            throw new DaoException("Error updating workout type. " + e.getMessage());
+        } catch (SQLException exc) {
+            SQLExceptionUtil.handleSQLException(exc, log);
         }
     }
 
     @Override
-    public Set<String> findByWorkoutId(int workoutId) {
-        Set<String> types = new HashSet<>();
-        String FIND_BY_WORKOUT_ID = "SELECT type FROM internal.workout_type WHERE workout_id = ?";
+    public List<WorkoutType> findByUserId(int userId) {
+        List<WorkoutType> types = new ArrayList<>();
+        String FIND_BY_USER_ID = "SELECT id, user_id, type FROM internal.workout_type WHERE user_id = ?";
 
         try (Connection connection = ConnectionManager.get();
-             PreparedStatement preparedStatement = connection.prepareStatement(FIND_BY_WORKOUT_ID)) {
+             PreparedStatement preparedStatement = connection.prepareStatement(FIND_BY_USER_ID)) {
 
-            preparedStatement.setInt(1, workoutId);
+            preparedStatement.setInt(1, userId);
 
-            try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                while (resultSet.next()) {
-                    types.add(resultSet.getString("type"));
-                }
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                types.add(buildWorkoutType(resultSet));
             }
-
-        } catch (SQLException e) {
-            throw new DaoException("Error finding types by workoutId. " + e.getMessage());
+        } catch (SQLException exc) {
+            SQLExceptionUtil.handleSQLException(exc, log);
         }
-
         return types;
     }
 
     @Override
-    public void delete(int workoutId) {
-        String DELETE_WORKOUT = "DELETE FROM internal.workout_type WHERE workout_id = ?";
+    public void delete(int user_id) {
+        String DELETE_WORKOUT = "DELETE FROM internal.workout_type WHERE user_id = ?";
 
         try (Connection connection = ConnectionManager.get()) {
             connection.setAutoCommit(false);
 
             try (PreparedStatement preparedStatement = connection.prepareStatement(DELETE_WORKOUT)) {
-                preparedStatement.setInt(1, workoutId);
+                preparedStatement.setInt(1, user_id);
 
                 preparedStatement.executeUpdate();
-            } catch (SQLException e) {
+            } catch (SQLException exc) {
                 connection.rollback();
-                throw new DaoException(e.getMessage());
+                SQLExceptionUtil.handleSQLException(exc, log);
             }
 
             connection.commit();
-        } catch (SQLException e) {
-            throw new DaoException("Error delete workout_type. " + e.getMessage());
+        } catch (SQLException exc) {
+            SQLExceptionUtil.handleSQLException(exc, log);
         }
+    }
+
+    @Override
+    public Optional<WorkoutType> findById(int id) {
+        String FIND_BY_ID = "SELECT id, user_id, type FROM internal.workout_type WHERE id = ?";
+
+        try (Connection connection = ConnectionManager.get();
+             PreparedStatement preparedStatement = connection.prepareStatement(FIND_BY_ID)) {
+
+            preparedStatement.setInt(1, id);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                return Optional.of(buildWorkoutType(resultSet));
+            }
+        } catch (SQLException exc) {
+            SQLExceptionUtil.handleSQLException(exc, log);
+        }
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<WorkoutType> findByType(String typeName) {
+        String FIND_BY_ID = "SELECT id, user_id, type FROM internal.workout_type WHERE type = ?";
+
+        try (Connection connection = ConnectionManager.get();
+             PreparedStatement preparedStatement = connection.prepareStatement(FIND_BY_ID)) {
+
+            preparedStatement.setString(1, typeName);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                return Optional.of(buildWorkoutType(resultSet));
+            }
+        } catch (SQLException exc) {
+            SQLExceptionUtil.handleSQLException(exc, log);
+        }
+        return Optional.empty();
+    }
+
+    private WorkoutType buildWorkoutType(ResultSet resultSet) throws SQLException {
+        WorkoutType workoutType = new WorkoutType();
+        workoutType.setId(resultSet.getInt("id"));
+        workoutType.setUserId(resultSet.getInt("user_id"));
+        workoutType.setType(resultSet.getString("type"));
+        return workoutType;
     }
 }

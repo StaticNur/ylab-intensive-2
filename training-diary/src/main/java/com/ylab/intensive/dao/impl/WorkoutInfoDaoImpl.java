@@ -3,6 +3,11 @@ package com.ylab.intensive.dao.impl;
 import com.ylab.intensive.dao.WorkoutInfoDao;
 import com.ylab.intensive.exception.DaoException;
 import com.ylab.intensive.config.ConnectionManager;
+import com.ylab.intensive.model.entity.WorkoutInfo;
+import com.ylab.intensive.util.SQLExceptionUtil;
+import jakarta.enterprise.context.ApplicationScoped;
+import lombok.NoArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 
 import java.sql.*;
 import java.util.HashMap;
@@ -11,6 +16,9 @@ import java.util.Map;
 /**
  * Implementation class for {@link WorkoutInfoDao}.
  */
+@Log4j2
+@ApplicationScoped
+@NoArgsConstructor
 public class WorkoutInfoDaoImpl implements WorkoutInfoDao {
 
     @Override
@@ -26,14 +34,14 @@ public class WorkoutInfoDaoImpl implements WorkoutInfoDao {
                 preparedStatement.setString(3, info);
 
                 preparedStatement.executeUpdate();
-            } catch (SQLException e) {
+            } catch (SQLException exc) {
                 connection.rollback();
-                throw new DaoException(e.getMessage());
+                SQLExceptionUtil.handleSQLException(exc, log);
             }
 
             connection.commit();
-        } catch (SQLException e) {
-            throw new DaoException("Error saving workout info. " + e.getMessage());
+        } catch (SQLException exc) {
+            SQLExceptionUtil.handleSQLException(exc, log);
         }
     }
 
@@ -52,42 +60,44 @@ public class WorkoutInfoDaoImpl implements WorkoutInfoDao {
                 int affectedRows = preparedStatement.executeUpdate();
 
                 if (affectedRows == 0) {
-                    throw new SQLException("Updating workout info failed, no rows affected.");
+                    throw new DaoException("Такого заголовка в доп. инфо. тренировки нет! Сначала добавьте ее.");
                 }
-            } catch (SQLException e) {
+            } catch (SQLException exc) {
                 connection.rollback();
-                throw new DaoException(e.getMessage());
+                SQLExceptionUtil.handleSQLException(exc, log);
             }
 
             connection.commit();
-        } catch (SQLException e) {
-            throw new DaoException("Error updating workout info. " + e.getMessage());
+        } catch (SQLException exc) {
+            SQLExceptionUtil.handleSQLException(exc, log);
         }
     }
 
     @Override
-    public Map<String, String> findByWorkoutId(int workoutId) {
+    public WorkoutInfo findByWorkoutId(int workoutId) {
+        WorkoutInfo workoutInfo = new WorkoutInfo();
         Map<String, String> workoutInfoMap = new HashMap<>();
-        String FIND_BY_WORKOUT_ID = "SELECT title, info FROM internal.workout_info WHERE workout_id = ?";
+        String FIND_BY_WORKOUT_ID = "SELECT id, title, info FROM internal.workout_info WHERE workout_id = ?";
 
         try (Connection connection = ConnectionManager.get();
              PreparedStatement preparedStatement = connection.prepareStatement(FIND_BY_WORKOUT_ID)) {
 
             preparedStatement.setInt(1, workoutId);
 
-            try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                while (resultSet.next()) {
-                    String key = resultSet.getString("title");
-                    String value = resultSet.getString("info");
-                    workoutInfoMap.put(key, value);
-                }
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                workoutInfo.setId(resultSet.getInt("id"));
+                String key = resultSet.getString("title");
+                String value = resultSet.getString("info");
+                workoutInfoMap.put(key, value);
             }
 
-        } catch (SQLException e) {
-            throw new DaoException("Error finding workout info by workoutId. " + e.getMessage());
+        } catch (SQLException exc) {
+            SQLExceptionUtil.handleSQLException(exc, log);
         }
-
-        return workoutInfoMap;
+        workoutInfo.setWorkoutInfo(workoutInfoMap);
+        workoutInfo.setWorkoutId(workoutId);
+        return workoutInfo;
     }
 
     @Override
@@ -101,15 +111,14 @@ public class WorkoutInfoDaoImpl implements WorkoutInfoDao {
                 preparedStatement.setInt(1, workoutId);
 
                 preparedStatement.executeUpdate();
-            } catch (SQLException e) {
+            } catch (SQLException exc) {
                 connection.rollback();
-                throw new DaoException(e.getMessage());
+                SQLExceptionUtil.handleSQLException(exc, log);
             }
 
             connection.commit();
-        } catch (SQLException e) {
-            throw new DaoException("Error delete workout_info. " + e.getMessage());
+        } catch (SQLException exc) {
+            SQLExceptionUtil.handleSQLException(exc, log);
         }
     }
-
 }

@@ -1,6 +1,6 @@
 package com.ylab.intensive.dao;
 
-import java.util.Map;
+import com.ylab.intensive.model.entity.WorkoutInfo;
 
 /**
  * Interface for workout additional information data access operations.
@@ -29,9 +29,9 @@ public interface WorkoutInfoDao {
      * Finds workout additional information by workout ID.
      *
      * @param workoutId the ID of the workout
-     * @return a map containing workout information
+     * @return a WorkoutInfo containing workout information
      */
-    Map<String, String> findByWorkoutId(int workoutId);
+    WorkoutInfo findByWorkoutId(int workoutId);
 
     /**
      * Delete workout additional information by workout ID.
