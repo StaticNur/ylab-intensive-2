@@ -3,11 +3,13 @@ package com.ylab.intensive.dao.impl;
 import com.ylab.intensive.dao.WorkoutDao;
 import com.ylab.intensive.exception.DaoException;
 import com.ylab.intensive.model.entity.Workout;
-import com.ylab.intensive.config.ConnectionManager;
-import com.ylab.intensive.util.SQLExceptionUtil;
-import jakarta.enterprise.context.ApplicationScoped;
-import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.stereotype.Repository;
 
 import java.sql.*;
 import java.sql.Date;
@@ -20,11 +22,127 @@ import java.util.*;
  * This class provides methods to interact with workout data in the database.
  */
 @Log4j2
-@ApplicationScoped
-@NoArgsConstructor
+@Repository
+@RequiredArgsConstructor
 public class WorkoutDaoImpl implements WorkoutDao {
 
+    private final JdbcTemplate jdbcTemplate;
+
     @Override
+    public Optional<Workout> findByDate(LocalDate date, int userId) {
+        String FIND_BY_DATE = """
+            SELECT w.id, w.uuid, w.user_id, w.workout_type, w.date, w.duration, w.calorie
+            FROM internal.workout w
+            WHERE w.date = ? and w.user_id = ?
+            """;
+
+        List<Workout> workouts = jdbcTemplate.query(FIND_BY_DATE,
+                new Object[]{date, userId},
+                (rs, rowNum) -> buildWorkout(rs));
+
+        return workouts.stream().findFirst();
+    }
+
+    @Override
+    public Workout saveWorkout(Workout workout) {
+        String INSERT_WORKOUT = "INSERT INTO internal.workout (uuid, user_id, workout_type, date, duration, calorie) VALUES (?, ?, ?, ?, ?, ?)";
+
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        int affectedRows = jdbcTemplate.update(connection -> {
+            PreparedStatement ps = connection.prepareStatement(INSERT_WORKOUT, Statement.RETURN_GENERATED_KEYS);
+            ps.setObject(1, workout.getUuid());
+            ps.setInt(2, workout.getUserId());
+            ps.setString(3, workout.getType());
+            ps.setDate(4, Date.valueOf(workout.getDate()));
+            ps.setInt(5, (int) workout.getDuration().getSeconds());
+            ps.setFloat(6, workout.getCalorie());
+            return ps;
+        }, keyHolder);
+
+        if (affectedRows == 0) {
+            throw new DaoException("Creating workout failed, no rows affected.");
+        }
+
+        if (keyHolder.getKey() != null) {
+            workout.setId(keyHolder.getKey().intValue());
+        } else {
+            throw new DaoException("Creating workout failed, no ID obtained.");
+        }
+
+        return workout;
+    }
+
+    @Override
+    public List<Workout> findByUserId(int userId) {
+        String FIND_ALL_WORKOUT = """
+            SELECT w.id, w.uuid, w.user_id, w.workout_type, w.date, w.duration, w.calorie
+            FROM internal.workout w
+            WHERE w.user_id = ?
+            ORDER BY w.date
+            """;
+
+        return jdbcTemplate.query(FIND_ALL_WORKOUT, new Object[]{userId}, (rs, rowNum) -> buildWorkout(rs));
+    }
+
+    @Override
+    public void deleteWorkout(int userId, int id) {
+        String DELETE_WORKOUT = "DELETE FROM internal.workout WHERE id = ? and user_id = ?";
+        int rowsAffected = jdbcTemplate.update(DELETE_WORKOUT, id, userId);
+        if (rowsAffected == 0) {
+            throw new DaoException("Deleting workout failed, no rows affected.");
+        }
+    }
+
+    @Override
+    public void updateCalorie(int id, Float calorie) {
+        String UPDATE_CALORIE = "UPDATE internal.workout SET calorie = ? WHERE id = ?";
+        int rowsAffected = jdbcTemplate.update(UPDATE_CALORIE, calorie, id);
+        if (rowsAffected == 0) {
+            throw new DaoException("Updating calorie failed, no rows affected.");
+        }
+    }
+
+    @Override
+    public void updateDuration(int id, Duration duration) {
+        String UPDATE_DURATION = "UPDATE internal.workout SET duration = ? WHERE id = ?";
+        int rowsAffected = jdbcTemplate.update(UPDATE_DURATION, (int) duration.getSeconds(), id);
+        if (rowsAffected == 0) {
+            throw new DaoException("Updating duration failed, no rows affected.");
+        }
+    }
+
+    @Override
+    public List<Workout> findByDuration(int userId, LocalDate begin, LocalDate end) {
+        String FIND_BY_DURATION = """
+            SELECT w.id, w.uuid, w.user_id, workout_type, w.date, w.duration, w.calorie
+            FROM internal.workout w
+            WHERE w.user_id = ? and w.date BETWEEN ? AND ?
+            """;
+
+        return jdbcTemplate.query(FIND_BY_DURATION, new Object[]{userId, begin, end}, (rs, rowNum) -> buildWorkout(rs));
+    }
+
+    @Override
+    public Optional<Workout> findByUUID(UUID uuid) {
+        String FIND_ALL_WORKOUT = """
+            SELECT w.id, w.uuid, w.user_id, w.workout_type, w.date, w.duration, w.calorie
+            FROM internal.workout w
+            WHERE w.uuid = ?
+            """;
+
+        List<Workout> workouts = jdbcTemplate.query(FIND_ALL_WORKOUT, new Object[]{uuid}, (rs, rowNum) -> buildWorkout(rs));
+        return workouts.stream().findFirst();
+    }
+
+    @Override
+    public void updateType(int workoutId, String newType) {
+        String UPDATE_TYPE = "UPDATE internal.workout SET workout_type = ? WHERE id = ?";
+        int rowsAffected = jdbcTemplate.update(UPDATE_TYPE, newType, workoutId);
+        if (rowsAffected == 0) {
+            throw new DaoException("Updating workout type failed, no rows affected.");
+        }
+    }
+    /*@Override
     public Optional<Workout> findByDate(LocalDate date, int userId) {
         String FIND_BY_DATE = """
                 SELECT w.id, w.uuid, w.user_id, w.workout_type, w.date, w.duration, w.calorie
@@ -247,7 +365,7 @@ public class WorkoutDaoImpl implements WorkoutDao {
         } catch (SQLException exc) {
             SQLExceptionUtil.handleSQLException(exc, log);
         }
-    }
+    }*/
 
     private Workout buildWorkout(ResultSet rs) throws SQLException {
         Workout workout = new Workout();

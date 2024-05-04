@@ -4,33 +4,29 @@ import com.ylab.intensive.aspects.annotation.Auditable;
 import com.ylab.intensive.aspects.annotation.Loggable;
 import com.ylab.intensive.aspects.annotation.Timed;
 import com.ylab.intensive.dao.WorkoutInfoDao;
-import jakarta.inject.Inject;
 import com.ylab.intensive.model.entity.WorkoutInfo;
 import com.ylab.intensive.service.WorkoutInfoService;
-import jakarta.enterprise.context.ApplicationScoped;
-import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Implementation class for {@link WorkoutInfoService}.
  */
-@ApplicationScoped
-@NoArgsConstructor
+@Service
+@RequiredArgsConstructor
 public class WorkoutInfoServiceImpl implements WorkoutInfoService {
 
     /**
      * Data access object for workout information operations.
      */
-    private WorkoutInfoDao workoutInfoDao;
-
-    @Inject
-    public WorkoutInfoServiceImpl(WorkoutInfoDao workoutInfoDao) {
-        this.workoutInfoDao = workoutInfoDao;
-    }
+    private final WorkoutInfoDao workoutInfoDao;
 
     @Override
     @Auditable
     @Loggable
     @Timed
+    @Transactional
     public void saveWorkoutInfo(int workoutId, String title, String info) {
         workoutInfoDao.saveWorkoutInfo(workoutId, title, info);
     }
@@ -38,6 +34,7 @@ public class WorkoutInfoServiceImpl implements WorkoutInfoService {
     @Override
     @Loggable
     @Timed
+    @Transactional
     public void updateWorkoutInfo(int workoutId, String title, String info) {
         workoutInfoDao.updateWorkoutInfo(workoutId, title, info);
     }

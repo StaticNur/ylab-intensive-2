@@ -2,26 +2,65 @@ package com.ylab.intensive.dao.impl;
 
 import com.ylab.intensive.dao.WorkoutInfoDao;
 import com.ylab.intensive.exception.DaoException;
-import com.ylab.intensive.config.ConnectionManager;
 import com.ylab.intensive.model.entity.WorkoutInfo;
-import com.ylab.intensive.util.SQLExceptionUtil;
-import jakarta.enterprise.context.ApplicationScoped;
-import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Repository;
 
-import java.sql.*;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
  * Implementation class for {@link WorkoutInfoDao}.
  */
 @Log4j2
-@ApplicationScoped
-@NoArgsConstructor
+@Repository
+@RequiredArgsConstructor
 public class WorkoutInfoDaoImpl implements WorkoutInfoDao {
 
+    private final JdbcTemplate jdbcTemplate;
+
+    public void saveWorkoutInfo(int workoutId, String title, String info) {
+        String INSERT_INFO = "INSERT INTO internal.workout_info (workout_id, title, info) VALUES (?, ?, ?)";
+        jdbcTemplate.update(INSERT_INFO, workoutId, title, info);
+    }
+
     @Override
+    public void updateWorkoutInfo(int workoutId, String title, String info) {
+        String UPDATE_INFO = "UPDATE internal.workout_info SET info = ? WHERE workout_id = ? AND title = ?";
+        int affectedRows = jdbcTemplate.update(UPDATE_INFO, info, workoutId, title);
+        if (affectedRows == 0) {
+            throw new DaoException("Такого заголовка в доп. инфо. тренировки нет! Сначала добавьте ее.");
+        }
+    }
+
+    @Override
+    public WorkoutInfo findByWorkoutId(int workoutId) {
+        String FIND_BY_WORKOUT_ID = "SELECT id, title, info FROM internal.workout_info WHERE workout_id = ?";
+        List<Map<String, Object>> rows = jdbcTemplate.queryForList(FIND_BY_WORKOUT_ID, workoutId);
+
+        WorkoutInfo workoutInfo = new WorkoutInfo();
+        workoutInfo.setWorkoutId(workoutId);
+        Map<String, String> workoutInfoMap = new HashMap<>();
+        for (Map<String, Object> row : rows) {
+            String title = (String) row.get("title");
+            String info = (String) row.get("info");
+            workoutInfoMap.put(title, info);
+        }
+        workoutInfo.setWorkoutInfo(workoutInfoMap);
+        return workoutInfo;
+    }
+
+    @Override
+    public void delete(int workoutId) {
+        String DELETE_WORKOUT = "DELETE FROM internal.workout_info WHERE workout_id = ?";
+        jdbcTemplate.update(DELETE_WORKOUT, workoutId);
+    }
+
+    /*@Override
     public void saveWorkoutInfo(int workoutId, String title, String info) {
         String INSERT_INFO = "INSERT INTO internal.workout_info (workout_id, title, info) VALUES (?, ?, ?)";
 
@@ -120,5 +159,5 @@ public class WorkoutInfoDaoImpl implements WorkoutInfoDao {
         } catch (SQLException exc) {
             SQLExceptionUtil.handleSQLException(exc, log);
         }
-    }
+    }*/
 }

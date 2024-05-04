@@ -1,3 +1,4 @@
+/*
 package com.ylab.intensive.in.servlets;
 
 import com.ylab.intensive.mapper.UserMapper;
@@ -116,3 +117,4 @@ class UserServletTest {
                      "email требуется повторная авторизация для обновления токена.\"}", stringWriter.toString());
     }
 }
+*/

@@ -1,3 +1,4 @@
+/*
 package com.ylab.intensive.in.servlets;
 
 import com.ylab.intensive.model.dto.StatisticsDto;
@@ -14,6 +15,7 @@ import lombok.NoArgsConstructor;
 
 import java.io.IOException;
 
+*/
 /**
  * Servlet for retrieving workout statistics.
  * <p>
@@ -22,7 +24,8 @@ import java.io.IOException;
  * </p>
  *
  * @since 1.0
- */
+ *//*
+
 @WebServlet("/training-diary/statistics")
 @ApplicationScoped
 @NoArgsConstructor
@@ -31,25 +34,29 @@ public class StatisticsServlet extends HttpServlet {
     private WorkoutService workoutService;
     private Converter converter;
 
-    /**
+    */
+/**
      * Injects dependencies into the servlet.
      *
      * @param workoutService the service for workout-related operations.
      * @param converter      the converter for converting objects to JSON.
-     */
+     *//*
+
     @Inject
     public void inject(WorkoutService workoutService, Converter converter) {
         this.workoutService = workoutService;
         this.converter = converter;
     }
 
-    /**
+    */
+/**
      * Handles HTTP GET requests.
      *
      * @param req  the HTTP servlet request.
      * @param resp the HTTP servlet response.
      * @throws IOException if an I/O error occurs while handling the request.
-     */
+     *//*
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String begin = req.getParameter("begin") == null ? "1970-01-01" : req.getParameter("begin");
@@ -61,3 +68,4 @@ public class StatisticsServlet extends HttpServlet {
                 .append(converter.convertObjectToJson(statistics));
     }
 }
+*/

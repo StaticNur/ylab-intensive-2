@@ -1,26 +1,21 @@
 package com.ylab.intensive.dao.impl;
 
 import com.ylab.intensive.dao.RoleDao;
-import com.ylab.intensive.exception.DaoException;
 import com.ylab.intensive.model.enums.Role;
-import com.ylab.intensive.config.ConnectionManager;
-import com.ylab.intensive.util.SQLExceptionUtil;
-import jakarta.enterprise.context.ApplicationScoped;
-import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Repository;
 
 /**
  * Implementation class for {@link RoleDao}.
  */
 @Log4j2
-@ApplicationScoped
-@NoArgsConstructor
+@Repository
+@RequiredArgsConstructor
 public class RoleDaoImpl implements RoleDao {
+
+    private final JdbcTemplate jdbcTemplate;
 
     @Override
     public int findByName(Role role) {
@@ -29,8 +24,9 @@ public class RoleDaoImpl implements RoleDao {
                 FROM internal.role r
                 WHERE r.name = ?
                 """;
+        return jdbcTemplate.queryForObject(FIND_BY_NAME, Integer.class, role);
 
-        try (Connection connection = ConnectionManager.get();
+        /*try (Connection connection = ConnectionManager.get();
              PreparedStatement preparedStatement = connection.prepareStatement(FIND_BY_NAME)) {
             preparedStatement.setString(1, role.name());
 
@@ -43,6 +39,6 @@ public class RoleDaoImpl implements RoleDao {
         } catch (SQLException exc) {
             SQLExceptionUtil.handleSQLException(exc, log);
             return -1;
-        }
+        }*/
     }
 }

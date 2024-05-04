@@ -2,9 +2,9 @@ package com.ylab.intensive.util.validation;
 
 import com.ylab.intensive.model.enums.Role;
 import com.ylab.intensive.util.validation.annotation.ValidRole;
-import jakarta.validation.ConstraintValidator;
-import jakarta.validation.ConstraintValidatorContext;
 
+import javax.validation.ConstraintValidator;
+import javax.validation.ConstraintValidatorContext;
 import java.util.Arrays;
 
 /**

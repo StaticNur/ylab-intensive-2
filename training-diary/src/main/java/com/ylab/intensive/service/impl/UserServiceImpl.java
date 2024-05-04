@@ -10,13 +10,15 @@ import com.ylab.intensive.model.dto.*;
 import com.ylab.intensive.model.entity.Audit;
 import com.ylab.intensive.model.entity.User;
 import com.ylab.intensive.model.enums.Role;
-import com.ylab.intensive.security.JwtTokenService;
+import com.ylab.intensive.in.security.JwtTokenService;
+import com.ylab.intensive.in.security.JwtUserDetailsService;
 import com.ylab.intensive.service.AuditService;
 import com.ylab.intensive.service.RoleService;
 import com.ylab.intensive.service.UserService;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -26,43 +28,36 @@ import java.util.stream.Collectors;
 /**
  * Implementation of the UserManagementService interface providing methods for managing user-related operations.
  */
-@ApplicationScoped
-@NoArgsConstructor
+@Service
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     /**
      * User DAO.
      * This DAO is responsible for data access operations related to users.
      */
-    private UserDao userDao;
+    private final UserDao userDao;
 
     /**
      * Service for role-related operations.
      */
-    private RoleService roleService;
+    private final RoleService roleService;
 
     /**
      * Service for audit-related operations.
      */
-    private AuditService auditService;
+    private final AuditService auditService;
 
     /**
      * Authorized User Session.
      * This session represents the currently authorized user.
      */
-    private JwtTokenService jwtTokenService;
-
-    @Inject
-    public UserServiceImpl(UserDao userDao, RoleService roleService,
-                           AuditService auditService, JwtTokenService jwtTokenService) {
-        this.userDao = userDao;
-        this.roleService = roleService;
-        this.auditService = auditService;
-        this.jwtTokenService = jwtTokenService;
-    }
+    private final JwtTokenService jwtTokenService;
+    private final JwtUserDetailsService jwtUserDetailsService;
 
     @Override
     @Timed
     @Loggable
+    @Transactional
     public User registerUser(RegistrationDto registrationDto) {
         userDao.findByEmail(registrationDto.getEmail())
                 .ifPresent(u -> {
@@ -85,16 +80,12 @@ public class UserServiceImpl implements UserService {
         if (loginDto.getEmail() == null || loginDto.getPassword() == null) {
             throw new InvalidInputException("Обязательно должны быть поля email и password");
         }
-        User user = userDao.findByEmail(loginDto.getEmail())
-                .orElseThrow(() -> new NotFoundException("There is no user with this login in the database."));
-
-        if (user.getPassword() != null && !user.getPassword().equals(loginDto.getPassword())) {
+        UserDetails userDetails = jwtUserDetailsService.loadUserByUsername(loginDto.getEmail());
+        if (userDetails.getPassword() != null && !userDetails.getPassword().equals(loginDto.getPassword())) {
             throw new AuthorizeException("Incorrect password.");
         }
-
-        String accessToken = jwtTokenService.createAccessToken(loginDto.getEmail(), user.getRole());
-        String refreshToken = jwtTokenService.createRefreshToken(loginDto.getEmail(), user.getRole());
-        jwtTokenService.authentication(accessToken);
+        String accessToken = jwtTokenService.createAccessToken(userDetails);
+        String refreshToken = jwtTokenService.createRefreshToken(userDetails);
 
         return new JwtResponse(loginDto.getEmail(), accessToken, refreshToken);
     }
@@ -103,6 +94,7 @@ public class UserServiceImpl implements UserService {
     @Auditable
     @Loggable
     @Timed
+    @Transactional
     public User changeUserPermissions(String uuidStr, ChangeUserRightsDto changeUserRightsDto) {
         Role role = changeUserRightsDto.newRole();//getRole(roleStr);
         int roleId = roleService.getIdByName(role);

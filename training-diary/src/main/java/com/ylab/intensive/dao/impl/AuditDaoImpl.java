@@ -1,31 +1,59 @@
 package com.ylab.intensive.dao.impl;
 
 import com.ylab.intensive.dao.AuditDao;
-import com.ylab.intensive.config.ConnectionManager;
 import com.ylab.intensive.model.Pageable;
 import com.ylab.intensive.model.entity.Audit;
-import com.ylab.intensive.util.SQLExceptionUtil;
-import jakarta.enterprise.context.ApplicationScoped;
-import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Repository;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Implementation class for {@link AuditDao}.
  */
 @Log4j2
-@ApplicationScoped
-@NoArgsConstructor
+@Repository
+@RequiredArgsConstructor
 public class AuditDaoImpl implements AuditDao {
 
+    private final JdbcTemplate jdbcTemplate;
+
     @Override
+    public List<Audit> getUserActions(int userId, Pageable pageable) {
+        String FIND_ALL_AUDIT = """
+            SELECT a.id, a.user_id, a.date_of_action, a.action
+            FROM internal.audit a
+            WHERE a.user_id = ?
+            ORDER BY a.id
+            LIMIT ? OFFSET ?
+            """;
+
+        int offset = pageable.getPage() * pageable.getCount();
+        List<Audit> actions = jdbcTemplate.query(FIND_ALL_AUDIT,
+                new Object[]{userId, pageable.getCount(), offset},
+                (rs, rowNum) -> new Audit(
+                        rs.getInt("id"),
+                        rs.getInt("user_id"),
+                        rs.getTimestamp("date_of_action").toLocalDateTime(),
+                        rs.getString("action")
+                ));
+
+        return actions;
+    }
+
+    @Override
+    public void insertUserAction(int userId, String action) {
+        String SAVE = """
+            INSERT INTO internal.audit(user_id, action, date_of_action)
+            VALUES (?, ?, CURRENT_TIMESTAMP)
+            """;
+
+        jdbcTemplate.update(SAVE, userId, action);
+    }
+
+    /*@Override
     public List<Audit> getUserActions(int userId, Pageable pageable) {
         List<Audit> actions = new ArrayList<>();
         int offset = pageable.getPage() * pageable.getCount();
@@ -81,5 +109,5 @@ public class AuditDaoImpl implements AuditDao {
         } catch (SQLException exc) {
             SQLExceptionUtil.handleSQLException(exc, log);
         }
-    }
+    }*/
 }

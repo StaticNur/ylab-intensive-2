@@ -1,121 +1,78 @@
 package com.ylab.intensive.in.filters;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ylab.intensive.exception.AuthorizeException;
+import com.ylab.intensive.exception.InvalidTokenException;
+import com.ylab.intensive.in.security.JwtTokenService;
 import com.ylab.intensive.model.dto.ExceptionResponse;
-import com.ylab.intensive.model.Authentication;
-import com.ylab.intensive.security.JwtTokenService;
-import com.ylab.intensive.util.Converter;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-import jakarta.servlet.*;
-import jakarta.servlet.annotation.WebFilter;
-import jakarta.servlet.annotation.WebInitParam;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import com.ylab.intensive.model.enums.Role;
+import io.jsonwebtoken.ExpiredJwtException;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
 
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Set;
+import java.util.Collections;
 
-import static com.ylab.intensive.model.enums.Endpoints.LOGIN;
-import static com.ylab.intensive.model.enums.Endpoints.REGISTRATION;
+@Component
+@RequiredArgsConstructor
+public class JwtTokenFilter extends OncePerRequestFilter {
 
-/**
- * Filter for validating JWT tokens and handling authentication.
- * <p>
- * This filter intercepts requests and checks for a valid JWT token in the Authorization header.
- * If a valid token is found, it extracts the authentication details and sets them in the servlet context.
- * Requests to public paths are allowed without authentication.
- * </p>
- *
- * @since 1.0
- */
-@WebFilter(urlPatterns = "/*", initParams = @WebInitParam(name = "order", value = "1"))
-@ApplicationScoped
-public class JwtTokenFilter implements Filter {
-
-    /**
-     * Set of public paths that do not require authentication.
-     */
-    private static final Set<String> PUBLIC_PATH = Set.of(LOGIN.getPath(), REGISTRATION.getPath());
-
-    /**
-     * Service for handling JWT tokens.
-     */
-    private JwtTokenService jwtTokenService;
-
-    /**
-     * Converter for converting objects to JSON.
-     */
-    private Converter converter;
-
-    /**
-     * Servlet context for accessing the servlet container's context attributes.
-     */
-    private ServletContext servletContext;
-
-
-    @Inject
-    public void init(JwtTokenService jwtTokenService, Converter converter) {
-        this.jwtTokenService = jwtTokenService;
-        this.converter = converter;
-    }
+    private final JwtTokenService jwtTokenService;
+    private final ObjectMapper jacksonMapper;
 
     @Override
-    public void init(FilterConfig filterConfig) throws ServletException {
-        servletContext = filterConfig.getServletContext();
-    }
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        String authHeader = request.getHeader("Authorization");
+        String email = null;
+        String jwt = null;
 
-    /**
-     * Filters requests to validate JWT tokens and handle authentication.
-     * <p>
-     * This method intercepts incoming requests, checks for a valid JWT token in the Authorization header,
-     * and validates it. If the token is valid, the authentication details are extracted and set in the servlet context.
-     * Requests to public paths are allowed without authentication.
-     * </p>
-     *
-     * @param servletRequest  the request to be filtered.
-     * @param servletResponse the response to be filtered.
-     * @param filterChain     the filter chain for invoking the next filter in the chain.
-     * @throws IOException      if an I/O error occurs during the filtering process.
-     * @throws ServletException if a servlet exception occurs during the filtering process.
-     */
-    @Override
-    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse,
-                         FilterChain filterChain) throws IOException, ServletException {
-        HttpServletRequest httpRequest = (HttpServletRequest) servletRequest;
-        HttpServletResponse httpResponse = (HttpServletResponse) servletResponse;
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            jwt = authHeader.substring(7).trim();
 
-        if (isPublicPath(httpRequest.getRequestURI())) {
-            filterChain.doFilter(servletRequest, servletResponse);
-            return;
+            if (!jwt.isEmpty()) {
+                try {
+                    email = jwtTokenService.extractEmail(jwt);
+                } catch (ExpiredJwtException exception) {
+                    sendResponse(response, "The token's lifetime has expired.");
+                    return;
+                } catch (InvalidTokenException | AuthorizeException e) {
+                    sendResponse(response, e.getMessage());
+                    return;
+
+                }
+            }
         }
 
-        String bearerToken = httpRequest.getHeader("Authorization");
-        if (bearerToken != null && bearerToken.startsWith("Bearer ")
-            && jwtTokenService.validateToken(bearerToken.substring(7))) {
-
-            Authentication authentication = jwtTokenService.authentication(bearerToken.substring(7));
-            servletContext.setAttribute("authentication", authentication);
-
-            filterChain.doFilter(servletRequest, servletResponse);
-        } else {
-            httpResponse.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            httpResponse.getWriter()
-                    .append(converter.convertObjectToJson(
-                            new ExceptionResponse("Authentication was denied for this request.")));
+        if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            try {
+                Role role = jwtTokenService.extractRoles(jwt);
+                UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(email, null, Collections.singleton(new SimpleGrantedAuthority(role.name())));
+                SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+            } catch (RuntimeException e) {
+                sendResponse(response, e.getMessage());
+                return;
+            }
         }
+        filterChain.doFilter(request, response);
     }
 
-    /**
-     * Checks if a request path is a public path.
-     * <p>
-     * This method determines whether a given request path corresponds to a public path,
-     * where authentication is not required.
-     * </p>
-     *
-     * @param uri the request path to be checked.
-     * @return {@code true} if the path is a public path, {@code false} otherwise.
-     */
-    private boolean isPublicPath(String uri) {
-        return PUBLIC_PATH.stream().anyMatch(uri::startsWith);
+
+    private void sendResponse(HttpServletResponse response, String message) throws IOException {
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.setContentType("application/json");
+
+        ExceptionResponse exceptionResponse = new ExceptionResponse(message);
+        String jsonResponse = jacksonMapper.writeValueAsString(exceptionResponse);
+        response.getWriter().write(jsonResponse);
     }
+
 }
+

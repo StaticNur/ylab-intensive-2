@@ -1,3 +1,4 @@
+/*
 package com.ylab.intensive.in.servlets;
 
 import com.ylab.intensive.model.dto.StatisticsDto;
@@ -87,3 +88,4 @@ class StatisticsServletTest {
         assertEquals("{\"statistics\":\"data\"}", stringWriter.toString());
     }
 }
+*/

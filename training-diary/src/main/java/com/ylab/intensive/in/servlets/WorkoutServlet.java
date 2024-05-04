@@ -1,3 +1,4 @@
+/*
 package com.ylab.intensive.in.servlets;
 
 import com.ylab.intensive.mapper.WorkoutMapper;
@@ -20,6 +21,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.regex.Pattern;
 
+*/
 /**
  * Servlet for handling workout-related operations.
  * <p>
@@ -29,7 +31,8 @@ import java.util.regex.Pattern;
  * </p>
  *
  * @since 1.0
- */
+ *//*
+
 @WebServlet("/training-diary/workouts/*")
 @ApplicationScoped
 @NoArgsConstructor
@@ -39,14 +42,16 @@ public class WorkoutServlet extends HttpServlet {
     private WorkoutMapper workoutMapper;
     private Converter converter;
 
-    /**
+    */
+/**
      * Injects dependencies into the servlet.
      *
      * @param workoutService    the service for workout-related operations.
      * @param validationService the service for validating user input.
      * @param workoutMapper     the mapper for mapping workout entities to DTOs.
      * @param converter         the converter for converting objects to JSON.
-     */
+     *//*
+
     @Inject
     public void inject(WorkoutService workoutService, ValidationService validationService,
                        WorkoutMapper workoutMapper, Converter converter) {
@@ -56,13 +61,15 @@ public class WorkoutServlet extends HttpServlet {
         this.converter = converter;
     }
 
-    /**
+    */
+/**
      * Handles HTTP GET requests to retrieve all workouts for the authenticated user.
      *
      * @param req  the HTTP servlet request.
      * @param resp the HTTP servlet response.
      * @throws IOException if an I/O error occurs while handling the request.
-     */
+     *//*
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         Authentication authentication = (Authentication) (req.getServletContext()).getAttribute("authentication");
@@ -72,13 +79,15 @@ public class WorkoutServlet extends HttpServlet {
                 .append(converter.convertObjectToJson(workouts));
     }
 
-    /**
+    */
+/**
      * Handles HTTP POST requests to add a new workout for the authenticated user.
      *
      * @param req  the HTTP servlet request.
      * @param resp the HTTP servlet response.
      * @throws IOException if an I/O error occurs while handling the request.
-     */
+     *//*
+
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         Authentication authentication = (Authentication) (req.getServletContext()).getAttribute("authentication");
@@ -97,13 +106,15 @@ public class WorkoutServlet extends HttpServlet {
         }
     }
 
-    /**
+    */
+/**
      * Handles HTTP PUT requests to update an existing workout for the authenticated user.
      *
      * @param req  the HTTP servlet request.
      * @param resp the HTTP servlet response.
      * @throws IOException if an I/O error occurs while handling the request.
-     */
+     *//*
+
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         Authentication authentication = (Authentication) (req.getServletContext()).getAttribute("authentication");
@@ -128,13 +139,15 @@ public class WorkoutServlet extends HttpServlet {
         }
     }
 
-    /**
+    */
+/**
      * Handles HTTP DELETE requests to delete an existing workout for the authenticated user.
      *
      * @param req  the HTTP servlet request.
      * @param resp the HTTP servlet response.
      * @throws IOException if an I/O error occurs while handling the request.
-     */
+     *//*
+
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         Authentication authentication = (Authentication) (req.getServletContext()).getAttribute("authentication");
@@ -152,24 +165,28 @@ public class WorkoutServlet extends HttpServlet {
         }
     }
 
-    /**
+    */
+/**
      * Checks if the provided UUID is in a valid format.
      *
      * @param uuid the UUID string to validate.
      * @return true if the UUID is in a valid format; false otherwise.
-     */
+     *//*
+
     private boolean isValidUUID(String uuid) {
         Pattern pattern = Pattern.compile("[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}");
         return pattern.matcher(uuid).matches();
     }
 
-    /**
+    */
+/**
      * Sends error message as response.
      *
      * @param resp   the HTTP servlet response.
      * @param object the object representing the error response.
      * @throws IOException if an I/O error occurs while sending the response.
-     */
+     *//*
+
     private void sendErrorMessage(HttpServletResponse resp, Object object) throws IOException {
         resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         resp.getWriter()
@@ -177,3 +194,4 @@ public class WorkoutServlet extends HttpServlet {
     }
 }
 
+*/

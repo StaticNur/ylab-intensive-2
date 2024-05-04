@@ -1,5 +1,6 @@
 package com.ylab.intensive.model.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,15 +16,12 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ValidationError {
-    /**
-     * The name of the field where the validation error occurred.
-     */
-    private String field;
+public class CustomFieldError {
 
-    /**
-     * The error message describing the validation failure.
-     */
-    private String message;
+    @JsonProperty("defaultMessage")
+    private String defaultMessage;
+
+    @JsonProperty("field")
+    private String field;
 }
 

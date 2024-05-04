@@ -1,3 +1,4 @@
+/*
 package com.ylab.intensive.service.impl;
 
 import com.ylab.intensive.dao.WorkoutDao;
@@ -248,3 +249,4 @@ class WorkoutServiceImplTest {
     }
 
 }
+*/

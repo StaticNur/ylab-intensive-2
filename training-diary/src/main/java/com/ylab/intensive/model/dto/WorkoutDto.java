@@ -2,14 +2,14 @@ package com.ylab.intensive.model.dto;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.ylab.intensive.util.validation.DurationDeserializer;
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 import java.time.Duration;
 import java.util.Map;
 import java.util.UUID;

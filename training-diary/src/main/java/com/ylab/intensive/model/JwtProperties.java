@@ -1,6 +1,10 @@
 package com.ylab.intensive.model;
 
+import com.ylab.intensive.util.YamlPropertiesUtilFactory;
 import lombok.Data;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.stereotype.Component;
 
 /**
  * Represents properties used for JWT token generation and validation.
@@ -11,20 +15,14 @@ import lombok.Data;
  *
  * @since 1.0
  */
+@Component
 @Data
+@PropertySource(value = "classpath:application.yml", factory = YamlPropertiesUtilFactory.class)
 public class JwtProperties {
-    /**
-     * The secret key used for signing JWT tokens.
-     */
+    @Value("${jwt.secret}")
     private String secret;
-
-    /**
-     * The expiration time (in milliseconds) for access tokens.
-     */
+    @Value("${jwt.access}")
     private Long access;
-
-    /**
-     * The expiration time (in milliseconds) for refresh tokens.
-     */
+    @Value("${jwt.refresh}")
     private Long refresh;
 }

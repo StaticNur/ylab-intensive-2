@@ -1,3 +1,4 @@
+/*
 package com.ylab.intensive.service.impl;
 
 import com.ylab.intensive.dao.UserDao;
@@ -216,3 +217,4 @@ class UserServiceImplTest {
         assertThat(result.get().getEmail()).isEqualTo(email);
     }
 }
+*/

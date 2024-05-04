@@ -1,3 +1,4 @@
+/*
 package com.ylab.intensive.in.servlets;
 
 import com.ylab.intensive.mapper.UserMapper;
@@ -108,3 +109,4 @@ class AuthServletTest {
         assertEquals("{\"error\":\"Not found endpoint.\"}", stringWriter.toString());
     }
 }
+*/

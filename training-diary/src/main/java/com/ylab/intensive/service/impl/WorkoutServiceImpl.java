@@ -11,9 +11,9 @@ import com.ylab.intensive.model.entity.Workout;
 import com.ylab.intensive.model.entity.WorkoutInfo;
 import com.ylab.intensive.model.entity.WorkoutType;
 import com.ylab.intensive.service.*;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDate;
@@ -23,47 +23,38 @@ import java.util.*;
 /**
  * Implementation of the WorkoutService interface providing methods for managing workout-related operations.
  */
-@ApplicationScoped
-@NoArgsConstructor
+@Service
+@RequiredArgsConstructor
 public class WorkoutServiceImpl implements WorkoutService {
     /**
      * Workout DAO.
      * This DAO is responsible for data access operations related to workouts.
      */
-    private WorkoutDao workoutDao;
+    private final WorkoutDao workoutDao;
 
     /**
      * User Management Service.
      * This service provides functionality for managing user-related operations.
      */
-    private UserService userService;
+    private final UserService userService;
 
     /**
      * Workout Information Service.
      * This service provides functionality for managing workout information.
      */
-    private WorkoutInfoService workoutInfoService;
+    private final WorkoutInfoService workoutInfoService;
 
     /**
      * Workout Type Service.
      * This service provides functionality for managing workout types.
      */
-    private WorkoutTypeService workoutTypeService;
-
-    @Inject
-    public WorkoutServiceImpl(WorkoutDao workoutDao, UserService userService,
-                              WorkoutInfoService workoutInfoService,
-                              WorkoutTypeService workoutTypeService) {
-        this.workoutDao = workoutDao;
-        this.userService = userService;
-        this.workoutInfoService = workoutInfoService;
-        this.workoutTypeService = workoutTypeService;
-    }
+    private final WorkoutTypeService workoutTypeService;
 
     @Override
     @Auditable
     @Loggable
     @Timed
+    @Transactional
     public WorkoutDto addWorkout(String email, WorkoutDto workoutDto) {
         int userId = getAuthorizedUserId(email);
         String type = workoutDto.getType();
@@ -101,6 +92,7 @@ public class WorkoutServiceImpl implements WorkoutService {
     @Auditable
     @Loggable
     @Timed
+    @Transactional
     public Workout addWorkoutInfo(String uuidStr, WorkoutInfoDto workoutInfoDto) {
         UUID uuid = convertToUUID(uuidStr);
         Workout workout = workoutDao.findByUUID(uuid)
@@ -145,6 +137,7 @@ public class WorkoutServiceImpl implements WorkoutService {
     }
 
     @Override
+    @Transactional
     public Workout updateWorkout(String email, String uuidStr, EditWorkout editWorkout) {
         UUID uuid = convertToUUID(uuidStr);
         Workout workout = workoutDao.findByUUID(uuid)
@@ -213,6 +206,7 @@ public class WorkoutServiceImpl implements WorkoutService {
     @Auditable
     @Loggable
     @Timed
+    @Transactional
     public void deleteWorkout(String email, String uuidStr) {
         UUID uuid = convertToUUID(uuidStr);
         int userId = getAuthorizedUserId(email);
@@ -270,6 +264,7 @@ public class WorkoutServiceImpl implements WorkoutService {
     @Auditable
     @Loggable
     @Timed
+    @Transactional
     public WorkoutType saveWorkoutType(String login, String typeName) {
         int userId = getAuthorizedUserId(login);
         return workoutTypeService.saveType(userId, typeName);

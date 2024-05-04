@@ -1,3 +1,4 @@
+/*
 package com.ylab.intensive.in.filters;
 
 import com.ylab.intensive.aspects.annotation.Loggable;
@@ -18,6 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.DataFormatException;
 
+*/
 /**
  * {@code ExceptionHandlerFilter} is a servlet filter responsible for handling exceptions
  * thrown during the processing of requests. It catches specified runtime exceptions and
@@ -46,7 +48,8 @@ import java.util.zip.DataFormatException;
  * @see ApplicationScoped
  * @see Log4j2
  * @see Loggable
- */
+ *//*
+
 @WebFilter(filterName = "a_exception_handler", urlPatterns = "/*",
         initParams = @WebInitParam(name = "order", value = "2"))
 @ApplicationScoped
@@ -56,19 +59,23 @@ public class ExceptionHandlerFilter implements Filter {
     private Converter converter;
     private static final Map<Class<? extends Exception>, Integer> exceptions = new HashMap<>();
 
-    /**
+    */
+/**
      * Injects the {@code Converter} instance into the filter.
      *
      * @param converter The {@code Converter} instance to be injected.
-     */
+     *//*
+
     @Inject
     public void inject(Converter converter) {
         this.converter = converter;
     }
 
-    /**
+    */
+/**
      * Default list of exception classes to catch.
-     */
+     *//*
+
     static  {
         exceptions.put(RegistrationException.class, HttpServletResponse.SC_BAD_REQUEST);
         exceptions.put(AuthorizeException.class, HttpServletResponse.SC_BAD_REQUEST);
@@ -89,7 +96,8 @@ public class ExceptionHandlerFilter implements Filter {
 
     }
 
-    /**
+    */
+/**
      * Processes the request by invoking the next filter in the chain. Catches runtime exceptions
      * and customizes the HTTP response accordingly.
      *
@@ -98,7 +106,8 @@ public class ExceptionHandlerFilter implements Filter {
      * @param filterChain     The filter chain.
      * @throws IOException      If an I/O error occurs.
      * @throws ServletException If a servlet-related exception occurs.
-     */
+     *//*
+
     @Override
     @Loggable
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse,
@@ -118,3 +127,4 @@ public class ExceptionHandlerFilter implements Filter {
         }
     }
 }
+*/

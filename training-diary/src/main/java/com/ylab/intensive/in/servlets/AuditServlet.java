@@ -1,3 +1,4 @@
+/*
 package com.ylab.intensive.in.servlets;
 
 import com.ylab.intensive.model.Pageable;
@@ -15,12 +16,14 @@ import lombok.NoArgsConstructor;
 
 import java.io.IOException;
 
+*/
 /**
  * The AuditServlet class is a servlet responsible for retrieving and displaying audit logs of user actions.
  * <p>
  * This servlet allows users to view audit logs of their actions by sending a GET request to the "training-diary/user/audit" endpoint.
  * The servlet retrieves the audit logs from the AuditService, converts them to DTOs, and returns them in JSON format.
- */
+ *//*
+
 @WebServlet("/training-diary/user/audit")
 @ApplicationScoped
 @NoArgsConstructor
@@ -36,13 +39,15 @@ public class AuditServlet extends HttpServlet {
         this.converter = converter;
     }
 
-    /**
+    */
+/**
      * Handles GET requests to show audit logs of user actions.
      *
      * @param req  the HTTP servlet request
      * @param resp the HTTP servlet response
      * @throws IOException if an I/O error occurs during request processing
-     */
+     *//*
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         int page = converter.getInteger(req, "page");
@@ -55,3 +60,4 @@ public class AuditServlet extends HttpServlet {
                 .append(converter.convertObjectToJson(audit));
     }
 }
+*/

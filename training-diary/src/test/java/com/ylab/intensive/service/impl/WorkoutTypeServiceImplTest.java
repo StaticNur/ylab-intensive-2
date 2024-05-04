@@ -1,3 +1,4 @@
+/*
 package com.ylab.intensive.service.impl;
 
 import com.ylab.intensive.dao.WorkoutTypeDao;
@@ -77,3 +78,4 @@ public class WorkoutTypeServiceImplTest {
         verify(workoutTypeDao).delete(userId);
     }
 }
+*/

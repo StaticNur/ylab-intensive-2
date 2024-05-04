@@ -4,11 +4,13 @@ import com.ylab.intensive.dao.UserDao;
 import com.ylab.intensive.exception.DaoException;
 import com.ylab.intensive.model.entity.User;
 import com.ylab.intensive.model.enums.Role;
-import com.ylab.intensive.config.ConnectionManager;
-import com.ylab.intensive.util.SQLExceptionUtil;
-import jakarta.enterprise.context.ApplicationScoped;
-import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.stereotype.Repository;
 
 import java.sql.*;
 import java.util.*;
@@ -18,11 +20,74 @@ import java.util.*;
  * This class provides methods to interact with user data in the database.
  */
 @Log4j2
-@ApplicationScoped
-@NoArgsConstructor
+@Repository
+@RequiredArgsConstructor
 public class UserDaoImpl implements UserDao {
 
+    private final JdbcTemplate jdbcTemplate;
+
     @Override
+    public User save(User user, int roleId) {
+        String INSERT_USER = "INSERT INTO internal.user (uuid, email, password, role_id) VALUES (?, ?, ?, ?)";
+
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        jdbcTemplate.update(INSERT_USER, user.getUuid(), user.getEmail(), user.getPassword(), roleId, keyHolder);
+        if (keyHolder.getKey() != null) {
+            user.setId(keyHolder.getKey().intValue());
+        } else {
+            throw new DaoException("Creating user failed, no ID obtained.");
+        }
+        return user;
+    }
+
+    @Override
+    public Optional<User> findByEmail(String email) {
+        String FIND_BY_EMAIL = """
+            SELECT u.id as user_id, u.uuid, u.email, u.password, u.role_id
+            FROM internal.user u
+            WHERE u.email = ?
+            """;
+
+        List<User> users = jdbcTemplate.query(FIND_BY_EMAIL, new Object[]{email}, (rs, rowNum) -> buildUser(rs));
+        return users.stream().findFirst();
+    }
+    @Override
+    public Optional<User> findByUUID(UUID uuid) {
+        String FIND_BY_UUID = """
+                SELECT u.id as user_id, u.uuid, u.email, u.password, u.role_id
+                FROM internal.user u
+                WHERE u.uuid = ?
+                """;
+        List<User> users = jdbcTemplate.query(FIND_BY_UUID, new Object[]{uuid}, (rs, rowNum) -> buildUser(rs));
+        return users.stream().findFirst();
+    }
+
+    @Override
+    public boolean updateUserRole(UUID uuid, int roleId) {
+        String UPDATE_USER_ROLE = "UPDATE internal.user SET role_id = ? WHERE uuid = ?";
+        int rowsAffected = jdbcTemplate.update(UPDATE_USER_ROLE, roleId, uuid);
+        return rowsAffected > 0;
+    }
+
+    @Override
+    public List<User> findAll() {
+        String FIND_ALL_USERS = "SELECT u.id as user_id, u.uuid, u.email, u.password, u.role_id FROM internal.user u";
+        return jdbcTemplate.query(FIND_ALL_USERS, (rs, rowNum) -> buildUser(rs));
+    }
+
+    private User buildUser(ResultSet rs) throws SQLException {
+        User user = new User();
+        user.setId(rs.getInt("user_id"));
+        user.setUuid((UUID) rs.getObject("uuid"));
+        user.setEmail(rs.getString("email"));
+        user.setPassword(rs.getString("password"));
+        user.setWorkouts(new ArrayList<>());
+        user.setAction(new ArrayList<>());
+        user.setRole(Role.fromValue(rs.getString("role_id")));
+        return user;
+    }
+
+    /*@Override
     public User save(User user, int roleId) {
         String INSERT_USER = "INSERT INTO internal.user (uuid, email, password, role_id) VALUES (?, ?, ?, ?)";
 
@@ -152,5 +217,5 @@ public class UserDaoImpl implements UserDao {
         user.setAction(new ArrayList<>());
         user.setRole(Role.fromValue(resultSet.getString("role_id")));
         return user;
-    }
+    }*/
 }

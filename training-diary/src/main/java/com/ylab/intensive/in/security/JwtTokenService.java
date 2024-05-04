@@ -1,8 +1,8 @@
-package com.ylab.intensive.security;
+package com.ylab.intensive.in.security;
 
-import com.ylab.intensive.model.Authentication;
 import com.ylab.intensive.model.dto.JwtResponse;
 import com.ylab.intensive.model.enums.Role;
+import org.springframework.security.core.userdetails.UserDetails;
 
 /**
  * Service interface for JWT token management.
@@ -15,23 +15,10 @@ import com.ylab.intensive.model.enums.Role;
  */
 public interface JwtTokenService {
 
-    /**
-     * Creates an access token for the specified user login and role.
-     *
-     * @param login The user login.
-     * @param role  The user role.
-     * @return The generated access token.
-     */
-    String createAccessToken(String login, Role role);
+    String createAccessToken(UserDetails userDetails);
 
-    /**
-     * Creates a refresh token for the specified user login and role.
-     *
-     * @param login The user login.
-     * @param role  The user role.
-     * @return The generated refresh token.
-     */
-    String createRefreshToken(String login, Role role);
+
+    String createRefreshToken(UserDetails userDetail);
 
     /**
      * Refreshes the user tokens using the provided refresh token.
@@ -40,14 +27,6 @@ public interface JwtTokenService {
      * @return The refreshed JWT response containing new access and refresh tokens.
      */
     JwtResponse refreshUserTokens(String refreshToken);
-
-    /**
-     * Authenticates a user based on the provided token.
-     *
-     * @param token The JWT token.
-     * @return The authentication details of the user.
-     */
-    Authentication authentication(String token);
 
     /**
      * Validates the provided JWT token.

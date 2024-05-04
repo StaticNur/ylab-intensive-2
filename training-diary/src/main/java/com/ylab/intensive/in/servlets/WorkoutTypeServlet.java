@@ -1,3 +1,4 @@
+/*
 package com.ylab.intensive.in.servlets;
 
 import com.ylab.intensive.mapper.WorkoutTypeMapper;
@@ -19,6 +20,7 @@ import lombok.NoArgsConstructor;
 import java.io.IOException;
 import java.util.List;
 
+*/
 /**
  * Servlet for handling workout type-related operations.
  * <p>
@@ -27,7 +29,8 @@ import java.util.List;
  * </p>
  *
  * @since 1.0
- */
+ *//*
+
 @WebServlet("/training-diary/workouts/type")
 @ApplicationScoped
 @NoArgsConstructor
@@ -37,14 +40,16 @@ public class WorkoutTypeServlet extends HttpServlet {
     private WorkoutTypeMapper workoutTypeMapper;
     private Converter converter;
 
-    /**
+    */
+/**
      * Injects dependencies into the servlet.
      *
      * @param workoutService     the service for workout-related operations.
      * @param validationService  the service for validating user input.
      * @param workoutTypeMapper  the mapper for mapping workout types to DTOs.
      * @param converter          the converter for converting objects to JSON.
-     */
+     *//*
+
     @Inject
     public void inject(WorkoutService workoutService, ValidationService validationService,
                        WorkoutTypeMapper workoutTypeMapper, Converter converter) {
@@ -54,13 +59,15 @@ public class WorkoutTypeServlet extends HttpServlet {
         this.converter = converter;
     }
 
-    /**
+    */
+/**
      * Handles HTTP GET requests to retrieve all workout types for the authenticated user.
      *
      * @param req  the HTTP servlet request.
      * @param resp the HTTP servlet response.
      * @throws IOException if an I/O error occurs while handling the request.
-     */
+     *//*
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         Authentication authentication = (Authentication) (req.getServletContext()).getAttribute("authentication");
@@ -71,13 +78,15 @@ public class WorkoutTypeServlet extends HttpServlet {
 
     }
 
-    /**
+    */
+/**
      * Handles HTTP POST requests to add a new workout type for the authenticated user.
      *
      * @param req  the HTTP servlet request.
      * @param resp the HTTP servlet response.
      * @throws IOException if an I/O error occurs while handling the request.
-     */
+     *//*
+
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         Authentication authentication = (Authentication) (req.getServletContext()).getAttribute("authentication");
@@ -97,3 +106,4 @@ public class WorkoutTypeServlet extends HttpServlet {
         }
     }
 }
+*/

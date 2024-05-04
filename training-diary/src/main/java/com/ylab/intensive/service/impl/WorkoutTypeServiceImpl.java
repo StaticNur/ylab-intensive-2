@@ -8,9 +8,9 @@ import com.ylab.intensive.exception.NotFoundException;
 import com.ylab.intensive.exception.WorkoutTypeException;
 import com.ylab.intensive.model.entity.WorkoutType;
 import com.ylab.intensive.service.WorkoutTypeService;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -18,24 +18,20 @@ import java.util.Optional;
 /**
  * Implementation class for {@link WorkoutTypeService}.
  */
-@ApplicationScoped
-@NoArgsConstructor
+@Service
+@RequiredArgsConstructor
 public class WorkoutTypeServiceImpl implements WorkoutTypeService {
 
     /**
      * Data access object for workout type operations.
      */
-    private WorkoutTypeDao workoutTypeDao;
-
-    @Inject
-    public WorkoutTypeServiceImpl(WorkoutTypeDao workoutTypeDao) {
-        this.workoutTypeDao = workoutTypeDao;
-    }
+    private final WorkoutTypeDao workoutTypeDao;
 
     @Override
     @Auditable
     @Loggable
     @Timed
+    @Transactional
     public WorkoutType saveType(int userId, String typeName) {
         Optional<WorkoutType> workoutType = workoutTypeDao.findByType(typeName);
         if (workoutType.isPresent()) {
@@ -50,6 +46,7 @@ public class WorkoutTypeServiceImpl implements WorkoutTypeService {
     }
 
     @Override
+    @Transactional
     public void updateType(int userId, String oldType, String newType) {
         workoutTypeDao.updateType(userId, oldType, newType);
     }
@@ -61,6 +58,7 @@ public class WorkoutTypeServiceImpl implements WorkoutTypeService {
     }
 
     @Override
+    @Transactional
     public void delete(int userId) {
         workoutTypeDao.delete(userId);
     }

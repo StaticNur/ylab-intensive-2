@@ -1,3 +1,4 @@
+/*
 package com.ylab.intensive.in.servlets;
 
 import com.ylab.intensive.mapper.WorkoutMapper;
@@ -17,6 +18,7 @@ import lombok.NoArgsConstructor;
 import java.io.IOException;
 import java.util.regex.Pattern;
 
+*/
 /**
  * Servlet for handling workout information-related operations.
  * <p>
@@ -25,7 +27,8 @@ import java.util.regex.Pattern;
  * </p>
  *
  * @since 1.0
- */
+ *//*
+
 @WebServlet("/training-diary/workout-info/*")
 @ApplicationScoped
 @NoArgsConstructor
@@ -34,13 +37,15 @@ public class WorkoutInfoServlet extends HttpServlet {
     private WorkoutMapper workoutMapper;
     private Converter converter;
 
-    /**
+    */
+/**
      * Injects dependencies into the servlet.
      *
      * @param workoutService the service for workout-related operations.
      * @param workoutMapper  the mapper for mapping workout entities to DTOs.
      * @param converter      the converter for converting objects to JSON.
-     */
+     *//*
+
     @Inject
     public void inject(WorkoutService workoutService, WorkoutMapper workoutMapper,
                        Converter converter) {
@@ -49,13 +54,15 @@ public class WorkoutInfoServlet extends HttpServlet {
         this.converter = converter;
     }
 
-    /**
+    */
+/**
      * Handles HTTP POST requests.
      *
      * @param req  the HTTP servlet request.
      * @param resp the HTTP servlet response.
      * @throws IOException if an I/O error occurs while handling the request.
-     */
+     *//*
+
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String pathInfo = req.getPathInfo();
@@ -76,12 +83,14 @@ public class WorkoutInfoServlet extends HttpServlet {
         }
     }
 
-    /**
+    */
+/**
      * Sends error message as response when UUID is not correct.
      *
      * @param resp the HTTP servlet response.
      * @throws IOException if an I/O error occurs while sending the response.
-     */
+     *//*
+
     private void sendErrorMessage(HttpServletResponse resp) throws IOException {
         resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         resp.getWriter()
@@ -89,3 +98,4 @@ public class WorkoutInfoServlet extends HttpServlet {
                                                                             + " Maybe the 'uuid' is not correct")));
     }
 }
+*/

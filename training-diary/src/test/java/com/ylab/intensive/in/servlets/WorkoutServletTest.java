@@ -1,3 +1,4 @@
+/*
 package com.ylab.intensive.in.servlets;
 
 import com.ylab.intensive.mapper.WorkoutMapper;
@@ -147,3 +148,4 @@ class WorkoutServletTest {
         assertEquals("{\"message\":\"Workout deleted successfully\"}", stringWriter.toString());
     }
 }
+*/
