@@ -1,7 +1,7 @@
 package com.ylab.intensive.config;
 
 import com.ylab.intensive.in.filters.JwtTokenFilter;
-import com.ylab.intensive.in.security.JwtUserDetailsService;
+import com.ylab.intensive.service.security.impl.JwtUserDetailsService;
 import com.ylab.intensive.model.dto.ExceptionResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;

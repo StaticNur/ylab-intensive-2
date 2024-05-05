@@ -1,8 +1,8 @@
-package com.ylab.intensive.in.security.impl;
+package com.ylab.intensive.service.security.impl;
 
 import com.ylab.intensive.exception.AccessDeniedException;
 import com.ylab.intensive.exception.InvalidTokenException;
-import com.ylab.intensive.in.security.JwtTokenService;
+import com.ylab.intensive.service.security.JwtTokenService;
 import com.ylab.intensive.model.dto.JwtResponse;
 import com.ylab.intensive.model.enums.Role;
 import io.jsonwebtoken.Claims;

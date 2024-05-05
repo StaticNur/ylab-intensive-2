@@ -24,6 +24,7 @@ public class WorkoutInfoServiceImpl implements WorkoutInfoService {
      */
     private final WorkoutInfoDao workoutInfoDao;
 
+
     @Override
     @Loggable
     @Timed

@@ -1,11 +1,9 @@
 package com.ylab.intensive.in.filters;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ylab.intensive.aspects.annotation.Loggable;
-import com.ylab.intensive.aspects.annotation.Timed;
 import com.ylab.intensive.exception.AuthorizeException;
 import com.ylab.intensive.exception.InvalidTokenException;
-import com.ylab.intensive.in.security.JwtTokenService;
+import com.ylab.intensive.service.security.JwtTokenService;
 import com.ylab.intensive.model.dto.ExceptionResponse;
 import com.ylab.intensive.model.enums.Role;
 import io.jsonwebtoken.ExpiredJwtException;

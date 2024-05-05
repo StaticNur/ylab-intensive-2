@@ -8,6 +8,7 @@ import com.ylab.intensive.service.UserService;
 import com.ylab.intensive.util.validation.GeneratorResponseMessage;
 import io.swagger.annotations.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,10 +23,7 @@ import java.util.List;
  * Controller class for handling authentication operations.
  */
 @RestController
-@Api(value = "AuditController", tags = {"Audit Controller"})
-@SwaggerDefinition(tags = {
-        @Tag(name = "Audit Controller")
-})
+@Api(tags = "Authorization and Registration")
 @RequestMapping("/training-diary/auth")
 @RequiredArgsConstructor
 public class SecurityController {
@@ -48,11 +46,9 @@ public class SecurityController {
      * @return ResponseEntity containing the registered User object.
      */
     @PostMapping("/registration")
-    @ApiOperation(value = "returns Audit of user actions", responseContainer = "List")
-    @ApiResponses(value = {
-            @ApiResponse(code = 400, message = "Пользователь не найден. Подробности об ошибках содержатся в теле ответа.", response = ExceptionResponse.class),
-            @ApiResponse(code = 500, message = "Внутренняя ошибка сервера. Подробности об ошибке содержатся в теле ответа.", response = ExceptionResponse.class)
-    })
+    @ApiOperation(value = "User registration", response = UserDto.class)
+    @ApiResponse(code = 400, message = "Ошибка валидации. Подробности об ошибках содержатся в теле ответа.",
+            response = CustomFieldError.class, responseContainer = "List")
     @Auditable(action = "Спортсмен зарегистрировался в системе.")
     public ResponseEntity<?> register(@RequestBody @Valid RegistrationDto registrationDto,
                                       BindingResult bindingResult) {
@@ -61,7 +57,7 @@ public class SecurityController {
             return ResponseEntity.badRequest().body(customFieldErrors);
         }
         User user = userService.registerUser(registrationDto);
-        return ResponseEntity.ok(userMapper.toDto(user));
+        return ResponseEntity.status(HttpStatus.CREATED).body(userMapper.toDto(user));
     }
 
     /**
@@ -71,6 +67,9 @@ public class SecurityController {
      * @return ResponseEntity containing the authorization token.
      */
     @PostMapping("/login")
+    @ApiOperation(value = "User authorization", response = JwtResponse.class)
+    @ApiResponse(code = 400, message = "Ошибка валидации. Подробности об ошибках содержатся в теле ответа.",
+            response = CustomFieldError.class, responseContainer = "List")
     @Auditable(action = "Спортсмен авторизовался в системе.")
     public ResponseEntity<?> authorize(@RequestBody @Valid LoginDto loginDto, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {

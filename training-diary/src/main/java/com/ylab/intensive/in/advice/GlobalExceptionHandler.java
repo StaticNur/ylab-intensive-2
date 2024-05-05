@@ -7,47 +7,40 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.util.zip.DataFormatException;
-
-
 /**
  * Controller advice class to handle global exceptions and return appropriate error responses.
  */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler({
-            AccessDeniedException.class,
-            ChangeUserPermissionsException.class
-    })
-    ResponseEntity<ExceptionResponse> handleAuthorizeException(RuntimeException exception) {
+    @ExceptionHandler(AccessDeniedException.class)
+    ResponseEntity<ExceptionResponse> handleAccessDeniedException(AccessDeniedException exception) {
         return buildErrorResponse(HttpStatus.FORBIDDEN, exception.getMessage());
     }
 
-    @ExceptionHandler(DaoException.class)
-    ResponseEntity<ExceptionResponse> handleDuplicateRecordException(DaoException exception) {
-        return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, exception.getMessage());
+    @ExceptionHandler(AuthorizeException.class)
+    ResponseEntity<ExceptionResponse> handleAccessDeniedException(AuthorizeException exception) {
+        return buildErrorResponse(HttpStatus.UNAUTHORIZED, exception.getMessage());
     }
 
     @ExceptionHandler({
-            RegistrationException.class,
-            AuthorizeException.class,
-            InvalidTokenException.class,
-            DataFormatException.class,
-            InvalidUUIDException.class,
-            TrainingTypeException.class,
-            WorkoutException.class,
-            WorkoutInfoException.class,
-            WorkoutTypeException.class,
-            NotFoundException.class,
             InvalidInputException.class,
+            InvalidTokenException.class,
+            RegistrationException.class,
+            WorkoutException.class,
+            WorkoutTypeException.class
     })
-    ResponseEntity<ExceptionResponse> handleInvalidCredentialsException(RuntimeException exception) {
+    ResponseEntity<ExceptionResponse> handleAccessDeniedException(CustomExceptionForBadRequest exception) {
         return buildErrorResponse(HttpStatus.BAD_REQUEST, exception.getMessage());
     }
 
-    @ExceptionHandler(RuntimeException.class)
-    ResponseEntity<ExceptionResponse> handleUserNotFoundException(RuntimeException exception) {
+    @ExceptionHandler(NotFoundException.class)
+    ResponseEntity<ExceptionResponse> handleAccessDeniedException(NotFoundException exception) {
+        return buildErrorResponse(HttpStatus.NOT_FOUND, exception.getMessage());
+    }
+
+    @ExceptionHandler(Exception.class)
+    ResponseEntity<ExceptionResponse> handleAccessDeniedException(Exception exception) {
         return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, exception.getMessage());
     }
 

@@ -69,13 +69,7 @@ public class WorkoutServiceImpl implements WorkoutService {
                 throw new WorkoutException("Тренировка типа " + typeOptional.get().getType()
                                            + " в " + date + " уже была добавлена! Ее теперь можно только редактировать.");
             }
-            Workout workout = new Workout();
-            workout.setUuid(UUID.randomUUID());
-            workout.setUserId(userId);
-            workout.setType(typeOptional.get().getType());
-            workout.setDate(date);
-            workout.setDuration(workoutDto.getDuration());
-            workout.setCalorie(workoutDto.getCalorie());
+            Workout workout = generateNewWorkout(workoutDto, userId, typeOptional.get(), date);
 
             Workout savedWorkout = workoutDao.saveWorkout(workout);
 
@@ -95,12 +89,11 @@ public class WorkoutServiceImpl implements WorkoutService {
     public Workout addWorkoutInfo(String email, String uuidStr, WorkoutInfoDto workoutInfoDto) {
         int userId = getAuthorizedUserId(email);
         UUID uuid = convertToUUID(uuidStr);
-        Workout workout = workoutDao.findByUUID(uuid)
-                .orElseThrow(() -> new NotFoundException("Тренировка с uuid = " + uuid +
-                                                         " нет в базе данных! Сначала добавьте ее."));
-        if(workout.getUserId() != userId){
+        Workout workout = getWorkoutByUUID(uuid);
+        if (workout.getUserId() != userId) {
             throw new AccessDeniedException("Дополнительную информацию можно добавлять только в свои тренировочные данные!");
         }
+
         WorkoutType workoutType = workoutTypeService.findByName(workout.getType());
         workout.setType(workoutType.getType());
         Optional<WorkoutInfo> infoByWorkoutId = workoutInfoService.getInfoByWorkoutId(workout.getId());
@@ -108,7 +101,7 @@ public class WorkoutServiceImpl implements WorkoutService {
 
         if (workoutInfoDto.getWorkoutInfo() != null) {
             for (Map.Entry<String, String> infoMap : workoutInfoDto.getWorkoutInfo().entrySet()) {
-                if(!workout.getWorkoutInfo().containsKey(infoMap.getKey())){
+                if (!workout.getWorkoutInfo().containsKey(infoMap.getKey())) {
                     workoutInfoService.saveWorkoutInfo(workout.getId(), infoMap.getKey(), infoMap.getValue());
                 }
                 workout.getWorkoutInfo().put(infoMap.getKey(), infoMap.getValue());
@@ -120,19 +113,15 @@ public class WorkoutServiceImpl implements WorkoutService {
     @Override
     @Loggable
     @Timed
-    public List<Workout> getAllUserWorkouts(String login) {
+    public List<Workout> getAllWorkoutsByUser(String login) {
         int userId = getAuthorizedUserId(login);
         List<Workout> workoutList = workoutDao.findByUserId(userId);
-        for (Workout workout : workoutList) {
-            WorkoutInfoDto workoutInfoDto = new WorkoutInfoDto();
+        workoutList.forEach(workout -> {
             Optional<WorkoutInfo> workoutInfo = workoutInfoService.getInfoByWorkoutId(workout.getId());
-            if(workoutInfo.isPresent()){
-                workoutInfoDto.setWorkoutInfo(workoutInfo.get().getWorkoutInfo());
-            }else {
-                workoutInfoDto.setWorkoutInfo(Collections.emptyMap());
-            }
-            workout.setWorkoutInfo(workoutInfoDto.getWorkoutInfo());
-        }
+            workout.setWorkoutInfo(workoutInfo
+                    .map(WorkoutInfo::getWorkoutInfo)
+                    .orElse(Collections.emptyMap()));
+        });
         return workoutList;
     }
 
@@ -140,11 +129,9 @@ public class WorkoutServiceImpl implements WorkoutService {
     @Transactional
     public Workout updateWorkout(String email, String uuidStr, EditWorkout editWorkout) {
         UUID uuid = convertToUUID(uuidStr);
-        Workout workout = workoutDao.findByUUID(uuid)
-                .orElseThrow(() -> new NotFoundException("Тренировка с uuid = " + uuid +
-                                                         " нет в базе данных! Сначала добавьте ее."));
+        Workout workout = getWorkoutByUUID(uuid);
         int userId = getAuthorizedUserId(email);
-        if(workout.getUserId() != userId){
+        if (workout.getUserId() != userId) {
             throw new AccessDeniedException("Только свои тренировочные данные можно редактировать!");
         }
         if (editWorkout.getCalorie() != null) {
@@ -215,9 +202,7 @@ public class WorkoutServiceImpl implements WorkoutService {
     public void deleteWorkout(String email, String uuidStr) {
         UUID uuid = convertToUUID(uuidStr);
         int userId = getAuthorizedUserId(email);
-        Workout workout = workoutDao.findByUUID(uuid)
-                .orElseThrow(() -> new NotFoundException("Тренировка с uuid = " + uuid +
-                                                         " нет в базе данных! Сначала добавьте ее."));
+        Workout workout = getWorkoutByUUID(uuid);
         workoutInfoService.delete(workout.getId());
         workoutDao.deleteWorkout(userId, workout.getId());
     }
@@ -247,9 +232,9 @@ public class WorkoutServiceImpl implements WorkoutService {
             for (Workout workout : workoutList) {
                 workout.setType(workout.getType());
                 Optional<WorkoutInfo> workoutInfo = workoutInfoService.getInfoByWorkoutId(workout.getId());
-                if (workoutInfo.isPresent()){
+                if (workoutInfo.isPresent()) {
                     workout.setWorkoutInfo(workoutInfo.get().getWorkoutInfo());
-                }else {
+                } else {
                     workout.setWorkoutInfo(Collections.emptyMap());
                 }
             }
@@ -287,11 +272,29 @@ public class WorkoutServiceImpl implements WorkoutService {
                                                          + email + " does not exist!"));
         return user.getId();
     }
+
+    private Workout getWorkoutByUUID(UUID uuid) {
+        return workoutDao.findByUUID(uuid)
+                .orElseThrow(() -> new NotFoundException("Тренировка с uuid = " + uuid +
+                                                         " нет в базе данных! Сначала добавьте ее."));
+    }
+
+    private Workout generateNewWorkout(WorkoutDto workoutDto, int userId, WorkoutType type, LocalDate date) {
+        Workout workout = new Workout();
+        workout.setUuid(UUID.randomUUID());
+        workout.setUserId(userId);
+        workout.setType(type.getType());
+        workout.setDate(date);
+        workout.setDuration(workoutDto.getDuration());
+        workout.setCalorie(workoutDto.getCalorie());
+        return workout;
+    }
+
     private UUID convertToUUID(String uuidStr) {
         return converter.convert(uuidStr, UUID::fromString, "Invalid UUID");
     }
+
     private LocalDate convertToDate(String dateStr) {
         return converter.convert(dateStr, LocalDate::parse, "Incorrect date format. Should be yyyy-MM-dd");
     }
-
 }

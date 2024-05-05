@@ -47,7 +47,7 @@ public interface WorkoutService {
      * @param login The email (email) of the user whose workouts are to be retrieved.
      * @return A list of DTOs representing the user's workouts.
      */
-    List<Workout> getAllUserWorkouts(String login);
+    List<Workout> getAllWorkoutsByUser(String login);
 
     /**
      * Updates the type of a workout.

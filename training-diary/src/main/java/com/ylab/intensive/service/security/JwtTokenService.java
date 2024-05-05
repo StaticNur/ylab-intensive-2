@@ -1,4 +1,4 @@
-package com.ylab.intensive.in.security;
+package com.ylab.intensive.service.security;
 
 import com.ylab.intensive.model.dto.JwtResponse;
 import com.ylab.intensive.model.enums.Role;

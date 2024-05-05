@@ -1,5 +1,6 @@
-package com.ylab.intensive.in.security;
+package com.ylab.intensive.service.security.impl;
 
+import com.ylab.intensive.exception.NotFoundException;
 import com.ylab.intensive.repository.UserDao;
 import com.ylab.intensive.model.entity.User;
 import lombok.RequiredArgsConstructor;
@@ -7,7 +8,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
@@ -24,13 +24,13 @@ public class JwtUserDetailsService implements UserDetailsService {
      *
      * @param username The username for which to load details.
      * @return UserDetails containing user details.
-     * @throws UsernameNotFoundException if the user is not found.
+     * @throws NotFoundException if the user is not found.
      */
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(String username){
         return userRepository.findByEmail(username)
                 .map(JwtUserDetails::new)
-                .orElseThrow(()-> new UsernameNotFoundException("user %s not found".formatted(username)));
+                .orElseThrow(()-> new NotFoundException("user %s not found".formatted(username)));
     }
 
     /**

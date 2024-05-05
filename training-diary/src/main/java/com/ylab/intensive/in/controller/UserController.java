@@ -8,10 +8,7 @@ import com.ylab.intensive.model.entity.User;
 import com.ylab.intensive.service.UserService;
 import com.ylab.intensive.service.WorkoutService;
 import com.ylab.intensive.util.validation.GeneratorResponseMessage;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.SwaggerDefinition;
-import io.swagger.annotations.Tag;
+import io.swagger.annotations.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -28,10 +25,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/training-diary")
-@Api(value = "AuthenticationController", tags = {"Authentication Controller"})
-@SwaggerDefinition(tags = {
-        @Tag(name = "email and registration controller.")
-})
+@Api(value = "UserController", tags = {"User Controller"})
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
@@ -41,6 +35,7 @@ public class UserController {
 
     @GetMapping("/users/workouts")
     @PreAuthorize("hasAuthority('ADMIN')")
+    @ApiOperation(value = "view workouts of all users", response = WorkoutDto.class, responseContainer = "List")
     @Auditable(action = "Пользователь просмотрел тренировки всех пользователей.")
     public ResponseEntity<?> viewTrainingsForAllUsers() {
         List<User> userList = userService.getAllUser();
@@ -52,6 +47,9 @@ public class UserController {
 
     @PatchMapping("/users/{uuid}/access")
     @PreAuthorize("hasAuthority('ADMIN')")
+    @ApiOperation(value = "change user rights", response = SuccessResponse.class)
+    @ApiResponse(code = 400, message = "Ошибка валидации. Подробности об ошибках содержатся в теле ответа.",
+            response = CustomFieldError.class, responseContainer = "List")
     @Auditable(action = "Пользователь изменил права пользователя по uuid=@uuid")
     public ResponseEntity<?> changeUserRights(@PathVariable("uuid") String uuid,
                                               @RequestBody @Valid ChangeUserRightsDto changeUserRightsDto,
@@ -68,9 +66,10 @@ public class UserController {
     }
 
     @GetMapping("/user/audit")
+    @ApiOperation(value = "view the audit in action", response = AuditDto.class)
     @Auditable(action = "Пользователь просмотрел свой аудит действий.")
-    public ResponseEntity<?> viewAudit(@RequestParam(value = "page", defaultValue = "0") int page,
-                                       @RequestParam(value = "count", defaultValue = "10") int count) {
+    public ResponseEntity<AuditDto> viewAudit(@RequestParam(value = "page", defaultValue = "0") int page,
+                                       @RequestParam(value = "count", defaultValue = "50") int count) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         AuditDto audit = userService.getAudit(authentication.getName(), new Pageable(page, count));
         return ResponseEntity.ok(audit);

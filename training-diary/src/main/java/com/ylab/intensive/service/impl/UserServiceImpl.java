@@ -1,6 +1,5 @@
 package com.ylab.intensive.service.impl;
 
-import com.ylab.intensive.aspects.annotation.Auditable;
 import com.ylab.intensive.aspects.annotation.Loggable;
 import com.ylab.intensive.aspects.annotation.Timed;
 import com.ylab.intensive.repository.UserDao;
@@ -10,8 +9,8 @@ import com.ylab.intensive.model.dto.*;
 import com.ylab.intensive.model.entity.Audit;
 import com.ylab.intensive.model.entity.User;
 import com.ylab.intensive.model.enums.Role;
-import com.ylab.intensive.in.security.JwtTokenService;
-import com.ylab.intensive.in.security.JwtUserDetailsService;
+import com.ylab.intensive.service.security.JwtTokenService;
+import com.ylab.intensive.service.security.impl.JwtUserDetailsService;
 import com.ylab.intensive.service.AuditService;
 import com.ylab.intensive.service.RoleService;
 import com.ylab.intensive.service.UserService;
@@ -22,7 +21,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -69,11 +67,7 @@ public class UserServiceImpl implements UserService {
                     throw new RegistrationException("Такой пользователь уже существует!");
                 });
         int roleId = roleService.getIdByName(registrationDto.getRole());
-        User user = new User();
-        user.setUuid(UUID.randomUUID());
-        user.setEmail(registrationDto.getEmail());
-        user.setPassword(passwordEncoder.encode(registrationDto.getPassword()));
-        user.setRole(registrationDto.getRole());
+        User user = generateNewUser(registrationDto);
         return userDao.save(user, roleId);
     }
 
@@ -107,7 +101,7 @@ public class UserServiceImpl implements UserService {
         if (isChange) {
             return userDao.findByUUID(uuid)
                     .orElseThrow(() -> new NotFoundException("Пользователь с uuid = " + uuidStr + " не существует!"));
-        } else throw new ChangeUserPermissionsException("Failed to change user role");
+        } else throw new DaoException("Failed to change user role. Invalid uuid");
     }
 
     @Override
@@ -145,5 +139,14 @@ public class UserServiceImpl implements UserService {
     @Timed
     public Optional<User> findByEmail(String email) {
         return userDao.findByEmail(email);
+    }
+
+    private User generateNewUser(RegistrationDto registrationDto) {
+        User user = new User();
+        user.setUuid(UUID.randomUUID());
+        user.setEmail(registrationDto.getEmail());
+        user.setPassword(passwordEncoder.encode(registrationDto.getPassword()));
+        user.setRole(registrationDto.getRole());
+        return user;
     }
 }
