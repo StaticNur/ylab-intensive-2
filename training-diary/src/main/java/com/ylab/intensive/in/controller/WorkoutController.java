@@ -43,7 +43,8 @@ public class WorkoutController {
 
     @PostMapping("/workout-info/{uuid}")
     public ResponseEntity<?> saveAdditionalInformation(@PathVariable("uuid") String uuid,
-                                                       @Valid WorkoutInfoDto workoutInfoDto, BindingResult bindingResult) {
+                                                       @RequestBody @Valid WorkoutInfoDto workoutInfoDto,
+                                                       BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             List<CustomFieldError> customFieldErrors = generatorResponseMessage.generateErrorMessage(bindingResult);
             return ResponseEntity.badRequest().body(customFieldErrors);
@@ -60,7 +61,7 @@ public class WorkoutController {
     }
 
     @PostMapping("/workouts")
-    public ResponseEntity<?> saveWorkout(@Valid WorkoutDto workoutDto, BindingResult bindingResult) {
+    public ResponseEntity<?> saveWorkout(@RequestBody @Valid WorkoutDto workoutDto, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             List<CustomFieldError> customFieldErrors = generatorResponseMessage.generateErrorMessage(bindingResult);
             return ResponseEntity.badRequest().body(customFieldErrors);
@@ -73,7 +74,7 @@ public class WorkoutController {
 
     @PutMapping("/workouts/{uuid}")
     public ResponseEntity<?> editWorkout(@PathVariable("uuid") String uuid,
-                                         @Valid EditWorkout editWorkout, BindingResult bindingResult) {
+                                         @RequestBody @Valid EditWorkout editWorkout, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             List<CustomFieldError> customFieldErrors = generatorResponseMessage.generateErrorMessage(bindingResult);
             return ResponseEntity.badRequest().body(customFieldErrors);

@@ -118,11 +118,15 @@ public class JwtTokenServiceImpl implements JwtTokenService {
         if (claims.isEmpty()) {
             throw new InvalidTokenException("Invalid token.");
         }
-        String roleStr = claims.get().get("role", String.class);
-        try {
-            return Role.valueOf(roleStr);
-        } catch (IllegalArgumentException e) {
-            throw new InvalidTokenException(e.getMessage());
+        List<String> roles = claims.get().get("roles", List.class);
+        if (!roles.isEmpty()) {
+            try {
+                return Role.valueOf(roles.get(0));
+            } catch (IllegalArgumentException e) {
+                throw new InvalidTokenException(e.getMessage());
+            }
+        } else {
+            throw new InvalidTokenException("Token does not contain roles claim.");
         }
     }
 

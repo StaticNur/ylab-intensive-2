@@ -3,7 +3,7 @@ package com.ylab.intensive.service.impl;
 import com.ylab.intensive.aspects.annotation.Auditable;
 import com.ylab.intensive.aspects.annotation.Loggable;
 import com.ylab.intensive.aspects.annotation.Timed;
-import com.ylab.intensive.dao.WorkoutDao;
+import com.ylab.intensive.repository.WorkoutDao;
 import com.ylab.intensive.exception.*;
 import com.ylab.intensive.model.dto.*;
 import com.ylab.intensive.model.entity.User;
@@ -127,8 +127,12 @@ public class WorkoutServiceImpl implements WorkoutService {
             workoutDto.setCalorie(workout.getCalorie());
 
             WorkoutInfoDto workoutInfoDto = new WorkoutInfoDto();
-            WorkoutInfo workoutInfo = workoutInfoService.getInfoByWorkoutId(workout.getId());
-            workoutInfoDto.setWorkoutInfo(workoutInfo.getWorkoutInfo());
+            Optional<WorkoutInfo> workoutInfo = workoutInfoService.getInfoByWorkoutId(workout.getId());
+            if(workoutInfo.isPresent()){
+                workoutInfoDto.setWorkoutInfo(workoutInfo.get().getWorkoutInfo());
+            }else {
+                workoutInfoDto.setWorkoutInfo(Collections.emptyMap());
+            }
             workoutDto.setWorkoutInfo(workoutInfoDto.getWorkoutInfo());
 
             workoutDtoList.add(workoutDto);
@@ -152,8 +156,12 @@ public class WorkoutServiceImpl implements WorkoutService {
             updateAdditionalInfo(workout.getId(), editWorkout.getWorkoutInfo());
             workout.setWorkoutInfo(editWorkout.getWorkoutInfo());
         } else {
-            WorkoutInfo infoByWorkoutId = workoutInfoService.getInfoByWorkoutId(workout.getId());
-            workout.setWorkoutInfo(infoByWorkoutId.getWorkoutInfo());
+            Optional<WorkoutInfo> workoutInfo = workoutInfoService.getInfoByWorkoutId(workout.getId());
+            if(workoutInfo.isPresent()){
+                workout.setWorkoutInfo(workoutInfo.get().getWorkoutInfo());
+            }else {
+                workout.setWorkoutInfo(Collections.emptyMap());
+            }
         }
         if (editWorkout.getType() != null) {
             updateType(userId, workout.getId(), editWorkout.getType());
@@ -173,7 +181,7 @@ public class WorkoutServiceImpl implements WorkoutService {
     @Loggable
     @Timed
     public void updateType(int userId, int workoutId, String type) {
-        WorkoutType workoutType = workoutTypeService.findByName(type.trim());
+        WorkoutType workoutType = workoutTypeService.findTypeByUserId(userId, type.trim());
         workoutDao.updateType(workoutId, workoutType.getType());
     }
 
@@ -243,8 +251,12 @@ public class WorkoutServiceImpl implements WorkoutService {
             List<Workout> workoutList = workoutDao.findByUserId(user.getId());
             for (Workout workout : workoutList) {
                 workout.setType(workout.getType());
-                WorkoutInfo workoutInfo = workoutInfoService.getInfoByWorkoutId(workout.getId());
-                workout.setWorkoutInfo(workoutInfo.getWorkoutInfo());
+                Optional<WorkoutInfo> workoutInfo = workoutInfoService.getInfoByWorkoutId(workout.getId());
+                if (workoutInfo.isPresent()){
+                    workout.setWorkoutInfo(workoutInfo.get().getWorkoutInfo());
+                }else {
+                    workout.setWorkoutInfo(Collections.emptyMap());
+                }
             }
             user.setWorkouts(workoutList);
         }

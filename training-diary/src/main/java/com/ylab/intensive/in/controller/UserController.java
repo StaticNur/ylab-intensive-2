@@ -39,7 +39,7 @@ public class UserController {
     private final UserMapper userMapper;
 
     @GetMapping("/users/workouts")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<?> viewTrainingsForAllUsers() {
         List<User> userList = userService.getAllUser();
         List<User> userWithWorkouts = workoutService.getAllUsersWorkouts(userList);
@@ -48,10 +48,11 @@ public class UserController {
         return ResponseEntity.ok(userDtolist);
     }
 
-    @PatchMapping("/training-diary/users/{uuid}/access")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PatchMapping("/users/{uuid}/access")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<?> changeUserRights(@PathVariable("uuid") String uuid,
-                                              @Valid ChangeUserRightsDto changeUserRightsDto, BindingResult bindingResult) {
+                                              @RequestBody @Valid ChangeUserRightsDto changeUserRightsDto,
+                                              BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             List<CustomFieldError> customFieldErrors = generatorResponseMessage.generateErrorMessage(bindingResult);
             return ResponseEntity.badRequest().body(customFieldErrors);

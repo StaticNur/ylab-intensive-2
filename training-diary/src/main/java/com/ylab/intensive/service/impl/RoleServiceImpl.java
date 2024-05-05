@@ -1,6 +1,7 @@
 package com.ylab.intensive.service.impl;
 
-import com.ylab.intensive.dao.RoleDao;
+import com.ylab.intensive.repository.RoleDao;
+import com.ylab.intensive.exception.NotFoundException;
 import com.ylab.intensive.model.enums.Role;
 import com.ylab.intensive.service.RoleService;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,10 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     public int getIdByName(Role role) {
-        return roleDao.findByName(role);
+        Integer id = roleDao.findByName(role);
+        if (id == null){
+            throw new NotFoundException("Такой роли нет в базе данных.");
+        }
+        return id;
     }
 }

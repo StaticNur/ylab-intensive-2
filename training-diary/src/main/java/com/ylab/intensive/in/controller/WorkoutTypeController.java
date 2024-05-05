@@ -43,7 +43,7 @@ public class WorkoutTypeController {
     }
 
     @PostMapping
-    public ResponseEntity<?> saveType(@Valid WorkoutTypeDto workoutTypeDto, BindingResult bindingResult) {
+    public ResponseEntity<?> saveType(@RequestBody @Valid WorkoutTypeDto workoutTypeDto, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             List<CustomFieldError> customFieldErrors = generatorResponseMessage.generateErrorMessage(bindingResult);
             return ResponseEntity.badRequest().body(customFieldErrors);

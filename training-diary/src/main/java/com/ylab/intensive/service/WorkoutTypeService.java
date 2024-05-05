@@ -3,6 +3,7 @@ package com.ylab.intensive.service;
 import com.ylab.intensive.model.entity.WorkoutType;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Service interface for managing workout types and related operations.
@@ -47,6 +48,8 @@ public interface WorkoutTypeService {
      * @param name@return An optional containing the found workout type, or empty if not found.
      */
     WorkoutType findByName(String name);
+
+    WorkoutType findTypeByUserId(int userId, String typeName);
 
     /**
      * Deletes all workout types associated with a specific user.

@@ -3,7 +3,7 @@ package com.ylab.intensive.service.impl;
 import com.ylab.intensive.aspects.annotation.Auditable;
 import com.ylab.intensive.aspects.annotation.Loggable;
 import com.ylab.intensive.aspects.annotation.Timed;
-import com.ylab.intensive.dao.UserDao;
+import com.ylab.intensive.repository.UserDao;
 import com.ylab.intensive.exception.*;
 import com.ylab.intensive.model.Pageable;
 import com.ylab.intensive.model.dto.*;
@@ -102,8 +102,6 @@ public class UserServiceImpl implements UserService {
         if (isChange) {
             User user = userDao.findByUUID(convertToUUID(uuidStr))
                     .orElseThrow(() -> new NotFoundException("Пользователь с uuid = " + uuidStr + " не существует!"));
-
-            auditService.saveAction(user.getId(), "Пользователь изменил роль на: " + role);
             return user;
         } else throw new ChangeUserPermissionsException("Failed to change user role");
     }

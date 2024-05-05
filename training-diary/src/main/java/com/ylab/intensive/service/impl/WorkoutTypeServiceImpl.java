@@ -3,7 +3,7 @@ package com.ylab.intensive.service.impl;
 import com.ylab.intensive.aspects.annotation.Auditable;
 import com.ylab.intensive.aspects.annotation.Loggable;
 import com.ylab.intensive.aspects.annotation.Timed;
-import com.ylab.intensive.dao.WorkoutTypeDao;
+import com.ylab.intensive.repository.WorkoutTypeDao;
 import com.ylab.intensive.exception.NotFoundException;
 import com.ylab.intensive.exception.WorkoutTypeException;
 import com.ylab.intensive.model.entity.WorkoutType;
@@ -33,7 +33,7 @@ public class WorkoutTypeServiceImpl implements WorkoutTypeService {
     @Timed
     @Transactional
     public WorkoutType saveType(int userId, String typeName) {
-        Optional<WorkoutType> workoutType = workoutTypeDao.findByType(typeName);
+        Optional<WorkoutType> workoutType = workoutTypeDao.findTypeByUserId(userId, typeName);
         if (workoutType.isPresent()) {
             throw new WorkoutTypeException("Такой тип ранее был добавлен!");
         }
@@ -53,8 +53,17 @@ public class WorkoutTypeServiceImpl implements WorkoutTypeService {
 
     @Override
     public WorkoutType findByName(String name) {
-        return workoutTypeDao.findByType(name)
+        return workoutTypeDao.findByName(name)
                 .orElseThrow(() -> new NotFoundException("Такой тип тренировок не существует в базе данных."));
+    }
+
+    @Override
+    public WorkoutType findTypeByUserId(int userId, String typeName) {
+        Optional<WorkoutType> workoutType = workoutTypeDao.findTypeByUserId(userId, typeName);
+        if (workoutType.isEmpty()) {
+            throw new NotFoundException("Такого типа тренировки у данного спортсмена не существует в базе данных!");
+        }
+        return workoutType.get();
     }
 
     @Override
