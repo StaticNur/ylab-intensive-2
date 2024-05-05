@@ -1,6 +1,6 @@
 package com.ylab.intensive.aspects;
 
-import com.ylab.intensive.dao.AuditDao;
+import com.ylab.intensive.repository.AuditDao;
 import com.ylab.intensive.exception.NotFoundException;
 import com.ylab.intensive.model.entity.User;
 import com.ylab.intensive.service.UserService;

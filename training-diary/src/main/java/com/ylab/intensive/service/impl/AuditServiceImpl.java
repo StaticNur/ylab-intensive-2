@@ -1,6 +1,6 @@
 package com.ylab.intensive.service.impl;
 
-import com.ylab.intensive.dao.AuditDao;
+import com.ylab.intensive.repository.AuditDao;
 import com.ylab.intensive.model.Pageable;
 import com.ylab.intensive.model.entity.Audit;
 import com.ylab.intensive.service.AuditService;

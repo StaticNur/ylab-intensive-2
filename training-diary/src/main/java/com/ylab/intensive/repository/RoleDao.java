@@ -1,4 +1,4 @@
-package com.ylab.intensive.dao;
+package com.ylab.intensive.repository;
 
 import com.ylab.intensive.model.enums.Role;
 
@@ -13,5 +13,5 @@ public interface RoleDao {
      * @param role the {@link Role} enum value
      * @return the ID of the role
      */
-    int findByName(Role role);
+    Integer findByName(Role role);
 }

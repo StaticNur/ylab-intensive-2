@@ -1,4 +1,4 @@
-package com.ylab.intensive.dao;
+package com.ylab.intensive.repository;
 
 import com.ylab.intensive.model.entity.WorkoutType;
 
@@ -44,18 +44,19 @@ public interface WorkoutTypeDao {
     void delete(int userId);
 
     /**
-     * Retrieves a workout type by its ID.
-     *
-     * @param id the ID of the workout type.
-     * @return an optional containing the workout type if found, or empty if not found.
-     */
-    Optional<WorkoutType> findById(int id);
-
-    /**
      * Retrieves a workout type by its name.
      *
      * @param typeName the name of the workout type.
      * @return an optional containing the workout type if found, or empty if not found.
      */
-    Optional<WorkoutType> findByType(String typeName);
+    Optional<WorkoutType> findByName(String typeName);
+
+    /**
+     * Retrieves a workout type by its name.
+     *
+     * @param typeName the name of the workout type.
+     * @param userId the ID of the user.
+     * @return an optional containing the workout type if found, or empty if not found.
+     */
+    Optional<WorkoutType> findTypeByUserId(int userId, String typeName);
 }

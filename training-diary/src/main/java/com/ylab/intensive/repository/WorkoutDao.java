@@ -1,4 +1,4 @@
-package com.ylab.intensive.dao;
+package com.ylab.intensive.repository;
 
 import com.ylab.intensive.model.entity.Workout;
 

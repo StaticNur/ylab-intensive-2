@@ -17,6 +17,7 @@ import com.ylab.intensive.service.RoleService;
 import com.ylab.intensive.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -53,6 +54,8 @@ public class UserServiceImpl implements UserService {
      */
     private final JwtTokenService jwtTokenService;
     private final JwtUserDetailsService jwtUserDetailsService;
+    private final PasswordEncoder passwordEncoder;
+
 
     @Override
     @Timed
@@ -67,7 +70,7 @@ public class UserServiceImpl implements UserService {
         User user = new User();
         user.setUuid(UUID.randomUUID());
         user.setEmail(registrationDto.getEmail());
-        user.setPassword(registrationDto.getPassword());
+        user.setPassword(passwordEncoder.encode(registrationDto.getPassword()));
         user.setRole(registrationDto.getRole());
         return userDao.save(user, roleId);
     }
@@ -81,9 +84,10 @@ public class UserServiceImpl implements UserService {
             throw new InvalidInputException("Обязательно должны быть поля email и password");
         }
         UserDetails userDetails = jwtUserDetailsService.loadUserByUsername(loginDto.getEmail());
-        if (userDetails.getPassword() != null && !userDetails.getPassword().equals(loginDto.getPassword())) {
-            throw new AuthorizeException("Incorrect password.");
+        if (!passwordEncoder.matches(loginDto.getPassword(), userDetails.getPassword())) {
+            throw new AuthorizeException("The password for this login is incorrect.");
         }
+
         String accessToken = jwtTokenService.createAccessToken(userDetails);
         String refreshToken = jwtTokenService.createRefreshToken(userDetails);
 
@@ -96,7 +100,7 @@ public class UserServiceImpl implements UserService {
     @Timed
     @Transactional
     public User changeUserPermissions(String uuidStr, ChangeUserRightsDto changeUserRightsDto) {
-        Role role = changeUserRightsDto.newRole();//getRole(roleStr);
+        Role role = changeUserRightsDto.newRole();
         int roleId = roleService.getIdByName(role);
         boolean isChange = userDao.updateUserRole(convertToUUID(uuidStr), roleId);
         if (isChange) {

@@ -1,4 +1,4 @@
-package com.ylab.intensive.dao.container;
+package com.ylab.intensive.repository.container;
 
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Testcontainers;
