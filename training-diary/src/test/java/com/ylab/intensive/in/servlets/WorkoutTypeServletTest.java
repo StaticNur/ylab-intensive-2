@@ -66,19 +66,19 @@ class WorkoutTypeServletTest {
 
     @Test
     void testDoGet() throws IOException {
-        String login = "user@example.com";
+        String email = "user@example.com";
         List<WorkoutType> workoutTypes = List.of(new WorkoutType(), new WorkoutType());
         List<WorkoutTypeDto> workoutTypeDtos = List.of(new WorkoutTypeDto("type1"), new WorkoutTypeDto("type1"));
 
         when(request.getServletContext()).thenReturn(servletContext);
-        when(authentication.getLogin()).thenReturn(login);
-        when(workoutService.getAllType(login)).thenReturn(workoutTypes);
+        when(authentication.getLogin()).thenReturn(email);
+        when(workoutService.getAllType(email)).thenReturn(workoutTypes);
         when(workoutTypeMapper.toDto(any(WorkoutType.class))).thenReturn(new WorkoutTypeDto("type1"));
         when(converter.convertObjectToJson(workoutTypeDtos)).thenReturn("[{\"type\":\"data\"}]");
 
         workoutTypeServlet.doGet(request, response);
 
-        verify(workoutService).getAllType(login);
+        verify(workoutService).getAllType(email);
         verify(response).setStatus(HttpServletResponse.SC_OK);
         assertEquals("[{\"type\":\"data\"}]", stringWriter.toString());
     }
@@ -86,22 +86,22 @@ class WorkoutTypeServletTest {
 
     @Test
     void testDoPost() throws IOException {
-        String login = "user@example.com";
+        String email = "user@example.com";
         WorkoutTypeDto workoutTypeDto = new WorkoutTypeDto("Running");
         WorkoutType workoutType = new WorkoutType();
         workoutType.setType("Running");
 
         when(request.getServletContext()).thenReturn(servletContext);
-        when(authentication.getLogin()).thenReturn(login);
+        when(authentication.getLogin()).thenReturn(email);
         when(converter.getRequestBody(request, WorkoutTypeDto.class)).thenReturn(workoutTypeDto);
-        when(workoutService.saveWorkoutType(login, workoutTypeDto.getType())).thenReturn(workoutType);
+        when(workoutService.saveWorkoutType(email, workoutTypeDto.getType())).thenReturn(workoutType);
         when(workoutTypeMapper.toDto(workoutType)).thenReturn(workoutTypeDto);
         when(converter.convertObjectToJson(workoutTypeDto)).thenReturn("{\"type\":\"Running\"}");
         when(validationService.validateAndReturnErrors(any())).thenReturn(Collections.emptyList());
 
         workoutTypeServlet.doPost(request, response);
 
-        verify(workoutService).saveWorkoutType(login, workoutTypeDto.getType());
+        verify(workoutService).saveWorkoutType(email, workoutTypeDto.getType());
         verify(response).setStatus(HttpServletResponse.SC_CREATED);
         assertEquals("{\"type\":\"Running\"}", stringWriter.toString());
     }

@@ -15,15 +15,16 @@ import com.ylab.intensive.in.security.JwtUserDetailsService;
 import com.ylab.intensive.service.AuditService;
 import com.ylab.intensive.service.RoleService;
 import com.ylab.intensive.service.UserService;
+import com.ylab.intensive.util.converter.Converter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -55,6 +56,7 @@ public class UserServiceImpl implements UserService {
     private final JwtTokenService jwtTokenService;
     private final JwtUserDetailsService jwtUserDetailsService;
     private final PasswordEncoder passwordEncoder;
+    private final Converter converter;
 
 
     @Override
@@ -76,7 +78,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Auditable
     @Loggable
     @Timed
     public JwtResponse login(LoginDto loginDto) {
@@ -85,7 +86,7 @@ public class UserServiceImpl implements UserService {
         }
         UserDetails userDetails = jwtUserDetailsService.loadUserByUsername(loginDto.getEmail());
         if (!passwordEncoder.matches(loginDto.getPassword(), userDetails.getPassword())) {
-            throw new AuthorizeException("The password for this login is incorrect.");
+            throw new AuthorizeException("The password for this email is incorrect.");
         }
 
         String accessToken = jwtTokenService.createAccessToken(userDetails);
@@ -95,43 +96,44 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Auditable
     @Loggable
     @Timed
     @Transactional
     public User changeUserPermissions(String uuidStr, ChangeUserRightsDto changeUserRightsDto) {
         Role role = changeUserRightsDto.newRole();
         int roleId = roleService.getIdByName(role);
-        boolean isChange = userDao.updateUserRole(convertToUUID(uuidStr), roleId);
+        UUID uuid = converter.convert(uuidStr, UUID::fromString, "Invalid UUID");
+        boolean isChange = userDao.updateUserRole(uuid, roleId);
         if (isChange) {
-            User user = userDao.findByUUID(convertToUUID(uuidStr))
+            return userDao.findByUUID(uuid)
                     .orElseThrow(() -> new NotFoundException("Пользователь с uuid = " + uuidStr + " не существует!"));
-            return user;
         } else throw new ChangeUserPermissionsException("Failed to change user role");
     }
 
     @Override
-    @Auditable
     @Loggable
     @Timed
     public AuditDto getAudit(String email, Pageable pageable) {
         User user = userDao.findByEmail(email)
-                .orElseThrow(() -> new NotFoundException("There is no user with this login in the database."));
+                .orElseThrow(() -> new NotFoundException("There is no user with this email in the database."));
+
         AuditDto auditDto = new AuditDto();
-        List<Audit> audit = auditService.getAudit(user.getId(), pageable);
         auditDto.setUuid(user.getUuid());
         auditDto.setEmail(user.getEmail());
         auditDto.setRole(user.getRole());
-        auditDto.setAction(audit.stream()
-                .collect(Collectors.toMap(
+
+        List<Audit> audit = auditService.getAudit(user.getId(), pageable);
+        Map<LocalDateTime, List<String>> actionMap = audit.stream()
+                .collect(Collectors.groupingBy(
                         Audit::getDateOfAction,
-                        Audit::getAction
-                )));
+                        TreeMap::new,
+                        Collectors.mapping(Audit::getAction, Collectors.toList())
+                ));
+        auditDto.setAction(actionMap);
         return auditDto;
     }
 
     @Override
-    @Auditable
     @Loggable
     @Timed
     public List<User> getAllUser() {
@@ -143,20 +145,5 @@ public class UserServiceImpl implements UserService {
     @Timed
     public Optional<User> findByEmail(String email) {
         return userDao.findByEmail(email);
-    }
-
-    /**
-     * Converts the provided string representation of a UUID into a UUID object.
-     *
-     * @param uuidStr The string representation of the UUID to convert.
-     * @return The UUID object corresponding to the input string.
-     * @throws InvalidUUIDException If the input string is not a valid UUID format.
-     */
-    private UUID convertToUUID(String uuidStr) {
-        try {
-            return UUID.fromString(uuidStr);
-        } catch (IllegalArgumentException e) {
-            throw new InvalidUUIDException(e.getMessage());
-        }
     }
 }

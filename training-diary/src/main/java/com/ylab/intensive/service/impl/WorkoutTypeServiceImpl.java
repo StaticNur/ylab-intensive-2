@@ -28,7 +28,6 @@ public class WorkoutTypeServiceImpl implements WorkoutTypeService {
     private final WorkoutTypeDao workoutTypeDao;
 
     @Override
-    @Auditable
     @Loggable
     @Timed
     @Transactional

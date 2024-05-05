@@ -1,6 +1,8 @@
 package com.ylab.intensive.in.filters;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ylab.intensive.aspects.annotation.Loggable;
+import com.ylab.intensive.aspects.annotation.Timed;
 import com.ylab.intensive.exception.AuthorizeException;
 import com.ylab.intensive.exception.InvalidTokenException;
 import com.ylab.intensive.in.security.JwtTokenService;
@@ -29,7 +31,8 @@ public class JwtTokenFilter extends OncePerRequestFilter {
     private final ObjectMapper jacksonMapper;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
+                                    FilterChain filterChain) throws ServletException, IOException {
         String authHeader = request.getHeader("Authorization");
         String email = null;
         String jwt = null;

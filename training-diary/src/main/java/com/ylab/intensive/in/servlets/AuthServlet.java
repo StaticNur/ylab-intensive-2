@@ -23,8 +23,8 @@ import java.util.List;
 /**
  * Servlet for handling user authentication-related requests.
  * <p>
- * This servlet handles registration and login requests. It validates incoming data,
- * performs registration or login operations accordingly, and sends appropriate responses.
+ * This servlet handles registration and email requests. It validates incoming data,
+ * performs registration or email operations accordingly, and sends appropriate responses.
  * </p>
  *
  * @since 1.0
@@ -96,8 +96,8 @@ public class AuthServlet extends HttpServlet {
 
         if ("/registration".equals(path)) {
             register(req, resp);
-        } else if ("/login".equals(path)) {
-            login(req, resp);
+        } else if ("/email".equals(path)) {
+            email(req, resp);
         } else {
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             resp.getWriter()
@@ -130,19 +130,19 @@ public class AuthServlet extends HttpServlet {
 
     */
 /**
-     * Handles user login.
+     * Handles user email.
      *
      * @param req  the HTTP servlet request.
      * @param resp the HTTP servlet response.
      * @throws IOException if an I/O error occurs while handling the request.
      *//*
 
-    private void login(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    private void email(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         LoginDto loginDto = converter.getRequestBody(req, LoginDto.class);
         List<ValidationError> validationErrors = validationService.validateAndReturnErrors(loginDto);
 
         if (validationErrors.isEmpty()) {
-            JwtResponse response = userService.login(loginDto);
+            JwtResponse response = userService.email(loginDto);
             resp.setStatus(HttpServletResponse.SC_OK);
             resp.getWriter()
                     .append(converter.convertObjectToJson(response));

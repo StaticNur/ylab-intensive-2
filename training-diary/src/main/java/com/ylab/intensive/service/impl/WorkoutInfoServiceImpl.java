@@ -25,7 +25,6 @@ public class WorkoutInfoServiceImpl implements WorkoutInfoService {
     private final WorkoutInfoDao workoutInfoDao;
 
     @Override
-    @Auditable
     @Loggable
     @Timed
     @Transactional

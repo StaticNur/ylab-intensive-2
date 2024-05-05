@@ -59,7 +59,7 @@ class JwtTokenFilterTest {
 
     @Test
     void testDoFilter_PublicPath() throws IOException, ServletException {
-        when(request.getRequestURI()).thenReturn("/training-diary/auth/login");
+        when(request.getRequestURI()).thenReturn("/training-diary/auth/email");
 
         jwtTokenFilter.doFilter(request, response, filterChain);
 

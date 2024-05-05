@@ -35,7 +35,7 @@ public class AuditMapperServiceImplTest {
     @DisplayName("Save user action - success")
     void testSaveAction_Success() {
         int userId = 1;
-        String action = "User login";
+        String action = "User email";
 
         doNothing().when(auditDao).insertUserAction(userId, action);
 
@@ -48,8 +48,8 @@ public class AuditMapperServiceImplTest {
     @DisplayName("Get user audit - success")
     void testGetAudit_Success() {
         int userId = 1;
-        List<Audit> mockActions = Arrays.asList(new Audit(1,2, LocalDateTime.now(), "User login"),
-                new Audit(1,2, LocalDateTime.now(), "User login"));
+        List<Audit> mockActions = Arrays.asList(new Audit(1,2, LocalDateTime.now(), "User email"),
+                new Audit(1,2, LocalDateTime.now(), "User email"));
 
         when(auditDao.getUserActions(userId, new Pageable(0,10))).thenReturn(mockActions);
 

@@ -1,5 +1,6 @@
 package com.ylab.intensive.in.controller;
 
+import com.ylab.intensive.aspects.annotation.Auditable;
 import com.ylab.intensive.mapper.WorkoutTypeMapper;
 import com.ylab.intensive.model.dto.*;
 import com.ylab.intensive.model.entity.WorkoutType;
@@ -25,7 +26,7 @@ import java.util.List;
 @RequestMapping("/training-diary/workouts/type")
 @Api(value = "AuthenticationController", tags = {"Authentication Controller"})
 @SwaggerDefinition(tags = {
-        @Tag(name = "login and registration controller.")
+        @Tag(name = "email and registration controller.")
 })
 @RequiredArgsConstructor
 public class WorkoutTypeController {
@@ -34,6 +35,7 @@ public class WorkoutTypeController {
     private final WorkoutTypeMapper workoutTypeMapper;
 
     @GetMapping
+    @Auditable(action = "Пользователь просмотрел свои типы тренировок.")
     public ResponseEntity<?> viewTypes() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         List<WorkoutType> workoutTypes = workoutService.getAllType(authentication.getName());
@@ -43,6 +45,7 @@ public class WorkoutTypeController {
     }
 
     @PostMapping
+    @Auditable(action = "Пользователь добавил новый тип тренировки.")
     public ResponseEntity<?> saveType(@RequestBody @Valid WorkoutTypeDto workoutTypeDto, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             List<CustomFieldError> customFieldErrors = generatorResponseMessage.generateErrorMessage(bindingResult);

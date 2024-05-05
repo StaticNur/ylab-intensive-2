@@ -1,5 +1,8 @@
 package com.ylab.intensive.aspects;
 
+import com.ylab.intensive.aspects.annotation.Auditable;
+import com.ylab.intensive.model.dto.JwtResponse;
+import com.ylab.intensive.model.dto.UserDto;
 import com.ylab.intensive.repository.AuditDao;
 import com.ylab.intensive.exception.NotFoundException;
 import com.ylab.intensive.model.entity.User;
@@ -9,13 +12,12 @@ import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.aspectj.lang.reflect.MethodSignature;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
-
-import java.util.Arrays;
 
 /**
  * The AuditAspect class defines an aspect responsible for auditing method executions.
@@ -43,26 +45,35 @@ public class AuditAspect {
     public void callAuditableMethod() {
     }
 
-    @AfterReturning("callAuditableMethod()")
-    public void audit(JoinPoint joinPoint) {
-        System.out.println("Aspect audit");
+    @AfterReturning(pointcut = "callAuditableMethod()", returning = "result")
+    public void audit(JoinPoint jp, Object result) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication instanceof UsernamePasswordAuthenticationToken) {
-            StringBuilder builder = new StringBuilder();
-            builder.append("User: ").append(authentication.getName())
-                    .append(", with role: ")
-                    .append(authentication.getAuthorities().stream().findAny().map(GrantedAuthority::toString)
-                            .orElse("empty"))
-                    .append(", execute: ").append(joinPoint.getSignature().getDeclaringType().getName())
-                    .append(".").append(joinPoint.getSignature().getName())
-                    .append("(");
-            Arrays.stream(joinPoint.getArgs()).forEach(arg -> builder.append(arg).append(", "));
-            builder.delete(builder.length() - 2, builder.length());
+        StringBuilder builder = new StringBuilder();
+        String email = authentication.getName();
 
-            User user = userService.findByEmail(authentication.getName())
-                    .orElseThrow(() -> new NotFoundException("There is no user with this login in the database."));
+        MethodSignature methodSignature = (MethodSignature) jp.getSignature();
+        Auditable audit = methodSignature.getMethod().getAnnotation(Auditable.class);
+        String action = audit.action();
 
-            auditDao.insertUserAction(user.getId(), builder.toString());
+        if (result instanceof ResponseEntity<?> responseEntity) {
+            Object body = responseEntity.getBody();
+            if (body instanceof JwtResponse jwtResponse) {
+                email = jwtResponse.login();
+            } else if (body instanceof UserDto userDto) {
+                email = userDto.getEmail();
+            }
         }
+        builder.append("User: ")
+                .append(email)
+                .append(", with role: ")
+                .append(authentication.getAuthorities().stream()
+                        .findAny().map(GrantedAuthority::toString).orElse("empty"))
+                .append(", execute: ").append(action);
+        String uuid = jp.getArgs().length > 0 ? jp.getArgs()[0].toString() : "";
+        action = builder.toString().replace("@uuid", uuid);
+
+        User user = userService.findByEmail(email)
+                .orElseThrow(() -> new NotFoundException("User with email = " + authentication.getName() + " does not exist!"));
+        auditDao.insertUserAction(user.getId(), action);
     }
 }

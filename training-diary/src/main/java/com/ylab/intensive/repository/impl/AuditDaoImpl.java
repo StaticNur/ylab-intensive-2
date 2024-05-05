@@ -29,7 +29,7 @@ public class AuditDaoImpl implements AuditDao {
                 SELECT a.id, a.user_id, a.date_of_action, a.action
                 FROM internal.audit a
                 WHERE a.user_id = ?
-                ORDER BY a.id
+                ORDER BY a.date_of_action
                 LIMIT ?
                 OFFSET ?
                 """;

@@ -70,61 +70,61 @@ class WorkoutServletTest {
 
     @Test
     void testDoGet() throws IOException {
-        String login = "user@example.com";
+        String email = "user@example.com";
         List<WorkoutDto> workoutDtos = List.of(new WorkoutDto(), new WorkoutDto());
 
         when(request.getServletContext()).thenReturn(servletContext);
-        when(authentication.getLogin()).thenReturn(login);
-        when(workoutService.getAllUserWorkouts(login)).thenReturn(workoutDtos);
+        when(authentication.getLogin()).thenReturn(email);
+        when(workoutService.getAllUserWorkouts(email)).thenReturn(workoutDtos);
         when(converter.convertObjectToJson(workoutDtos)).thenReturn("[{\"workout\":\"data\"}]");
 
         workoutServlet.doGet(request, response);
 
-        verify(workoutService).getAllUserWorkouts(login);
+        verify(workoutService).getAllUserWorkouts(email);
         verify(response).setStatus(HttpServletResponse.SC_OK);
         assertEquals("[{\"workout\":\"data\"}]", stringWriter.toString());
     }
 
     @Test
     void testDoPost() throws IOException {
-        String login = "user@example.com";
+        String email = "user@example.com";
         WorkoutDto workoutDto = new WorkoutDto();
         WorkoutDto workoutDtoSaved = new WorkoutDto();
 
         when(request.getServletContext()).thenReturn(servletContext);
-        when(authentication.getLogin()).thenReturn(login);
+        when(authentication.getLogin()).thenReturn(email);
         when(converter.getRequestBody(request, WorkoutDto.class)).thenReturn(workoutDto);
-        when(workoutService.addWorkout(login, workoutDto)).thenReturn(workoutDtoSaved);
+        when(workoutService.addWorkout(email, workoutDto)).thenReturn(workoutDtoSaved);
         when(converter.convertObjectToJson(workoutDtoSaved)).thenReturn("{\"workout\":\"data\"}");
         when(validationService.validateAndReturnErrors(any())).thenReturn(Collections.emptyList());
 
         workoutServlet.doPost(request, response);
 
-        verify(workoutService).addWorkout(login, workoutDto);
+        verify(workoutService).addWorkout(email, workoutDto);
         verify(response).setStatus(HttpServletResponse.SC_OK);
         assertEquals("{\"workout\":\"data\"}", stringWriter.toString());
     }
 
     @Test
     void testDoPut_validUuid() throws IOException, ServletException {
-        String login = "user@example.com";
+        String email = "user@example.com";
         String uuid = "123e4567-e89b-12d3-a456-426614174001";
         EditWorkout editWorkout = new EditWorkout();
         Workout workout = new Workout();
 
         when(request.getServletContext()).thenReturn(servletContext);
-        when(authentication.getLogin()).thenReturn(login);
+        when(authentication.getLogin()).thenReturn(email);
         when(request.getPathInfo()).thenReturn("/" + uuid);
 
         when(converter.getRequestBody(request, EditWorkout.class)).thenReturn(editWorkout);
-        when(workoutService.updateWorkout(login, uuid, editWorkout)).thenReturn(workout);
+        when(workoutService.updateWorkout(email, uuid, editWorkout)).thenReturn(workout);
         when(workoutMapper.toDto(workout)).thenReturn(new WorkoutDto());
         when(converter.convertObjectToJson(any(WorkoutDto.class))).thenReturn("{\"workout\":\"data\"}");
         when(validationService.validateAndReturnErrors(any())).thenReturn(Collections.emptyList());
 
         workoutServlet.doPut(request, response);
 
-        verify(workoutService).updateWorkout(login, uuid, editWorkout);
+        verify(workoutService).updateWorkout(email, uuid, editWorkout);
         verify(workoutMapper).toDto(workout);
         verify(response).setStatus(HttpServletResponse.SC_OK);
         assertEquals("{\"workout\":\"data\"}", stringWriter.toString());
@@ -132,18 +132,18 @@ class WorkoutServletTest {
 
     @Test
     void testDoDelete_validUuid() throws IOException, ServletException {
-        String login = "user@example.com";
+        String email = "user@example.com";
         String uuid = "123e4567-e89b-12d3-a456-426614174001";
 
         when(request.getServletContext()).thenReturn(servletContext);
-        when(authentication.getLogin()).thenReturn(login);
+        when(authentication.getLogin()).thenReturn(email);
         when(request.getPathInfo()).thenReturn("/" + uuid);
-        doNothing().when(workoutService).deleteWorkout(login, uuid);
+        doNothing().when(workoutService).deleteWorkout(email, uuid);
         when(converter.convertObjectToJson(any(SuccessResponse.class))).thenReturn("{\"message\":\"Workout deleted successfully\"}");
 
         workoutServlet.doDelete(request, response);
 
-        verify(workoutService).deleteWorkout(login, uuid);
+        verify(workoutService).deleteWorkout(email, uuid);
         verify(response).setStatus(HttpServletResponse.SC_OK);
         assertEquals("{\"message\":\"Workout deleted successfully\"}", stringWriter.toString());
     }

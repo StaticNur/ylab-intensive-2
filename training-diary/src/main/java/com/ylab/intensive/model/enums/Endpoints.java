@@ -10,7 +10,7 @@ public enum Endpoints {
     AUDIT("/training-diary/user/audit?page={page}&count={count}", "GET"),
 
     REGISTRATION("/training-diary/auth/registration", "POST"),
-    LOGIN("/training-diary/auth/login", "POST"),
+    LOGIN("/training-diary/auth/email", "POST"),
 
     VIEW_STATISTICS("/training-diary/statistics", "GET"),
 

@@ -43,7 +43,7 @@ public class JwtTokenServiceImpl implements JwtTokenService {
     @PostConstruct
     public void init() {
         byte[] keyBytes = Decoders.BASE64.decode(secret);
-        key = Keys.hmacShaKeyFor(keyBytes);
+        this.key = Keys.hmacShaKeyFor(keyBytes);
     }
 
     @Override
@@ -94,7 +94,7 @@ public class JwtTokenServiceImpl implements JwtTokenService {
 
         String login = extractEmail(refreshToken);
 
-        return null;//new JwtResponse(login, createAccessToken(login), createRefreshToken(login)); //TODO
+        return null;//new JwtResponse(email, createAccessToken(email), createRefreshToken(email)); //TODO
     }
 
     @Override

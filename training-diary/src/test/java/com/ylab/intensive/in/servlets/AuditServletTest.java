@@ -65,15 +65,15 @@ class AuditServletTest {
 
     @Test
     void testDoGet_shouldReturnAuditDto() throws IOException {
-        String login = "testUser";
-        when(authentication.getLogin()).thenReturn(login);
+        String email = "testUser";
+        when(authentication.getLogin()).thenReturn(email);
         AuditDto auditDto = new AuditDto();
-        when(userService.getAudit(login, new Pageable(0,10))).thenReturn(auditDto);
+        when(userService.getAudit(email, new Pageable(0,10))).thenReturn(auditDto);
         when(converter.convertObjectToJson(auditDto)).thenReturn("{\"audit\":\"data\"}");
 
         auditServlet.doGet(request, response);
 
-        verify(userService).getAudit(login, new Pageable(0,10));
+        verify(userService).getAudit(email, new Pageable(0,10));
         verify(converter).convertObjectToJson(auditDto);
         verify(response).setStatus(HttpServletResponse.SC_OK);
         assert stringWriter.toString().equals("{\"audit\":\"data\"}");

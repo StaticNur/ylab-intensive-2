@@ -87,9 +87,9 @@ class AuthServletTest {
         LoginDto loginDto = new LoginDto("test@email.com", "password");
         JwtResponse jwtResponse = new JwtResponse("token", "refreshToken", "test@email.com");
         when(converter.getRequestBody(request, LoginDto.class)).thenReturn(loginDto);
-        when(userService.login(loginDto)).thenReturn(jwtResponse);
+        when(userService.email(loginDto)).thenReturn(jwtResponse);
         when(converter.convertObjectToJson(jwtResponse)).thenReturn("{\"jwt\":\"data\"}");
-        when(request.getPathInfo()).thenReturn("/login");
+        when(request.getPathInfo()).thenReturn("/email");
         when(validationService.validateAndReturnErrors(any())).thenReturn(Collections.emptyList());
 
         authServlet.doPost(request, response);

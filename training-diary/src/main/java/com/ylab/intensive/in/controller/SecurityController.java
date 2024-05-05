@@ -1,5 +1,6 @@
 package com.ylab.intensive.in.controller;
 
+import com.ylab.intensive.aspects.annotation.Auditable;
 import com.ylab.intensive.mapper.UserMapper;
 import com.ylab.intensive.model.dto.*;
 import com.ylab.intensive.model.entity.User;
@@ -52,6 +53,7 @@ public class SecurityController {
             @ApiResponse(code = 400, message = "Пользователь не найден. Подробности об ошибках содержатся в теле ответа.", response = ExceptionResponse.class),
             @ApiResponse(code = 500, message = "Внутренняя ошибка сервера. Подробности об ошибке содержатся в теле ответа.", response = ExceptionResponse.class)
     })
+    @Auditable(action = "Спортсмен зарегистрировался в системе.")
     public ResponseEntity<?> register(@RequestBody @Valid RegistrationDto registrationDto,
                                       BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
@@ -69,6 +71,7 @@ public class SecurityController {
      * @return ResponseEntity containing the authorization token.
      */
     @PostMapping("/login")
+    @Auditable(action = "Спортсмен авторизовался в системе.")
     public ResponseEntity<?> authorize(@RequestBody @Valid LoginDto loginDto, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             List<CustomFieldError> customFieldErrors = generatorResponseMessage.generateErrorMessage(bindingResult);

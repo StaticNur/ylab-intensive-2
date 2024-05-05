@@ -1,6 +1,5 @@
 package com.ylab.intensive.service.impl;
 
-import com.ylab.intensive.aspects.annotation.Auditable;
 import com.ylab.intensive.aspects.annotation.Loggable;
 import com.ylab.intensive.aspects.annotation.Timed;
 import com.ylab.intensive.repository.WorkoutDao;
@@ -11,13 +10,13 @@ import com.ylab.intensive.model.entity.Workout;
 import com.ylab.intensive.model.entity.WorkoutInfo;
 import com.ylab.intensive.model.entity.WorkoutType;
 import com.ylab.intensive.service.*;
+import com.ylab.intensive.util.converter.Converter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
 import java.util.*;
 
 /**
@@ -49,9 +48,9 @@ public class WorkoutServiceImpl implements WorkoutService {
      * This service provides functionality for managing workout types.
      */
     private final WorkoutTypeService workoutTypeService;
+    private final Converter converter;
 
     @Override
-    @Auditable
     @Loggable
     @Timed
     @Transactional
@@ -64,7 +63,7 @@ public class WorkoutServiceImpl implements WorkoutService {
                 .findFirst();
 
         if (typeOptional.isPresent()) {
-            LocalDate date = getDate(workoutDto.getDate());
+            LocalDate date = convertToDate(workoutDto.getDate());
             Optional<Workout> byDate = workoutDao.findByDate(date, userId);
             if (byDate.isPresent()) {
                 throw new WorkoutException("Тренировка типа " + typeOptional.get().getType()
@@ -77,6 +76,7 @@ public class WorkoutServiceImpl implements WorkoutService {
             workout.setDate(date);
             workout.setDuration(workoutDto.getDuration());
             workout.setCalorie(workoutDto.getCalorie());
+
             Workout savedWorkout = workoutDao.saveWorkout(workout);
 
             for (Map.Entry<String, String> infoMap : workoutDto.getWorkoutInfo().entrySet()) {
@@ -89,21 +89,28 @@ public class WorkoutServiceImpl implements WorkoutService {
     }
 
     @Override
-    @Auditable
     @Loggable
     @Timed
     @Transactional
-    public Workout addWorkoutInfo(String uuidStr, WorkoutInfoDto workoutInfoDto) {
+    public Workout addWorkoutInfo(String email, String uuidStr, WorkoutInfoDto workoutInfoDto) {
+        int userId = getAuthorizedUserId(email);
         UUID uuid = convertToUUID(uuidStr);
         Workout workout = workoutDao.findByUUID(uuid)
                 .orElseThrow(() -> new NotFoundException("Тренировка с uuid = " + uuid +
                                                          " нет в базе данных! Сначала добавьте ее."));
+        if(workout.getUserId() != userId){
+            throw new AccessDeniedException("Дополнительную информацию можно добавлять только в свои тренировочные данные!");
+        }
         WorkoutType workoutType = workoutTypeService.findByName(workout.getType());
         workout.setType(workoutType.getType());
+        Optional<WorkoutInfo> infoByWorkoutId = workoutInfoService.getInfoByWorkoutId(workout.getId());
+        infoByWorkoutId.ifPresent(workoutInfo -> workout.setWorkoutInfo(workoutInfo.getWorkoutInfo()));
 
         if (workoutInfoDto.getWorkoutInfo() != null) {
             for (Map.Entry<String, String> infoMap : workoutInfoDto.getWorkoutInfo().entrySet()) {
-                workoutInfoService.saveWorkoutInfo(workout.getId(), infoMap.getKey(), infoMap.getValue());
+                if(!workout.getWorkoutInfo().containsKey(infoMap.getKey())){
+                    workoutInfoService.saveWorkoutInfo(workout.getId(), infoMap.getKey(), infoMap.getValue());
+                }
                 workout.getWorkoutInfo().put(infoMap.getKey(), infoMap.getValue());
             }
         }
@@ -111,21 +118,12 @@ public class WorkoutServiceImpl implements WorkoutService {
     }
 
     @Override
-    @Auditable
     @Loggable
     @Timed
-    public List<WorkoutDto> getAllUserWorkouts(String login) {
+    public List<Workout> getAllUserWorkouts(String login) {
         int userId = getAuthorizedUserId(login);
         List<Workout> workoutList = workoutDao.findByUserId(userId);
-        List<WorkoutDto> workoutDtoList = new ArrayList<>();
         for (Workout workout : workoutList) {
-            WorkoutDto workoutDto = new WorkoutDto();
-            workoutDto.setUuid(workout.getUuid());
-            workoutDto.setDate(workout.getDate().toString());
-            workoutDto.setType(workout.getType());
-            workoutDto.setDuration(workout.getDuration());
-            workoutDto.setCalorie(workout.getCalorie());
-
             WorkoutInfoDto workoutInfoDto = new WorkoutInfoDto();
             Optional<WorkoutInfo> workoutInfo = workoutInfoService.getInfoByWorkoutId(workout.getId());
             if(workoutInfo.isPresent()){
@@ -133,11 +131,9 @@ public class WorkoutServiceImpl implements WorkoutService {
             }else {
                 workoutInfoDto.setWorkoutInfo(Collections.emptyMap());
             }
-            workoutDto.setWorkoutInfo(workoutInfoDto.getWorkoutInfo());
-
-            workoutDtoList.add(workoutDto);
+            workout.setWorkoutInfo(workoutInfoDto.getWorkoutInfo());
         }
-        return workoutDtoList;
+        return workoutList;
     }
 
     @Override
@@ -148,26 +144,23 @@ public class WorkoutServiceImpl implements WorkoutService {
                 .orElseThrow(() -> new NotFoundException("Тренировка с uuid = " + uuid +
                                                          " нет в базе данных! Сначала добавьте ее."));
         int userId = getAuthorizedUserId(email);
+        if(workout.getUserId() != userId){
+            throw new AccessDeniedException("Только свои тренировочные данные можно редактировать!");
+        }
         if (editWorkout.getCalorie() != null) {
             updateCalories(workout.getId(), editWorkout.getCalorie());
             workout.setCalorie(editWorkout.getCalorie());
         }
         if (editWorkout.getWorkoutInfo() != null) {
-            updateAdditionalInfo(workout.getId(), editWorkout.getWorkoutInfo());
-            workout.setWorkoutInfo(editWorkout.getWorkoutInfo());
+            Map<String, String> allInfo = updateAdditionalInfo(workout.getId(), editWorkout.getWorkoutInfo());
+            workout.setWorkoutInfo(allInfo);
         } else {
             Optional<WorkoutInfo> workoutInfo = workoutInfoService.getInfoByWorkoutId(workout.getId());
-            if(workoutInfo.isPresent()){
-                workout.setWorkoutInfo(workoutInfo.get().getWorkoutInfo());
-            }else {
-                workout.setWorkoutInfo(Collections.emptyMap());
-            }
+            workoutInfo.ifPresent(info -> workout.getWorkoutInfo().putAll(info.getWorkoutInfo()));
         }
         if (editWorkout.getType() != null) {
             updateType(userId, workout.getId(), editWorkout.getType());
             workout.setType(editWorkout.getType());
-        } else {
-            workout.setType(workout.getType());
         }
         if (editWorkout.getDuration() != null) {
             updateDuration(workout.getId(), editWorkout.getDuration());
@@ -177,7 +170,6 @@ public class WorkoutServiceImpl implements WorkoutService {
     }
 
     @Override
-    @Auditable
     @Loggable
     @Timed
     public void updateType(int userId, int workoutId, String type) {
@@ -186,7 +178,6 @@ public class WorkoutServiceImpl implements WorkoutService {
     }
 
     @Override
-    @Auditable
     @Loggable
     @Timed
     public void updateDuration(int workoutId, Duration duration) {
@@ -194,24 +185,30 @@ public class WorkoutServiceImpl implements WorkoutService {
     }
 
     @Override
-    @Auditable
     @Loggable
     @Timed
     public void updateCalories(int workoutId, Float calories) {
         workoutDao.updateCalorie(workoutId, calories);
     }
 
-    @Auditable
+    @Override
     @Loggable
     @Timed
-    public void updateAdditionalInfo(int workoutId, Map<String, String> workoutInfo) {
-        for (Map.Entry<String, String> infoMap : workoutInfo.entrySet()) {
-            workoutInfoService.updateWorkoutInfo(workoutId, infoMap.getKey(), infoMap.getValue());
-        }
+    public Map<String, String> updateAdditionalInfo(int workoutId, Map<String, String> workoutInfo) {
+        Optional<WorkoutInfo> infoByWorkoutId = workoutInfoService.getInfoByWorkoutId(workoutId);
+        Map<String, String> workoutInfoMap = infoByWorkoutId.map(WorkoutInfo::getWorkoutInfo)
+                .orElse(new HashMap<>());
+
+        workoutInfo.forEach((key, value) -> {
+            if (workoutInfoMap.containsKey(key)) {
+                workoutInfoService.updateWorkoutInfo(workoutId, key, value);
+            }
+            workoutInfoMap.put(key, value);
+        });
+        return workoutInfoMap;
     }
 
     @Override
-    @Auditable
     @Loggable
     @Timed
     @Transactional
@@ -226,24 +223,22 @@ public class WorkoutServiceImpl implements WorkoutService {
     }
 
     @Override
-    @Auditable
     @Loggable
     @Timed
     public StatisticsDto getWorkoutStatistics(String email, String beginStr, String endStr) {
-        LocalDate begin = getDate(beginStr);
-        LocalDate end = getDate(endStr);
+        LocalDate begin = convertToDate(beginStr);
+        LocalDate end = convertToDate(endStr);
         int authorizedUserId = getAuthorizedUserId(email);
-        List<Workout> workoutList = workoutDao.findByDuration(authorizedUserId, begin, end);
-        int totalCalories = 0;
 
-        for (Workout workout : workoutList) {
-            totalCalories += workout.getCalorie();
-        }
+        List<Workout> workoutList = workoutDao.findByDuration(authorizedUserId, begin, end);
+
+        float totalCalories = (float) workoutList.stream()
+                .mapToDouble(Workout::getCalorie)
+                .sum();
         return new StatisticsDto(totalCalories);
     }
 
     @Override
-    @Auditable
     @Loggable
     @Timed
     public List<User> getAllUsersWorkouts(List<User> userList) {
@@ -264,7 +259,6 @@ public class WorkoutServiceImpl implements WorkoutService {
     }
 
     @Override
-    @Auditable
     @Loggable
     @Timed
     public List<WorkoutType> getAllType(String login) {
@@ -273,30 +267,12 @@ public class WorkoutServiceImpl implements WorkoutService {
     }
 
     @Override
-    @Auditable
     @Loggable
     @Timed
     @Transactional
     public WorkoutType saveWorkoutType(String login, String typeName) {
         int userId = getAuthorizedUserId(login);
         return workoutTypeService.saveType(userId, typeName);
-    }
-
-    /**
-     * Parses a date string into a LocalDate object.
-     *
-     * @param dateStr the date string in "dd-MM-yyyy" format
-     * @return the parsed LocalDate object
-     * @throws DateFormatException if the date string has an incorrect format
-     */
-    private LocalDate getDate(String dateStr) {
-        LocalDate date;
-        try {
-            date = LocalDate.parse(dateStr);
-        } catch (DateTimeParseException e) {
-            throw new DateFormatException("Incorrect date format. Should be yyyy-MM-dd");
-        }
-        return date;
     }
 
     /**
@@ -311,19 +287,11 @@ public class WorkoutServiceImpl implements WorkoutService {
                                                          + email + " does not exist!"));
         return user.getId();
     }
-
-    /**
-     * Converts the provided string representation of a UUID into a UUID object.
-     *
-     * @param uuidStr The string representation of the UUID to convert.
-     * @return The UUID object corresponding to the input string.
-     * @throws InvalidUUIDException If the input string is not a valid UUID format.
-     */
     private UUID convertToUUID(String uuidStr) {
-        try {
-            return UUID.fromString(uuidStr);
-        } catch (IllegalArgumentException e) {
-            throw new InvalidUUIDException(e.getMessage());
-        }
+        return converter.convert(uuidStr, UUID::fromString, "Invalid UUID");
     }
+    private LocalDate convertToDate(String dateStr) {
+        return converter.convert(dateStr, LocalDate::parse, "Incorrect date format. Should be yyyy-MM-dd");
+    }
+
 }

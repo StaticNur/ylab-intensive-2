@@ -39,15 +39,15 @@ public interface WorkoutService {
      * @param workoutInfoDto  The DTO containing additional information to be added.
      * @return The updated workout entity with additional information.
      */
-    Workout addWorkoutInfo(String uuidStr, WorkoutInfoDto workoutInfoDto);
+    Workout addWorkoutInfo(String email, String uuidStr, WorkoutInfoDto workoutInfoDto);
 
     /**
      * Retrieves all workouts associated with a specific user.
      *
-     * @param login The login (email) of the user whose workouts are to be retrieved.
+     * @param login The email (email) of the user whose workouts are to be retrieved.
      * @return A list of DTOs representing the user's workouts.
      */
-    List<WorkoutDto> getAllUserWorkouts(String login);
+    List<Workout> getAllUserWorkouts(String login);
 
     /**
      * Updates the type of a workout.
@@ -79,8 +79,9 @@ public interface WorkoutService {
      *
      * @param workoutId   The ID of the workout to update.
      * @param workoutInfo A map containing additional information to update.
+     * @return
      */
-    void updateAdditionalInfo(int workoutId, Map<String, String> workoutInfo);
+    Map<String, String> updateAdditionalInfo(int workoutId, Map<String, String> workoutInfo);
 
     /**
      * Deletes a workout for the specified user.
@@ -111,7 +112,7 @@ public interface WorkoutService {
     /**
      * Retrieves all workout types for a specific user.
      *
-     * @param login The login (email) of the user for whom to retrieve workout types.
+     * @param login The email (email) of the user for whom to retrieve workout types.
      * @return A list of workout types associated with the user.
      */
     List<WorkoutType> getAllType(String login);
@@ -119,7 +120,7 @@ public interface WorkoutService {
     /**
      * Saves a new workout type for the specified user.
      *
-     * @param login    The login (email) of the user for whom to save the workout type.
+     * @param login    The email (email) of the user for whom to save the workout type.
      * @param typeName The name of the workout type to save.
      * @return The saved workout type entity.
      */

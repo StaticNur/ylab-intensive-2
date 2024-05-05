@@ -127,9 +127,9 @@ class UserServiceImplTest {
         when(jwtTokenService.createRefreshToken(email, Role.USER)).thenReturn("key");
         when(jwtTokenService.authentication("key")).thenReturn(new Authentication());
 
-        JwtResponse result = userManagementService.login(loginDto);
+        JwtResponse result = userManagementService.email(loginDto);
 
-        assertThat(result.login()).isEqualTo(email);
+        assertThat(result.email()).isEqualTo(email);
         assertThat(result.accessToken()).isEqualTo("key");
     }
 
@@ -141,9 +141,9 @@ class UserServiceImplTest {
 
         when(userDao.findByEmail(email)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> userManagementService.login(new LoginDto(email, password)))
+        assertThatThrownBy(() -> userManagementService.email(new LoginDto(email, password)))
                 .isInstanceOf(NotFoundException.class)
-                .hasMessage("There is no user with this login in the database.");
+                .hasMessage("There is no user with this email in the database.");
     }
 
     @Test
@@ -156,7 +156,7 @@ class UserServiceImplTest {
 
         when(userDao.findByEmail(email)).thenReturn(Optional.of(user));
 
-        assertThatThrownBy(() -> userManagementService.login(new LoginDto(email, "password787")))
+        assertThatThrownBy(() -> userManagementService.email(new LoginDto(email, "password787")))
                 .isInstanceOf(AuthorizeException.class)
                 .hasMessage("Incorrect password.");
     }

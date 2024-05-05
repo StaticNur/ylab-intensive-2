@@ -1,5 +1,6 @@
 package com.ylab.intensive.in.controller;
 
+import com.ylab.intensive.aspects.annotation.Auditable;
 import com.ylab.intensive.mapper.UserMapper;
 import com.ylab.intensive.model.Pageable;
 import com.ylab.intensive.model.dto.*;
@@ -29,7 +30,7 @@ import java.util.List;
 @RequestMapping("/training-diary")
 @Api(value = "AuthenticationController", tags = {"Authentication Controller"})
 @SwaggerDefinition(tags = {
-        @Tag(name = "login and registration controller.")
+        @Tag(name = "email and registration controller.")
 })
 @RequiredArgsConstructor
 public class UserController {
@@ -40,6 +41,7 @@ public class UserController {
 
     @GetMapping("/users/workouts")
     @PreAuthorize("hasAuthority('ADMIN')")
+    @Auditable(action = "Пользователь просмотрел тренировки всех пользователей.")
     public ResponseEntity<?> viewTrainingsForAllUsers() {
         List<User> userList = userService.getAllUser();
         List<User> userWithWorkouts = workoutService.getAllUsersWorkouts(userList);
@@ -50,6 +52,7 @@ public class UserController {
 
     @PatchMapping("/users/{uuid}/access")
     @PreAuthorize("hasAuthority('ADMIN')")
+    @Auditable(action = "Пользователь изменил права пользователя по uuid=@uuid")
     public ResponseEntity<?> changeUserRights(@PathVariable("uuid") String uuid,
                                               @RequestBody @Valid ChangeUserRightsDto changeUserRightsDto,
                                               BindingResult bindingResult) {
@@ -65,6 +68,7 @@ public class UserController {
     }
 
     @GetMapping("/user/audit")
+    @Auditable(action = "Пользователь просмотрел свой аудит действий.")
     public ResponseEntity<?> viewAudit(@RequestParam(value = "page", defaultValue = "0") int page,
                                        @RequestParam(value = "count", defaultValue = "10") int count) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

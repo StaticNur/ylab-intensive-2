@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 /**
  * Represents authentication information for a user.
  * <p>
- * This class contains the user's login, role, and authentication status.
+ * This class contains the user's email, role, and authentication status.
  * </p>
  *
  * @since 1.0
@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class Authentication {
     /**
-     * The login or email address of the user.
+     * The email or email address of the user.
      */
     private String login;
 

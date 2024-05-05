@@ -10,7 +10,7 @@ import java.util.Optional;
 /**
  * Service interface for user-related operations.
  * <p>
- * This interface defines methods for user registration, login, changing user permissions,
+ * This interface defines methods for user registration, email, changing user permissions,
  * retrieving audit logs, and accessing user information.
  * </p>
  *
@@ -27,9 +27,9 @@ public interface UserService {
     User registerUser(RegistrationDto registrationDto);
 
     /**
-     * Logs in a user using the provided login credentials.
+     * Logs in a user using the provided email credentials.
      *
-     * @param loginDto The login credentials of the user.
+     * @param loginDto The email credentials of the user.
      * @return The JWT response containing access and refresh tokens.
      */
     JwtResponse login(LoginDto loginDto);
