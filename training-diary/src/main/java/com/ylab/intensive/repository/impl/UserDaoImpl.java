@@ -24,8 +24,15 @@ import java.util.*;
 @Repository
 @RequiredArgsConstructor
 public class UserDaoImpl implements UserDao {
-
+    /**
+     * The JDBC template used for executing SQL queries against the database.
+     */
     private final JdbcTemplate jdbcTemplate;
+
+    /**
+     * The User extractor responsible for extracting User information
+     * from the provided {@code ResultSet}.
+     */
     private final UserExtractor extractor;
 
     @Override

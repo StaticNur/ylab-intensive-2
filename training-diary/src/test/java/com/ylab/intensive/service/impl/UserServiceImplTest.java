@@ -7,8 +7,6 @@ import com.ylab.intensive.exception.RegistrationException;
 import com.ylab.intensive.model.dto.*;
 import com.ylab.intensive.model.entity.User;
 import com.ylab.intensive.model.enums.Role;
-import com.ylab.intensive.mapper.UserMapper;
-import com.ylab.intensive.model.Authentication;
 import com.ylab.intensive.repository.UserDao;
 import com.ylab.intensive.service.AuditService;
 import com.ylab.intensive.service.RoleService;
@@ -32,8 +30,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -61,7 +59,7 @@ class UserServiceImplTest {
     private Converter converter;
 
     @InjectMocks
-    private UserServiceImpl userManagementService;
+    private UserServiceImpl userService;
 
     @Test
     @DisplayName("Register user - success")
@@ -79,7 +77,7 @@ class UserServiceImplTest {
         when(passwordEncoder.encode(any())).thenReturn(password);
         when(userDao.save(any(User.class), anyInt())).thenReturn(user);
 
-        User result = userManagementService.registerUser(new RegistrationDto(email, password, role));
+        User result = userService.registerUser(new RegistrationDto(email, password, role));
 
         assertThat(result).isEqualTo(user);
     }
@@ -93,7 +91,7 @@ class UserServiceImplTest {
 
         when(userDao.findByEmail(email)).thenReturn(Optional.of(new User()));
 
-        assertThatThrownBy(() -> userManagementService.registerUser(new RegistrationDto(email, password, role)))
+        assertThatThrownBy(() -> userService.registerUser(new RegistrationDto(email, password, role)))
                 .isInstanceOf(RegistrationException.class)
                 .hasMessage("Такой пользователь уже существует!");
     }
@@ -108,7 +106,7 @@ class UserServiceImplTest {
         when(converter.convert(uuid, UUID::fromString, "Invalid UUID")).thenReturn(UUID.randomUUID());
         when(userDao.updateUserRole(UUID.fromString(uuid),1)).thenReturn(false);
 
-        assertThatThrownBy(() -> userManagementService.changeUserPermissions(uuid, new ChangeUserRightsDto(role)))
+        assertThatThrownBy(() -> userService.changeUserPermissions(uuid, new ChangeUserRightsDto(role)))
                 .isInstanceOf(DaoException.class)
                 .hasMessage("Failed to change user role. Invalid uuid");
     }
@@ -120,7 +118,7 @@ class UserServiceImplTest {
 
         when(userDao.findByEmail(email)).thenReturn(Optional.empty());
 
-        assertThat(userManagementService.findByEmail(email)).isEmpty();
+        assertThat(userService.findByEmail(email)).isEmpty();
     }
 
     @Test
@@ -175,7 +173,7 @@ class UserServiceImplTest {
         when(jwtTokenService.createAccessToken(any())).thenReturn("key");
         when(jwtTokenService.createRefreshToken(any())).thenReturn("key");
 
-        JwtResponse result = userManagementService.login(loginDto);
+        JwtResponse result = userService.login(loginDto);
 
         assertThat(result.login()).isEqualTo(email);
         assertThat(result.accessToken()).isEqualTo("key");
@@ -227,7 +225,7 @@ class UserServiceImplTest {
         });
         when(passwordEncoder.matches(any(),any())).thenReturn(false);
 
-        assertThatThrownBy(() -> userManagementService.login(new LoginDto(email, password)))
+        assertThatThrownBy(() -> userService.login(new LoginDto(email, password)))
                 .isInstanceOf(AuthorizeException.class)
                 .hasMessage("The password for this email is incorrect.");
     }
@@ -248,7 +246,7 @@ class UserServiceImplTest {
         when(userDao.updateUserRole(uuid, roleId)).thenReturn(true);
         when(userDao.findByUUID(uuid)).thenReturn(Optional.of(user));
 
-        User updatedUser = userManagementService.changeUserPermissions(uuidStr, changeUserRightsDto);
+        User updatedUser = userService.changeUserPermissions(uuidStr, changeUserRightsDto);
 
         assertThat(updatedUser.getRole()).isEqualTo(Role.USER);
     }
@@ -267,7 +265,7 @@ class UserServiceImplTest {
         when(userDao.updateUserRole(uuid, roleId)).thenReturn(true);
         when(userDao.findByUUID(uuid)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> userManagementService.changeUserPermissions(uuidStr, changeUserRightsDto))
+        assertThatThrownBy(() -> userService.changeUserPermissions(uuidStr, changeUserRightsDto))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessage("Пользователь с uuid = " + uuidStr + " не существует!");
     }
@@ -281,9 +279,18 @@ class UserServiceImplTest {
 
         when(userDao.findByEmail(email)).thenReturn(Optional.of(user));
 
-        Optional<User> result = userManagementService.findByEmail(email);
+        Optional<User> result = userService.findByEmail(email);
 
         assertThat(result).isPresent();
         assertThat(result.get().getEmail()).isEqualTo(email);
+    }
+
+    @Test
+    @DisplayName("Find by email")
+    void testUpdateToken() {
+        when(jwtTokenService.refreshUserToken(anyString()))
+                .thenReturn(new JwtResponse("login","token","token"));
+
+        assertDoesNotThrow(() -> userService.updateToken("token"));
     }
 }

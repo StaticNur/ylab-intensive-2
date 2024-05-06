@@ -32,6 +32,10 @@ public class SecurityController {
      * The service for user-related operations.
      */
     private final UserService userService;
+
+    /**
+     * Utility for generating custom error response messages
+     */
     private final GeneratorResponseMessage generatorResponseMessage;
 
     /**
@@ -77,6 +81,27 @@ public class SecurityController {
             return ResponseEntity.badRequest().body(customFieldErrors);
         }
         JwtResponse response = userService.login(loginDto);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * update the token a user.
+     *
+     * @param refreshTokenDto The SecurityRequest object containing user refresh token.
+     * @return ResponseEntity containing the authorization token.
+     */
+    @PostMapping("/refresh-token")
+    @ApiOperation(value = "User refresh token", response = JwtResponse.class)
+    @ApiResponse(code = 400, message = "Ошибка валидации. Подробности об ошибках содержатся в теле ответа.",
+            response = CustomFieldError.class, responseContainer = "List")
+    @Auditable(action = "Спортсмен продлевает срок службы токена.")
+    public ResponseEntity<?> extendTheLifeOfTheToken(@RequestBody @Valid RefreshTokenDto refreshTokenDto,
+                                                     BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            List<CustomFieldError> customFieldErrors = generatorResponseMessage.generateErrorMessage(bindingResult);
+            return ResponseEntity.badRequest().body(customFieldErrors);
+        }
+        JwtResponse response = userService.updateToken(refreshTokenDto.refreshToken().trim());
         return ResponseEntity.ok(response);
     }
 }

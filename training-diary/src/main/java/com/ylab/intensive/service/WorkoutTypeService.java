@@ -3,7 +3,6 @@ package com.ylab.intensive.service;
 import com.ylab.intensive.model.entity.WorkoutType;
 
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Service interface for managing workout types and related operations.
@@ -15,7 +14,6 @@ import java.util.Optional;
  * @since 1.0
  */
 public interface WorkoutTypeService {
-
     /**
      * Saves a new workout type for the specified user.
      *
@@ -43,12 +41,21 @@ public interface WorkoutTypeService {
     void updateType(int workoutId, String oldType, String newType);
 
     /**
-     * Finds a workout type by its ID.
+     * Retrieves a workout type by its name.
      *
-     * @param name@return An optional containing the found workout type, or empty if not found.
+     * @param name The name of the workout type to retrieve.
+     * @return The workout type with the specified name, or null if no such workout type exists.
      */
     WorkoutType findByName(String name);
 
+    /**
+     * Retrieves a workout type by the name and the user ID.
+     *
+     * @param userId   The ID of the user associated with the workout type.
+     * @param typeName The name of the workout type to retrieve.
+     * @return The workout type with the specified name and associated with the specified user ID,
+     * or null if no such workout type exists.
+     */
     WorkoutType findTypeByUserId(int userId, String typeName);
 
     /**

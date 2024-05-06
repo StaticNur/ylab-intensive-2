@@ -14,7 +14,9 @@ import org.springframework.stereotype.Repository;
 @Repository
 @RequiredArgsConstructor
 public class RoleDaoImpl implements RoleDao {
-
+    /**
+     * The JDBC template used for executing SQL queries against the database.
+     */
     private final JdbcTemplate jdbcTemplate;
 
     @Override

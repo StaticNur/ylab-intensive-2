@@ -1,5 +1,7 @@
 package com.ylab.intensive.service.security;
 
+import com.ylab.intensive.exception.AccessDeniedException;
+import com.ylab.intensive.exception.InvalidTokenException;
 import com.ylab.intensive.model.dto.JwtResponse;
 import com.ylab.intensive.model.enums.Role;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -14,22 +16,33 @@ import org.springframework.security.core.userdetails.UserDetails;
  * @since 1.0
  */
 public interface JwtTokenService {
-
+    /**
+     * Creates an access token for the given user details.
+     *
+     * @param userDetails The user details for whom the token is created.
+     * @return The generated access token.
+     */
     String createAccessToken(UserDetails userDetails);
 
-
-    String createRefreshToken(UserDetails userDetail);
-
     /**
-     * Refreshes the user tokens using the provided refresh token.
+     * Creates a refresh token for the given user details.
      *
-     * @param refreshToken The refresh token.
-     * @return The refreshed JWT response containing new access and refresh tokens.
+     * @param userDetails The user details for whom the token is created.
+     * @return The generated refresh token.
      */
-    JwtResponse refreshUserTokens(String refreshToken);
+    String createRefreshToken(UserDetails userDetails);
 
     /**
-     * Validates the provided JWT token.
+     * Refreshes the user's access and refresh tokens.
+     *
+     * @param refreshToken The refresh token to use for token refreshing.
+     * @return The updated JWT response containing the new access and refresh tokens.
+     * @throws AccessDeniedException If the refresh token is invalid or expired.
+     */
+    JwtResponse refreshUserToken(String refreshToken);
+
+    /**
+     * Validates the given JWT token.
      *
      * @param token The JWT token to validate.
      * @return {@code true} if the token is valid, {@code false} otherwise.
@@ -37,18 +50,20 @@ public interface JwtTokenService {
     boolean validateToken(String token);
 
     /**
-     * Extracts the roles from the provided JWT token.
+     * Extracts the email from the given JWT token.
      *
-     * @param token The JWT token.
-     * @return The role extracted from the token.
+     * @param token The JWT token from which to extract the email.
+     * @return The extracted email.
+     * @throws InvalidTokenException If the token is invalid or does not contain an email claim.
      */
     Role extractRoles(String token);
 
     /**
-     * Extracts the email address from the provided JWT token.
+     * Extracts the roles from the given JWT token.
      *
-     * @param token The JWT token.
-     * @return The email address extracted from the token.
+     * @param token The JWT token from which to extract the roles.
+     * @return The extracted roles.
+     * @throws InvalidTokenException If the token is invalid or does not contain a roles claim.
      */
     String extractEmail(String token);
 }

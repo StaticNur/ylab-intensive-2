@@ -33,11 +33,11 @@ public class WorkoutInfoExtractor implements ResultSetExtractor<WorkoutInfo> {
             workoutInfo = new WorkoutInfo();
             workoutInfo.setWorkoutId(rs.getInt("id"));
             Map<String, String> workoutInfoMap = new HashMap<>();
-            do{
+            do {
                 String title = rs.getString("title");
                 String info = rs.getString("info");
                 workoutInfoMap.put(title, info);
-            }while (rs.next());
+            } while (rs.next());
             workoutInfo.setWorkoutInfo(workoutInfoMap);
         }
         return workoutInfo;

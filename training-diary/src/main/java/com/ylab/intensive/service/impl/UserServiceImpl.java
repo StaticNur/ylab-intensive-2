@@ -32,7 +32,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     /**
-     * User DAO.
      * This DAO is responsible for data access operations related to users.
      */
     private final UserDao userDao;
@@ -48,14 +47,24 @@ public class UserServiceImpl implements UserService {
     private final AuditService auditService;
 
     /**
-     * Authorized User Session.
-     * This session represents the currently authorized user.
+     * The service responsible for the token
      */
     private final JwtTokenService jwtTokenService;
-    private final JwtUserDetailsService jwtUserDetailsService;
-    private final PasswordEncoder passwordEncoder;
-    private final Converter converter;
 
+    /**
+     * The service responsible for managing user details for JWT authentication.
+     */
+    private final JwtUserDetailsService jwtUserDetailsService;
+
+    /**
+     * The password encoder used for encoding and decoding passwords.
+     */
+    private final PasswordEncoder passwordEncoder;
+
+    /**
+     * The converter used for converting one type of object to another.
+     */
+    private final Converter converter;
 
     @Override
     @Timed
@@ -139,6 +148,13 @@ public class UserServiceImpl implements UserService {
     @Timed
     public Optional<User> findByEmail(String email) {
         return userDao.findByEmail(email);
+    }
+
+    @Override
+    @Loggable
+    @Timed
+    public JwtResponse updateToken(String refreshToken) {
+        return jwtTokenService.refreshUserToken(refreshToken);
     }
 
     private User generateNewUser(RegistrationDto registrationDto) {

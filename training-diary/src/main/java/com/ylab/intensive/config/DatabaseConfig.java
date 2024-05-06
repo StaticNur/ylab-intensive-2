@@ -14,6 +14,12 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.sql.DataSource;
 
+/**
+ * Configuration class for database-related settings.
+ * <p>
+ * This class configures the data source, transaction management, Liquibase integration,
+ * and JDBC template for database operations.
+ */
 @Configuration
 @EnableTransactionManagement
 @PropertySource(value = "classpath:application.yml", factory = YamlPropertiesUtilFactory.class)
@@ -34,6 +40,11 @@ public class DatabaseConfig {
     @Value("${liquibase.change-log}")
     private String changeLogFile;
 
+    /**
+     * Configures the data source for database connectivity.
+     *
+     * @return a configured DataSource instance
+     */
     @Bean
     public DataSource dataSource() {
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
@@ -44,6 +55,11 @@ public class DatabaseConfig {
         return dataSource;
     }
 
+    /**
+     * Configures Liquibase integration for database migrations.
+     *
+     * @return a SpringLiquibase instance for managing database changes
+     */
     @Bean
     public SpringLiquibase liquibase() {
         SpringLiquibase liquibase = new SpringLiquibase();
@@ -52,10 +68,21 @@ public class DatabaseConfig {
         return liquibase;
     }
 
+    /**
+     * Configures a JDBC template for database operations.
+     *
+     * @return a JdbcTemplate instance for executing SQL queries
+     */
     @Bean
     public JdbcTemplate jdbcTemplate() {
         return new JdbcTemplate(dataSource());
     }
+
+    /**
+     * Configures the platform transaction manager for annotation-driven transaction management.
+     *
+     * @return a PlatformTransactionManager instance for managing transactions
+     */
     @Bean
     public PlatformTransactionManager annotationDrivenTransactionManager() {
         return new DataSourceTransactionManager(dataSource());

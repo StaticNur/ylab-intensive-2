@@ -15,7 +15,8 @@ import java.util.Map;
 /**
  * Service interface for managing workouts and related operations.
  * <p>
- * This interface defines methods to perform various operations related to workouts, including adding, updating, and deleting workouts,
+ * This interface defines methods to perform various operations related to workouts,
+ * including adding, updating, and deleting workouts,
  * retrieving workout statistics, and managing workout types.
  * </p>
  *
@@ -35,8 +36,8 @@ public interface WorkoutService {
     /**
      * Adds additional information to an existing workout.
      *
-     * @param uuidStr         The UUID of the workout to which the information is added.
-     * @param workoutInfoDto  The DTO containing additional information to be added.
+     * @param uuidStr        The UUID of the workout to which the information is added.
+     * @param workoutInfoDto The DTO containing additional information to be added.
      * @return The updated workout entity with additional information.
      */
     Workout addWorkoutInfo(String email, String uuidStr, WorkoutInfoDto workoutInfoDto);
@@ -75,11 +76,15 @@ public interface WorkoutService {
     void updateCalories(int workoutId, Float calories);
 
     /**
-     * Updates additional information of a workout.
+     * Updates additional information for a workout specified by its ID.
      *
-     * @param workoutId   The ID of the workout to update.
-     * @param workoutInfo A map containing additional information to update.
-     * @return
+     * @param workoutId   The ID of the workout for which additional information is to be updated.
+     * @param workoutInfo A map containing the additional information to update,
+     *                    where the keys represent the names of the fields to update,
+     *                    and the values represent the new values for those fields.
+     * @return A map containing the updated additional information for the workout,
+     * where the keys represent the names of the fields, and
+     * the values represent the updated values for those fields.
      */
     Map<String, String> updateAdditionalInfo(int workoutId, Map<String, String> workoutInfo);
 
@@ -129,8 +134,8 @@ public interface WorkoutService {
     /**
      * Updates an existing workout.
      *
-     * @param email     The email of the user who owns the workout.
-     * @param uuidStr   The UUID of the workout to update.
+     * @param email       The email of the user who owns the workout.
+     * @param uuidStr     The UUID of the workout to update.
      * @param editWorkout The DTO containing the updated workout information.
      * @return The updated workout entity.
      */

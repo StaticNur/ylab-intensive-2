@@ -1,6 +1,5 @@
 package com.ylab.intensive.service.impl;
 
-import com.ylab.intensive.aspects.annotation.Auditable;
 import com.ylab.intensive.aspects.annotation.Loggable;
 import com.ylab.intensive.aspects.annotation.Timed;
 import com.ylab.intensive.repository.WorkoutInfoDao;
@@ -23,7 +22,6 @@ public class WorkoutInfoServiceImpl implements WorkoutInfoService {
      * Data access object for workout information operations.
      */
     private final WorkoutInfoDao workoutInfoDao;
-
 
     @Override
     @Loggable

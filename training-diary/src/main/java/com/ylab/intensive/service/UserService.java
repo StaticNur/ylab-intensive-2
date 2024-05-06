@@ -1,5 +1,6 @@
 package com.ylab.intensive.service;
 
+import com.ylab.intensive.exception.AccessDeniedException;
 import com.ylab.intensive.model.Pageable;
 import com.ylab.intensive.model.dto.*;
 import com.ylab.intensive.model.entity.User;
@@ -37,8 +38,8 @@ public interface UserService {
     /**
      * Changes the permissions of a user identified by the UUID.
      *
-     * @param uuidStr               The UUID of the user.
-     * @param changeUserRightsDto   The new user permissions.
+     * @param uuidStr             The UUID of the user.
+     * @param changeUserRightsDto The new user permissions.
      * @return The updated user.
      */
     User changeUserPermissions(String uuidStr, ChangeUserRightsDto changeUserRightsDto);
@@ -46,8 +47,8 @@ public interface UserService {
     /**
      * Retrieves audit logs for a user specified by their email address.
      *
-     * @param email     The email address of the user.
-     * @param pageable  The pagination information.
+     * @param email    The email address of the user.
+     * @param pageable The pagination information.
      * @return The audit logs for the user.
      */
     AuditDto getAudit(String email, Pageable pageable);
@@ -66,5 +67,14 @@ public interface UserService {
      * @return An optional containing the user if found, otherwise empty.
      */
     Optional<User> findByEmail(String email);
+
+    /**
+     * Updates the user's access and refresh tokens using the provided refresh token.
+     *
+     * @param refreshToken The refresh token to use for updating the tokens.
+     * @return The updated JWT response containing the new access and refresh tokens.
+     * @throws AccessDeniedException If the refresh token is invalid or expired.
+     */
+    JwtResponse updateToken(String refreshToken);
 }
 

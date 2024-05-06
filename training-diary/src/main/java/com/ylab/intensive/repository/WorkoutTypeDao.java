@@ -52,10 +52,10 @@ public interface WorkoutTypeDao {
     Optional<WorkoutType> findByName(String typeName);
 
     /**
-     * Retrieves a workout type by its name.
+     * Retrieves a workout type by its name and userId.
      *
      * @param typeName the name of the workout type.
-     * @param userId the ID of the user.
+     * @param userId   the ID of the user.
      * @return an optional containing the workout type if found, or empty if not found.
      */
     Optional<WorkoutType> findTypeByUserId(int userId, String typeName);

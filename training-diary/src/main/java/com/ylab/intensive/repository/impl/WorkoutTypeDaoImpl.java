@@ -24,8 +24,15 @@ import java.util.Optional;
 @Repository
 @RequiredArgsConstructor
 public class WorkoutTypeDaoImpl implements WorkoutTypeDao {
-
+    /**
+     * The JDBC template used for executing SQL queries against the database.
+     */
     private final JdbcTemplate jdbcTemplate;
+
+    /**
+     * The WorkoutType extractor responsible for extracting WorkoutType information
+     * from the provided {@code ResultSet}.
+     */
     private final WorkoutTypeExtractor extractor;
 
     public WorkoutType saveType(int userId, String type) {

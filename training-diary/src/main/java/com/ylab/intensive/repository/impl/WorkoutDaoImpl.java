@@ -26,8 +26,15 @@ import java.util.*;
 @Repository
 @RequiredArgsConstructor
 public class WorkoutDaoImpl implements WorkoutDao {
-
+    /**
+     * The JDBC template used for executing SQL queries against the database.
+     */
     private final JdbcTemplate jdbcTemplate;
+
+    /**
+     * The Workout extractor responsible for extracting Workout information
+     * from the provided {@code ResultSet}.
+     */
     private final WorkoutExtractor extractor;
 
     @Override

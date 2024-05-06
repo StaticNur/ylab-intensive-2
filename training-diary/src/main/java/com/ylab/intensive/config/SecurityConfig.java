@@ -23,6 +23,10 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import javax.servlet.http.HttpServletResponse;
 
+/**
+ * Configuration class for security settings of the application.
+ * Configures authentication, authorization, JWT token handling, and exception handling.
+ */
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
@@ -32,6 +36,13 @@ public class SecurityConfig {
     private final JwtUserDetailsService jwtUserDetailsService;
     private final JwtTokenFilter jwtFilter;
 
+    /**
+     * Configures security filters and rules for HTTP requests.
+     *
+     * @param http HttpSecurity object for configuring security settings
+     * @return SecurityFilterChain object representing the security filter chain
+     * @throws Exception if an error occurs during configuration
+     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
@@ -49,9 +60,7 @@ public class SecurityConfig {
                             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
                             response.setContentType("application/json");
 
-                            ExceptionResponse exceptionResponse = new ExceptionResponse("Access Denied");
-                            //String jsonResponse = jacksonMapper.writeValueAsString(exceptionResponse);
-                            response.getWriter().write(exceptionResponse.toString());
+                            response.getWriter().write(String.valueOf(new ExceptionResponse("Access Denied")));
                         }))
                 .sessionManagement(httpSecuritySessionManagementConfigurer ->
                         httpSecuritySessionManagementConfigurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -59,6 +68,11 @@ public class SecurityConfig {
                 .build();
     }
 
+    /**
+     * Configures the authentication provider.
+     *
+     * @return AuthenticationProvider object for authenticating users
+     */
     @Bean
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
@@ -67,11 +81,23 @@ public class SecurityConfig {
         return provider;
     }
 
+    /**
+     * Configures the authentication manager.
+     *
+     * @param authenticationConfiguration AuthenticationConfiguration object for configuring authentication
+     * @return AuthenticationManager object for managing authentication
+     * @throws Exception if an error occurs during configuration
+     */
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
     }
 
+    /**
+     * Configures the password encoder for encoding and decoding passwords.
+     *
+     * @return PasswordEncoder object for encoding passwords
+     */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();

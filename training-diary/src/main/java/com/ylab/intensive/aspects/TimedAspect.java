@@ -39,7 +39,7 @@ public class TimedAspect {
         long after = System.currentTimeMillis();
         builder.append("execution time: ").append(after - before).append("ms");
         log.info(builder.toString());
-        System.out.println("Timed: " +builder);
+        System.out.println("Timed: " + builder);
         return retVal;
     }
 }

@@ -38,7 +38,7 @@ public class LoggingAspect {
         log.info("before: {}", builder);
         Object retVal = joinPoint.proceed();
         log.info("after: {}", builder);
-        System.out.println("Loggable: " +builder);
+        System.out.println("Loggable: " + builder);
         return retVal;
     }
 }

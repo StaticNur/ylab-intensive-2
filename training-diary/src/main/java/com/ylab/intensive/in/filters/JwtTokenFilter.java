@@ -7,6 +7,7 @@ import com.ylab.intensive.service.security.JwtTokenService;
 import com.ylab.intensive.model.dto.ExceptionResponse;
 import com.ylab.intensive.model.enums.Role;
 import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -21,6 +22,9 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Collections;
 
+/**
+ * Filter class to intercept and process JWT tokens in incoming requests.
+ */
 @Component
 @RequiredArgsConstructor
 public class JwtTokenFilter extends OncePerRequestFilter {
@@ -28,6 +32,15 @@ public class JwtTokenFilter extends OncePerRequestFilter {
     private final JwtTokenService jwtTokenService;
     private final ObjectMapper jacksonMapper;
 
+    /**
+     * Filters incoming requests to process JWT tokens.
+     *
+     * @param request     the incoming HTTP servlet request
+     * @param response    the HTTP servlet response
+     * @param filterChain the filter chain
+     * @throws ServletException if an error occurs during the servlet processing
+     * @throws IOException      if an I/O error occurs
+     */
     @Override
     public void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                  FilterChain filterChain) throws ServletException, IOException {
@@ -65,10 +78,15 @@ public class JwtTokenFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-
+    /**
+     * Sends an unauthorized response with the specified message.
+     *
+     * @param response the HTTP servlet response
+     * @param message  the error message to be sent in the response
+     * @throws IOException if an I/O error occurs
+     */
     private void sendResponse(HttpServletResponse response, String message) throws IOException {
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        response.setContentType("application/json");
 
         ExceptionResponse exceptionResponse = new ExceptionResponse(message);
         String jsonResponse = jacksonMapper.writeValueAsString(exceptionResponse);

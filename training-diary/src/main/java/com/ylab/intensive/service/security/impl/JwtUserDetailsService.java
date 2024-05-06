@@ -16,7 +16,9 @@ import java.util.Collections;
 @Service
 @RequiredArgsConstructor
 public class JwtUserDetailsService implements UserDetailsService {
-
+    /**
+     * This DAO is responsible for data access operations related to users.
+     */
     private final UserDao userRepository;
 
     /**
@@ -30,7 +32,7 @@ public class JwtUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username){
         return userRepository.findByEmail(username)
                 .map(JwtUserDetails::new)
-                .orElseThrow(()-> new NotFoundException("user %s not found".formatted(username)));
+                .orElseThrow(()-> new NotFoundException("User %s not found".formatted(username)));
     }
 
     /**

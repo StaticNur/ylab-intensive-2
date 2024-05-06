@@ -2,16 +2,14 @@ package com.ylab.intensive.service.security.impl;
 
 import com.ylab.intensive.exception.AccessDeniedException;
 import com.ylab.intensive.exception.InvalidTokenException;
+import com.ylab.intensive.model.JwtProperties;
 import com.ylab.intensive.service.security.JwtTokenService;
 import com.ylab.intensive.model.dto.JwtResponse;
 import com.ylab.intensive.model.enums.Role;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import org.springframework.beans.factory.annotation.Value;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -30,19 +28,24 @@ import java.util.*;
  * @since 1.0
  */
 @Service
+@RequiredArgsConstructor
 public class JwtTokenServiceImpl implements JwtTokenService {
-    @Value("${jwt.secret}")
-    private String secret;
-    @Value("${jwt.access}")
-    private Long access;
-    @Value("${jwt.refresh}")
-    private Long refresh;
+    /**
+     * Properties related to JWT configuration.
+     */
+    private final JwtProperties jwtProperties;
 
+    /**
+     * Secret key used for JWT signing and verification.
+     */
     private SecretKey key;
 
+    /**
+     * Initializes the secret key used for JWT operations.
+     */
     @PostConstruct
     public void init() {
-        byte[] keyBytes = Decoders.BASE64.decode(secret);
+        byte[] keyBytes = Decoders.BASE64.decode(jwtProperties.getSecret());
         this.key = Keys.hmacShaKeyFor(keyBytes);
     }
 
@@ -54,16 +57,7 @@ public class JwtTokenServiceImpl implements JwtTokenService {
                 .toList();
         claims.put("roles", rolesList);
 
-        Date now = new Date();
-        Date validity = new Date(now.getTime() + access);
-
-        return Jwts.builder()
-                .claims(claims)
-                .subject(userDetails.getUsername())
-                .issuedAt(now)
-                .expiration(validity)
-                .signWith(key)
-                .compact();
+        return generateToken(claims, userDetails.getUsername(), jwtProperties.getAccess());
     }
 
     @Override
@@ -74,33 +68,39 @@ public class JwtTokenServiceImpl implements JwtTokenService {
                 .toList();
         claims.put("roles", rolesList);
 
-        Date now = new Date();
-        Date validity = new Date(now.getTime() + refresh);
-
-        return Jwts.builder()
-                .claims(claims)
-                .subject(userDetails.getUsername())
-                .issuedAt(now)
-                .expiration(validity)
-                .signWith(key)
-                .compact();
+        return generateToken(claims, userDetails.getUsername(), jwtProperties.getRefresh());
     }
 
     @Override
-    public JwtResponse refreshUserTokens(String refreshToken) throws AccessDeniedException {
-        if (!validateToken(refreshToken)) {
-            throw new AccessDeniedException("Access denied!");
+    public JwtResponse refreshUserToken(String refreshToken) throws AccessDeniedException {
+        try {
+            if (validateToken(refreshToken)) {
+                String email = extractEmail(refreshToken);
+                Role role = extractRoles(refreshToken);
+                Map<String, Object> roles = new HashMap<>();
+                roles.put("roles", Collections.singletonList(role.name()));
+
+                String accessToken = generateToken(roles, email, jwtProperties.getAccess());
+                String newRefreshToken = generateToken(roles, email, jwtProperties.getRefresh());
+
+                return new JwtResponse(email, accessToken, newRefreshToken);
+            } else throw new IllegalArgumentException();
+        } catch (ExpiredJwtException | UnsupportedJwtException
+                 | MalformedJwtException | IllegalArgumentException e) {
+            throw new AccessDeniedException("Invalid or expired refresh token");
         }
-
-        String login = extractEmail(refreshToken);
-
-        return null;//new JwtResponse(email, createAccessToken(email), createRefreshToken(email)); //TODO
     }
 
     @Override
     public boolean validateToken(String token) {
-        Jws<Claims> claims = Jwts.parser().build().parseSignedClaims(token);
-        return !claims.getPayload().getExpiration().before(new Date());
+        try {
+            Jws<Claims> claims = Jwts.parser()
+                    .verifyWith(key).build().parseSignedClaims(token);
+            return !claims.getPayload().getExpiration().before(new Date());
+        } catch (ExpiredJwtException | UnsupportedJwtException
+                 | MalformedJwtException | IllegalArgumentException e) {
+            return false;
+        }
     }
 
     @Override
@@ -130,11 +130,35 @@ public class JwtTokenServiceImpl implements JwtTokenService {
         }
     }
 
+    /**
+     * Generates a JWT token based on the provided claims and expiration time.
+     *
+     * @param claims         The claims to include in the token.
+     * @param username       The subject of the token.
+     * @param expirationTime The expiration time of the token.
+     * @return The generated JWT token.
+     */
+    private String generateToken(Map<String, Object> claims, String username, long expirationTime) {
+        return Jwts.builder()
+                .claims(claims)
+                .subject(username)
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + expirationTime))
+                .signWith(key)
+                .compact();
+    }
+
+    /**
+     * Extracts all claims from the given JWT token.
+     *
+     * @param token The JWT token from which to extract the claims.
+     * @return The optional containing all extracted claims.
+     */
     private Optional<Claims> extractAllClaims(String token) {
         try {
             Jws<Claims> claimsJws = Jwts.parser()
-                                        .verifyWith(key).build()
-                                        .parseSignedClaims(token);
+                    .verifyWith(key).build()
+                    .parseSignedClaims(token);
             return Optional.ofNullable(claimsJws.getPayload());
         } catch (MalformedJwtException e) {
             throw new InvalidTokenException("Malformed JWT token." + e.getMessage());

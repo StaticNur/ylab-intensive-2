@@ -19,8 +19,15 @@ import java.util.List;
 @Repository
 @RequiredArgsConstructor
 public class AuditDaoImpl implements AuditDao {
-
+    /**
+     * The JDBC template used for executing SQL queries against the database.
+     */
     private final JdbcTemplate jdbcTemplate;
+
+    /**
+     * The audit extractor responsible for extracting audit information
+     * from the provided {@code ResultSet}.
+     */
     private final AuditExtractor extractor;
 
     @Override

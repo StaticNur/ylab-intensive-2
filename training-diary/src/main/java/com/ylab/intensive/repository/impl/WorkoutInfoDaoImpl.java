@@ -18,8 +18,15 @@ import java.util.Optional;
 @Repository
 @RequiredArgsConstructor
 public class WorkoutInfoDaoImpl implements WorkoutInfoDao {
-
+    /**
+     * The JDBC template used for executing SQL queries against the database.
+     */
     private final JdbcTemplate jdbcTemplate;
+
+    /**
+     * The WorkoutInfo extractor responsible for extracting WorkoutInfo information
+     * from the provided {@code ResultSet}.
+     */
     private final WorkoutInfoExtractor extractor;
 
     public void saveWorkoutInfo(int workoutId, String title, String info) {

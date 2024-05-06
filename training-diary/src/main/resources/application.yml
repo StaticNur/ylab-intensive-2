@@ -3,7 +3,6 @@ db:
   username: postgres_user
   password: postgres_psw
   driver-class-name: org.postgresql.Driver
-  poolSize: 5
 
 liquibase:
   change-log: db.changelog/changelog.xml

@@ -13,16 +13,34 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    /**
+     * Handles AccessDeniedException and returns a response with HTTP status 403 (FORBIDDEN).
+     *
+     * @param exception AccessDeniedException object representing the exception
+     * @return ResponseEntity containing an ExceptionResponse object with error details
+     */
     @ExceptionHandler(AccessDeniedException.class)
     ResponseEntity<ExceptionResponse> handleAccessDeniedException(AccessDeniedException exception) {
         return buildErrorResponse(HttpStatus.FORBIDDEN, exception.getMessage());
     }
 
+    /**
+     * Handles AuthorizeException and returns a response with HTTP status 401 (UNAUTHORIZED).
+     *
+     * @param exception AuthorizeException object representing the exception
+     * @return ResponseEntity containing an ExceptionResponse object with error details
+     */
     @ExceptionHandler(AuthorizeException.class)
-    ResponseEntity<ExceptionResponse> handleAccessDeniedException(AuthorizeException exception) {
+    ResponseEntity<ExceptionResponse> handleAuthorizeExceptionException(AuthorizeException exception) {
         return buildErrorResponse(HttpStatus.UNAUTHORIZED, exception.getMessage());
     }
 
+    /**
+     * Handles various custom exceptions for bad requests and returns a response with HTTP status 400 (BAD REQUEST).
+     *
+     * @param exception CustomExceptionForBadRequest object representing the exception
+     * @return ResponseEntity containing an ExceptionResponse object with error details
+     */
     @ExceptionHandler({
             InvalidInputException.class,
             InvalidTokenException.class,
@@ -30,20 +48,39 @@ public class GlobalExceptionHandler {
             WorkoutException.class,
             WorkoutTypeException.class
     })
-    ResponseEntity<ExceptionResponse> handleAccessDeniedException(CustomExceptionForBadRequest exception) {
+    ResponseEntity<ExceptionResponse> handleBadRequestException(CustomExceptionForBadRequest exception) {
         return buildErrorResponse(HttpStatus.BAD_REQUEST, exception.getMessage());
     }
 
+    /**
+     * Handles NotFoundException and returns a response with HTTP status 404 (NOT FOUND).
+     *
+     * @param exception NotFoundException object representing the exception
+     * @return ResponseEntity containing an ExceptionResponse object with error details
+     */
     @ExceptionHandler(NotFoundException.class)
-    ResponseEntity<ExceptionResponse> handleAccessDeniedException(NotFoundException exception) {
+    ResponseEntity<ExceptionResponse> handleNotFoundExceptionException(NotFoundException exception) {
         return buildErrorResponse(HttpStatus.NOT_FOUND, exception.getMessage());
     }
 
+    /**
+     * Handles generic exceptions and returns a response with HTTP status 500 (INTERNAL SERVER ERROR).
+     *
+     * @param exception Exception object representing the exception
+     * @return ResponseEntity containing an ExceptionResponse object with error details
+     */
     @ExceptionHandler(Exception.class)
-    ResponseEntity<ExceptionResponse> handleAccessDeniedException(Exception exception) {
+    ResponseEntity<ExceptionResponse> handleException(Exception exception) {
         return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, exception.getMessage());
     }
 
+    /**
+     * Builds a ResponseEntity with the given HTTP status and error message.
+     *
+     * @param status  HTTP status code for the response
+     * @param message Error message to be included in the response
+     * @return ResponseEntity containing an ExceptionResponse object with error details
+     */
     private ResponseEntity<ExceptionResponse> buildErrorResponse(HttpStatus status, String message) {
         return ResponseEntity.status(status).body(new ExceptionResponse(message));
     }

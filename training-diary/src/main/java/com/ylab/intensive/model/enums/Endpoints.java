@@ -11,6 +11,7 @@ public enum Endpoints {
 
     REGISTRATION("/training-diary/auth/registration", "POST"),
     LOGIN("/training-diary/auth/email", "POST"),
+    REFRESH_TOKEN("/training-diary/auth/refresh-token", "POST"),
 
     VIEW_STATISTICS("/training-diary/statistics", "GET"),
 

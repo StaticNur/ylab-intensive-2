@@ -21,7 +21,7 @@ public class RoleServiceImpl implements RoleService {
     @Override
     public int getIdByName(Role role) {
         Integer id = roleDao.findByName(role);
-        if (id == null){
+        if (id == null) {
             throw new NotFoundException("Такой роли нет в базе данных.");
         }
         return id;

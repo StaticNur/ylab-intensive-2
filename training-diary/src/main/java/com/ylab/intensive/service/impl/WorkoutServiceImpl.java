@@ -12,6 +12,7 @@ import com.ylab.intensive.model.entity.WorkoutType;
 import com.ylab.intensive.service.*;
 import com.ylab.intensive.util.converter.Converter;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,10 +24,10 @@ import java.util.*;
  * Implementation of the WorkoutService interface providing methods for managing workout-related operations.
  */
 @Service
+@Log4j2
 @RequiredArgsConstructor
 public class WorkoutServiceImpl implements WorkoutService {
     /**
-     * Workout DAO.
      * This DAO is responsible for data access operations related to workouts.
      */
     private final WorkoutDao workoutDao;
@@ -48,6 +49,10 @@ public class WorkoutServiceImpl implements WorkoutService {
      * This service provides functionality for managing workout types.
      */
     private final WorkoutTypeService workoutTypeService;
+
+    /**
+     * The converter used for converting one type of object to another.
+     */
     private final Converter converter;
 
     @Override
@@ -267,17 +272,39 @@ public class WorkoutServiceImpl implements WorkoutService {
      */
     private int getAuthorizedUserId(String email) {
         User user = userService.findByEmail(email)
-                .orElseThrow(() -> new NotFoundException("User with email = "
-                                                         + email + " does not exist!"));
+                .orElseThrow(() -> {
+                    String message = "User with email = " + email + " does not exist!";
+                    log.error(message);
+                    return new NotFoundException(message);
+                });
         return user.getId();
     }
 
+    /**
+     * Retrieves a workout from the database based on the provided UUID.
+     *
+     * @param uuid the UUID of the workout to retrieve
+     * @return the workout corresponding to the UUID
+     * @throws NotFoundException if the workout with the specified UUID is not found in the database
+     */
     private Workout getWorkoutByUUID(UUID uuid) {
         return workoutDao.findByUUID(uuid)
-                .orElseThrow(() -> new NotFoundException("Тренировка с uuid = " + uuid +
-                                                         " нет в базе данных! Сначала добавьте ее."));
+                .orElseThrow(() -> {
+                    String message = "Тренировка с uuid = " + uuid + " нет в базе данных! Сначала добавьте ее.";
+                    log.error(message);
+                    return new NotFoundException(message);
+                });
     }
 
+    /**
+     * Generates a Workout entity based on the provided parameters.
+     *
+     * @param workoutDto the DTO containing workout information
+     * @param userId     the ID of the user associated with the workout
+     * @param type       the type of the workout
+     * @param date       the date of the workout
+     * @return the newly generated Workout entity
+     */
     private Workout generateNewWorkout(WorkoutDto workoutDto, int userId, WorkoutType type, LocalDate date) {
         Workout workout = new Workout();
         workout.setUuid(UUID.randomUUID());
@@ -289,10 +316,24 @@ public class WorkoutServiceImpl implements WorkoutService {
         return workout;
     }
 
+    /**
+     * Converts a string representation of a UUID to a UUID object.
+     *
+     * @param uuidStr the string representation of the UUID
+     * @return the UUID object
+     * @throws IllegalArgumentException if the string cannot be parsed into a valid UUID
+     */
     private UUID convertToUUID(String uuidStr) {
         return converter.convert(uuidStr, UUID::fromString, "Invalid UUID");
     }
 
+    /**
+     * Converts a string representation of a date to a LocalDate object.
+     *
+     * @param dateStr the string representation of the date
+     * @return the LocalDate object
+     * @throws IllegalArgumentException if the string cannot be parsed into a valid date
+     */
     private LocalDate convertToDate(String dateStr) {
         return converter.convert(dateStr, LocalDate::parse, "Incorrect date format. Should be yyyy-MM-dd");
     }

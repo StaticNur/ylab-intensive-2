@@ -104,5 +104,18 @@ class SecurityControllerTest {
                                  "}"))
                 .andExpect(status().isBadRequest());
     }
+
+    @Test
+    @DisplayName("Должен успешно продлить срок службы токена.")
+    void shouldSuccessfullyExtendTheLifeOfTheToken() throws Exception {
+        when(userService.updateToken(any())).thenReturn(new JwtResponse("login", "token", "token"));
+
+        mockMvc.perform(post("/training-diary/auth/refresh-token")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\n" +
+                                 "  \"refreshToken\": \"token\",\n" +
+                                 "}"))
+                .andExpect(status().isBadRequest());
+    }
 }
 

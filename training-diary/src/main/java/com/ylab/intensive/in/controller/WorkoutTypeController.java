@@ -14,12 +14,13 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+
 import javax.validation.Valid;
 
 import java.util.List;
 
 /**
- * Controller class for handling authentication operations.
+ * Controller class for managing workout type-related operations.
  */
 @RestController
 @RequestMapping("/training-diary/workouts/type")
@@ -29,23 +30,52 @@ import java.util.List;
 })
 @RequiredArgsConstructor
 public class WorkoutTypeController {
+    /**
+     * Service for workout-related operations
+     */
     private final WorkoutService workoutService;
+
+    /**
+     * Utility for generating custom error response messages
+     */
     private final GeneratorResponseMessage generatorResponseMessage;
+
+    /**
+     * Mapper for converting WorkoutType entities to DTOs
+     */
     private final WorkoutTypeMapper workoutTypeMapper;
 
+    /**
+     * Retrieves workout types for the authenticated user.
+     *
+     * @return ResponseEntity containing a list of WorkoutTypeDto objects representing the user's workout types
+     */
     @GetMapping
-    @ApiOperation(value = "view user workout types", response = WorkoutTypeDto.class, responseContainer = "List")
+    @ApiOperation(value = "view user workout types", response = WorkoutTypeDto.class, responseContainer = "List",
+            authorizations = {
+                    @Authorization(value="JWT")
+            })
     @Auditable(action = "Пользователь просмотрел свои типы тренировок.")
     public ResponseEntity<List<WorkoutTypeDto>> viewTypes() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         List<WorkoutType> workoutTypes = workoutService.getAllType(authentication.getName());
         return ResponseEntity.ok(workoutTypes.stream()
-                                            .map(workoutTypeMapper::toDto)
-                                            .toList());
+                .map(workoutTypeMapper::toDto)
+                .toList());
     }
 
+    /**
+     * Saves a new workout type for the authenticated user.
+     *
+     * @param workoutTypeDto DTO containing details of the workout type to be saved
+     * @param bindingResult  BindingResult for validating the request body
+     * @return ResponseEntity containing the saved WorkoutTypeDto object
+     */
     @PostMapping
-    @ApiOperation(value = "save user workout type", response = WorkoutType.class)
+    @ApiOperation(value = "save user workout type", response = WorkoutType.class,
+            authorizations = {
+                    @Authorization(value="JWT")
+            })
     @ApiResponse(code = 400, message = "Ошибка валидации. Подробности об ошибках содержатся в теле ответа.",
             response = CustomFieldError.class, responseContainer = "List")
     @Auditable(action = "Пользователь добавил новый тип тренировки.")
