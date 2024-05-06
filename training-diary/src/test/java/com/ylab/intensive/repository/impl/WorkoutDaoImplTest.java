@@ -1,13 +1,15 @@
-/*
-package com.ylab.intensive.dao.impl;
+package com.ylab.intensive.repository.impl;
 
-import com.ylab.intensive.dao.container.PostgresTestContainer;
-import com.ylab.intensive.dao.container.TestConfigurationEnvironment;
 import com.ylab.intensive.model.entity.Workout;
+import com.ylab.intensive.repository.WorkoutDao;
+import com.ylab.intensive.repository.container.PostgresTestContainer;
+import com.ylab.intensive.repository.container.TestConfigurationEnvironment;
+import com.ylab.intensive.repository.extractor.WorkoutExtractor;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.time.Duration;
 import java.time.LocalDate;
@@ -15,118 +17,146 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
-@DisplayName("Workout Database Operations Testing")
-class WorkoutDaoImplTest extends TestConfigurationEnvironment {
+@DisplayName("Тесты для реализации WorkoutDaoImpl")
+public class WorkoutDaoImplTest extends TestConfigurationEnvironment {
 
-    private static WorkoutDaoImpl workoutDao;
+    private static WorkoutDao workoutDao;
 
     @BeforeAll
     static void setUp() {
         postgreSQLContainer = PostgresTestContainer.getInstance();
-        workoutDao = new WorkoutDaoImpl();
+        JdbcTemplate jdbcTemplate = PostgresTestContainer.getJdbcTemplate();
+        workoutDao = new WorkoutDaoImpl(jdbcTemplate, new WorkoutExtractor());
     }
 
     @Test
-    @DisplayName("Find workout by date - workout exists")
-    void testFindByDate_WorkoutExists() {
-        LocalDate date = LocalDate.of(2024, 4, 17);
+    @DisplayName("Должен находить тренировку по дате и идентификатору пользователя")
+    void shouldFindWorkoutByDateAndUserId() {
+        LocalDate date = LocalDate.parse("2024-04-17");
+        int userId = 1;
 
-        Optional<Workout> workout = workoutDao.findByDate(date, 1);
+        Optional<Workout> workoutOptional = workoutDao.findByDate(date, userId);
 
-        assertThat(workout).isPresent();
+        assertThat(workoutOptional).isPresent();
+        Workout workout = workoutOptional.get();
+        assertThat(workout.getDate()).isEqualTo(date);
+        assertThat(workout.getUserId()).isEqualTo(userId);
     }
 
     @Test
-    @DisplayName("Find workout by date - workout does not exist")
-    void testFindByDate_WorkoutDoesNotExist() {
-        LocalDate date = LocalDate.of(1000, 1, 1);
-
-        Optional<Workout> workout = workoutDao.findByDate(date, 1);
-
-        assertThat(workout).isEmpty();
-    }
-
-    @Test
-    @DisplayName("Save workout - success")
-    void testSaveWorkout_Success() {
+    @DisplayName("Должен сохранять новую тренировку")
+    void shouldSaveWorkout() {
+        LocalDate localDate = LocalDate.parse("2024-04-17");
         Workout workout = new Workout();
-        workout.setUuid(UUID.randomUUID());
         workout.setUserId(1);
-        workout.setType("1");
-        workout.setDate(LocalDate.now());
-        workout.setDuration(Duration.ofMinutes(30));
-        workout.setCalorie(300.0f);
+        workout.setUuid(UUID.randomUUID());
+        workout.setType("Running");
+        workout.setDate(localDate);
+        workout.setDuration(Duration.ofHours(1));
+        workout.setCalorie(500.0f);
 
         Workout savedWorkout = workoutDao.saveWorkout(workout);
 
         assertThat(savedWorkout.getId()).isPositive();
+        assertThat(savedWorkout.getUuid()).isNotNull();
+        assertThat(savedWorkout.getType()).isEqualTo("Running");
+        assertThat(savedWorkout.getDate()).isEqualTo(localDate);
+        assertThat(savedWorkout.getDuration()).isEqualTo(Duration.ofHours(1));
+        assertThat(savedWorkout.getCalorie()).isEqualTo(500.0f);
     }
 
     @Test
-    @DisplayName("Find workouts by user ID")
-    void testFindByUserId() {
+    @DisplayName("Должен находить все тренировки пользователя")
+    void shouldFindWorkoutsByUserId() {
         int userId = 1;
 
         List<Workout> workouts = workoutDao.findByUserId(userId);
 
         assertThat(workouts).isNotEmpty();
+        workouts.forEach(workout -> assertThat(workout.getUserId()).isEqualTo(userId));
     }
 
     @Test
-    @DisplayName("Delete workout - success")
-    void testDeleteWorkout_Success() {
-        LocalDate date = LocalDate.of(2022, 2, 22);
+    @DisplayName("Должен удалять тренировку")
+    void shouldDeleteWorkout() {
+        int userId = 2;
+        int workoutId = 3;
 
-        workoutDao.deleteWorkout(1, 4);
+        workoutDao.deleteWorkout(userId, workoutId);
 
-        Optional<Workout> deletedWorkout = workoutDao.findByDate(date, 1);
-
-        assertThat(deletedWorkout).isEmpty();
+        Optional<Workout> workoutOptional = workoutDao.findByDate(LocalDate.parse("2024-03-19"), userId);
+        assertThat(workoutOptional).isNotPresent();
     }
 
     @Test
-    @DisplayName("Update calorie for workout - success")
-    void testUpdateCalorie_Success() {
-        int workoutId = 2;
-        float calorie = 400.0f;
+    @DisplayName("Должен обновлять количество калорий для тренировки")
+    void shouldUpdateCalorieForWorkout() {
+        int workoutId = 1;
+        float newCalorie = 600.0f;
 
-        workoutDao.updateCalorie(workoutId, calorie);
+        workoutDao.updateCalorie(workoutId, newCalorie);
 
-        Optional<Workout> updatedWorkout = workoutDao.findByDate(LocalDate.parse("2024-04-19"), 2);
+        Optional<Workout> workoutOptional = workoutDao.findByUUID(UUID.fromString("123e4567-e89b-12d3-a456-426614174002"));
+        assertThat(workoutOptional).isPresent();
+        Workout workout = workoutOptional.get();
+        assertThat(workout.getCalorie()).isEqualTo(newCalorie);
+    }
+    @Test
+    @DisplayName("Должен обновлять продолжительность тренировки")
+    void shouldUpdateDurationForWorkout() {
+        int workoutId = 4;
+        Duration newDuration = Duration.ofMinutes(90);
 
-        assertThat(updatedWorkout)
-                .isPresent()
-                .get()
-                .hasFieldOrPropertyWithValue("calorie", calorie);
+        workoutDao.updateDuration(workoutId, newDuration);
+
+        Optional<Workout> workoutOptional = workoutDao.findByDate(LocalDate.parse("2022-02-22"), 1);
+        assertThat(workoutOptional).isPresent();
+        Workout workout = workoutOptional.get();
+        assertThat(workout.getDuration()).isEqualTo(newDuration);
     }
 
     @Test
-    @DisplayName("Update duration for workout - success")
-    void testUpdateDuration_Success() {
-        int workoutId = 2;
-        Duration duration = Duration.ofMinutes(45);
+    @DisplayName("Должен находить тренировки по диапазону дат и идентификатору пользователя")
+    void shouldFindWorkoutsByDateRangeAndUserId() {
+        int userId = 1;
+        LocalDate startDate = LocalDate.of(2000, 6, 1);
+        LocalDate endDate = LocalDate.of(2025, 6, 10);
 
-        workoutDao.updateDuration(workoutId, duration);
-
-        Optional<Workout> updatedWorkout = workoutDao.findByDate(LocalDate.parse("2024-04-19"), 2);
-
-        assertThat(updatedWorkout)
-                .isPresent()
-                .get()
-                .hasFieldOrPropertyWithValue("duration", duration);
-    }
-
-    @Test
-    @DisplayName("Find workouts by duration")
-    void testFindByDuration() {
-        LocalDate begin = LocalDate.of(1000, 1, 1);
-        LocalDate end = LocalDate.of(3000, 1, 1);
-
-        List<Workout> workouts = workoutDao.findByDuration( 1,begin, end);
+        List<Workout> workouts = workoutDao.findByDuration(userId, startDate, endDate);
 
         assertThat(workouts).isNotEmpty();
+        workouts.forEach(workout -> {
+            assertThat(workout.getUserId()).isEqualTo(userId);
+            assertThat(workout.getDate()).isBetween(startDate, endDate);
+        });
+    }
+
+    @Test
+    @DisplayName("Должен находить тренировку по UUID")
+    void shouldFindWorkoutByUUID() {
+        UUID workoutUUID = UUID.fromString("123e4567-e89b-12d3-a456-426614174005");
+
+        Optional<Workout> workoutOptional = workoutDao.findByUUID(workoutUUID);
+
+        assertThat(workoutOptional).isPresent();
+        Workout workout = workoutOptional.get();
+        assertThat(workout.getUuid()).isEqualTo(workoutUUID);
+    }
+
+    @Test
+    @DisplayName("Должен обновлять тип тренировки")
+    void shouldUpdateWorkoutType() {
+        int workoutId = 4;
+        String newType = "Cycling";
+
+        workoutDao.updateType(workoutId, newType);
+
+        Optional<Workout> workoutOptional = workoutDao.findByDate(LocalDate.parse("2022-02-22"), 1);
+        assertThat(workoutOptional).isPresent();
+        Workout workout = workoutOptional.get();
+        assertThat(workout.getType()).isEqualTo(newType);
     }
 
     @AfterAll
@@ -134,4 +164,3 @@ class WorkoutDaoImplTest extends TestConfigurationEnvironment {
         postgreSQLContainer.stop();
     }
 }
-*/

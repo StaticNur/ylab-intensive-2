@@ -1,9 +1,8 @@
-/*
 package com.ylab.intensive.service.impl;
 
-import com.ylab.intensive.dao.AuditDao;
 import com.ylab.intensive.model.Pageable;
 import com.ylab.intensive.model.entity.Audit;
+import com.ylab.intensive.repository.AuditDao;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,7 +22,7 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 @DisplayName("Audit Service Tests")
-public class AuditMapperServiceImplTest {
+public class AuditServiceImplTest {
 
     @Mock
     private AuditDao auditDao;
@@ -58,4 +57,3 @@ public class AuditMapperServiceImplTest {
         assertThat(result).isEqualTo(mockActions);
     }
 }
-*/

@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.NotNull;
 import java.util.Map;
 
 /**
@@ -21,6 +22,7 @@ public class WorkoutInfoDto {
     /**
      * The additional workout information represented as a map of key-value pairs.
      */
+    @NotNull(message = "Обязательное поля!")
     private Map<String, String> workoutInfo;
 }
 

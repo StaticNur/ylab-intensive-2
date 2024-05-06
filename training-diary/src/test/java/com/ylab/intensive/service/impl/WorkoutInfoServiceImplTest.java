@@ -1,8 +1,7 @@
-/*
 package com.ylab.intensive.service.impl;
 
-import com.ylab.intensive.dao.WorkoutInfoDao;
 import com.ylab.intensive.model.entity.WorkoutInfo;
+import com.ylab.intensive.repository.WorkoutInfoDao;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,8 +12,10 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
 import java.util.HashMap;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -60,11 +61,12 @@ public class WorkoutInfoServiceImplTest {
         WorkoutInfo expectedInfo = new WorkoutInfo(10, 2, new HashMap<>());
         expectedInfo.getWorkoutInfo().put("Title", "Info");
 
-        when(workoutInfoDao.findByWorkoutId(workoutId)).thenReturn(expectedInfo);
+        when(workoutInfoDao.findByWorkoutId(workoutId)).thenReturn(Optional.of(expectedInfo));
 
-        WorkoutInfo result = workoutInfoService.getInfoByWorkoutId(workoutId);
+        Optional<WorkoutInfo> result = workoutInfoService.getInfoByWorkoutId(workoutId);
 
-        assertThat(result).isEqualTo(expectedInfo);
+        assertTrue(result.isPresent());
+        assertThat(result.get()).isEqualTo(expectedInfo);
     }
 
     @Test
@@ -77,4 +79,3 @@ public class WorkoutInfoServiceImplTest {
         verify(workoutInfoDao).delete(workoutId);
     }
 }
-*/

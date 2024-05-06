@@ -1,88 +1,105 @@
-/*
-package com.ylab.intensive.dao.impl;
+package com.ylab.intensive.repository.impl;
 
-import com.ylab.intensive.dao.container.PostgresTestContainer;
-import com.ylab.intensive.dao.container.TestConfigurationEnvironment;
 import com.ylab.intensive.model.entity.User;
-import com.ylab.intensive.model.enums.Role;
+import com.ylab.intensive.repository.UserDao;
+import com.ylab.intensive.repository.container.PostgresTestContainer;
+import com.ylab.intensive.repository.container.TestConfigurationEnvironment;
+import com.ylab.intensive.repository.extractor.UserExtractor;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.jdbc.core.JdbcTemplate;
 
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@DisplayName("User Database Operations Testing")
-class UserDaoImplTest extends TestConfigurationEnvironment {
+@DisplayName("Тесты для реализации UserDaoImpl")
+public class UserDaoImplTest extends TestConfigurationEnvironment {
 
-    private static UserDaoImpl userDao;
+    private static UserDao userDao;
 
     @BeforeAll
     static void setUp() {
         postgreSQLContainer = PostgresTestContainer.getInstance();
-        userDao = new UserDaoImpl();
+        JdbcTemplate jdbcTemplate = PostgresTestContainer.getJdbcTemplate();
+        userDao = new UserDaoImpl(jdbcTemplate, new UserExtractor());
     }
 
     @Test
-    @DisplayName("Save user successfully")
-    void testSave() {
+    @DisplayName("Должен сохранять пользователя в базе данных")
+    void shouldSaveUser() {
         User user = new User();
-        user.setUuid(UUID.fromString("622e0957-e81b-19d3-a446-426614879357"));
-        user.setEmail("test@email.com");
+        user.setUuid(UUID.randomUUID());
+        user.setEmail("test@example.com");
         user.setPassword("password");
-        int roleId = Role.USER.getValue();
+        int roleId = 1;
 
-        User userSaved = userDao.save(user, roleId);
+        User savedUser = userDao.save(user, roleId);
 
-        assertThat(userSaved.getId() != 0).isTrue();
+        assertThat(savedUser.getId()).isPositive();
+        assertThat(savedUser.getEmail()).isEqualTo("test@example.com");
+        assertThat(savedUser.getPassword()).isEqualTo("password");
     }
 
     @Test
-    @DisplayName("Test findByEmail method - user exists")
-    void testFindByEmail() {
+    @DisplayName("Должен находить пользователя по электронной почте")
+    void shouldFindUserByEmail() {
+        String email = "admin@example.com";
 
-        assertThat(userDao.findByEmail("admin@example.com"))
-                .isPresent()
-                .get()
-                .hasFieldOrPropertyWithValue("role", Role.ADMIN);
+        Optional<User> userOptional = userDao.findByEmail(email);
+
+        assertThat(userOptional).isPresent();
+        User user = userOptional.get();
+        assertThat(user.getEmail()).isEqualTo(email);
     }
 
     @Test
-    @DisplayName("Find workout by date - user does not exist")
-    void testFindByEmail_UserDoesNotExist() {
-        assertThat(userDao.findByEmail("dw3rwed@example.com")).isEmpty();
+    @DisplayName("Не должен находить пользователя по электронной почте")
+    void notShouldFindUserByEmail() {
+        String email = "test.com";
+
+        Optional<User> userOptional = userDao.findByEmail(email);
+
+        assertThat(userOptional).isNotPresent();
     }
 
     @Test
-    @DisplayName("Update user role - success")
-    void testUpdateUserRole_Success() {
-        String email = "test23@email.com";
-        int roleId = Role.ADMIN.getValue();
-        User user = new User();
-        user.setUuid(UUID.fromString("123e4567-e89b-12d3-a456-426614174012"));
-        user.setEmail(email);
-        user.setPassword("password");
+    @DisplayName("Должен находить пользователя по UUID")
+    void shouldFindUserByUUID() {
+        UUID uuid = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
 
-        User userSaved = userDao.save(user, Role.USER.getValue());
+        Optional<User> userOptional = userDao.findByUUID(uuid);
 
-        boolean result = userDao.updateUserRole(userSaved.getUuid(), roleId);
-
-        assertThat(result).isTrue();
+        assertThat(userOptional).isPresent();
+        User user = userOptional.get();
+        assertThat(user.getUuid()).isEqualTo(uuid);
     }
 
     @Test
-    @DisplayName("Update user role - user does not exist")
-    void testUpdateUserRole_UserDoesNotExist() {
-        boolean result = userDao.updateUserRole(UUID.fromString("123e4567-e89b-12d3-a456-426614174029"),
-                Role.ADMIN.getValue());
-        assertThat(result).isFalse();
+    @DisplayName("Должен обновлять роль пользователя")
+    void shouldUpdateUserRole() {
+        UUID uuid = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
+        int newRoleId = 2;
+
+        boolean updated = userDao.updateUserRole(uuid, newRoleId);
+
+        assertThat(updated).isTrue();
     }
 
+    @Test
+    @DisplayName("Должен возвращать список всех пользователей")
+    void shouldFindAllUsers() {
+        List<User> users = userDao.findAll();
+
+        assertThat(users).isNotEmpty();
+    }
     @AfterAll
-    static void destroy() {
+    static void tearDown() {
         postgreSQLContainer.stop();
     }
 }
-*/
+

@@ -33,6 +33,9 @@
         <liquibase-core.version>4.25.1</liquibase-core.version>
         <testcontainers.version>1.19.4</testcontainers.version>
         <jsr310.version>2.16.1</jsr310.version>
+        <assertj.version>3.24.2</assertj.version>
+        <junit.platform.version>1.10.2</junit.platform.version>
+
     </properties>
 
     <dependencies>
@@ -189,6 +192,16 @@
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+            <version>${log4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <version>${log4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-slf4j-impl</artifactId>
             <version>${log4j.version}</version>
         </dependency>
@@ -202,9 +215,17 @@
             <artifactId>liquibase-core</artifactId>
             <version>${liquibase-core.version}</version>
         </dependency>
+
+
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
+            <version>${junit.jupiter.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
             <version>${junit.jupiter.version}</version>
             <scope>test</scope>
         </dependency>
@@ -214,6 +235,13 @@
             <version>${mockito.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
+            <version>${mockito.version}</version>
+            <scope>test</scope>
+        </dependency>
+
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>junit-jupiter</artifactId>
@@ -232,6 +260,19 @@
             <version>${mockito.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>${assertj.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-launcher</artifactId>
+            <version>${junit.platform.version}</version>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
     <build>

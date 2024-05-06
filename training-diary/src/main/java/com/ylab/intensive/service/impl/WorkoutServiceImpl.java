@@ -231,12 +231,11 @@ public class WorkoutServiceImpl implements WorkoutService {
             List<Workout> workoutList = workoutDao.findByUserId(user.getId());
             for (Workout workout : workoutList) {
                 workout.setType(workout.getType());
+
                 Optional<WorkoutInfo> workoutInfo = workoutInfoService.getInfoByWorkoutId(workout.getId());
-                if (workoutInfo.isPresent()) {
-                    workout.setWorkoutInfo(workoutInfo.get().getWorkoutInfo());
-                } else {
-                    workout.setWorkoutInfo(Collections.emptyMap());
-                }
+                workout.setWorkoutInfo(workoutInfo
+                        .map(WorkoutInfo::getWorkoutInfo)
+                        .orElseGet(Collections::emptyMap));
             }
             user.setWorkouts(workoutList);
         }

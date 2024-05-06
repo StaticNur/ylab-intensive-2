@@ -49,11 +49,11 @@ public class WorkoutController {
     public ResponseEntity<?> saveAdditionalInformation(@PathVariable("uuid") String uuid,
                                                        @RequestBody @Valid WorkoutInfoDto workoutInfoDto,
                                                        BindingResult bindingResult) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (bindingResult.hasErrors()) {
             List<CustomFieldError> customFieldErrors = generatorResponseMessage.generateErrorMessage(bindingResult);
             return ResponseEntity.badRequest().body(customFieldErrors);
         }
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Workout workout = workoutService.addWorkoutInfo(authentication.getName(), uuid, workoutInfoDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(workoutMapper.toDto(workout));
     }

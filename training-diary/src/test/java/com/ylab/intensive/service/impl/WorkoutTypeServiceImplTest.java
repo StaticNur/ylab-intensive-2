@@ -1,8 +1,7 @@
-/*
 package com.ylab.intensive.service.impl;
 
-import com.ylab.intensive.dao.WorkoutTypeDao;
 import com.ylab.intensive.model.entity.WorkoutType;
+import com.ylab.intensive.repository.WorkoutTypeDao;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,8 +13,11 @@ import org.mockito.quality.Strictness;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -42,16 +44,16 @@ public class WorkoutTypeServiceImplTest {
     }
 
     @Test
-    @DisplayName("Find types by workout ID - success")
-    void testFindByWorkoutId_Success() {
-        int workoutId = 1;
+    @DisplayName("Find types by user ID - success")
+    void testFindByUserId_Success() {
+        int userId = 1;
         List<WorkoutType> expectedTypes = new ArrayList<>();
         expectedTypes.add(new WorkoutType());
         expectedTypes.add(new WorkoutType());
 
-        when(workoutTypeDao.findByUserId(workoutId)).thenReturn(expectedTypes);
+        when(workoutTypeDao.findByUserId(userId)).thenReturn(expectedTypes);
 
-        List<WorkoutType> result = workoutTypeService.findByUserId(workoutId);
+        List<WorkoutType> result = workoutTypeService.findByUserId(userId);
 
         assertThat(result).isEqualTo(expectedTypes);
     }
@@ -59,13 +61,37 @@ public class WorkoutTypeServiceImplTest {
     @Test
     @DisplayName("Update workout type - success")
     void testUpdateType_Success() {
-        int workoutId = 1;
+        int userId = 1;
         String oldType = "Cardio";
         String newType = "Yoga";
 
-        workoutTypeService.updateType(workoutId, oldType, newType);
+        workoutTypeService.updateType(userId, oldType, newType);
 
-        verify(workoutTypeDao).updateType(workoutId, oldType, newType);
+        verify(workoutTypeDao).updateType(userId, oldType, newType);
+    }
+
+    @Test
+    @DisplayName("Find types by name - success")
+    void testFindByName_Success() {
+        WorkoutType workoutType = new WorkoutType();
+        workoutType.setType("type");
+        when(workoutTypeDao.findByName(anyString())).thenReturn(Optional.of(workoutType));
+
+        WorkoutType result = workoutTypeService.findByName("type");
+
+        assertThat(result.getType()).isEqualTo("type");
+    }
+
+    @Test
+    @DisplayName("Find types by user ID and name - success")
+    void testFindTypeByUserId_Success() {
+        WorkoutType workoutType = new WorkoutType();
+        workoutType.setType("type");
+        when(workoutTypeDao.findTypeByUserId(anyInt(), anyString())).thenReturn(Optional.of(workoutType));
+
+        WorkoutType result = workoutTypeService.findTypeByUserId(1,"type");
+
+        assertThat(result.getType()).isEqualTo("type");
     }
 
     @Test
@@ -78,4 +104,3 @@ public class WorkoutTypeServiceImplTest {
         verify(workoutTypeDao).delete(userId);
     }
 }
-*/

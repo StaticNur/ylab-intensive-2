@@ -1,20 +1,22 @@
-/*
-package com.ylab.intensive.dao.container;
+package com.ylab.intensive.repository.container;
 
 import com.github.dockerjava.api.model.ExposedPort;
 import com.github.dockerjava.api.model.PortBinding;
 import com.github.dockerjava.api.model.Ports;
-import com.ylab.intensive.config.ConnectionManager;
 import liquibase.Liquibase;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.LiquibaseException;
 import liquibase.resource.ClassLoaderResourceAccessor;
+import org.postgresql.ds.PGSimpleDataSource;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -37,8 +39,12 @@ public class PostgresTestContainer extends PostgreSQLContainer<PostgresTestConta
 
     @Override
     public void stop() {
-        ConnectionManager.closePool();
         super.stop();
+    }
+
+    public static JdbcTemplate getJdbcTemplate() {
+        DataSource dataSource = createDataSource();
+        return new JdbcTemplate(dataSource);
     }
 
     public static PostgresTestContainer getInstance() {
@@ -54,20 +60,25 @@ public class PostgresTestContainer extends PostgreSQLContainer<PostgresTestConta
 
     private void migration() {
         try {
-            Connection connection = ConnectionManager.get();
+            Connection connection = DriverManager.getConnection(container.getJdbcUrl(), container.getUsername(), container.getPassword());
             Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection));
 
-            String changeLogFile = PropertiesUtil.get("liquibase.changeLogFile");
-            String schemaName = PropertiesUtil.get("liquibase.schemaName");
+            createSchemaForMigration(connection, "migration");
 
-            createSchemaForMigration(connection, schemaName);
-
-            database.setLiquibaseSchemaName(schemaName);
-            Liquibase liquibase = new Liquibase(changeLogFile, new ClassLoaderResourceAccessor(), database);
+            database.setLiquibaseSchemaName("migration");
+            Liquibase liquibase = new Liquibase("db.changelog/changelog.xml", new ClassLoaderResourceAccessor(), database);
             liquibase.update();
         } catch (LiquibaseException | SQLException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private static DataSource createDataSource() {
+        PGSimpleDataSource dataSource = new PGSimpleDataSource();
+        dataSource.setUrl(container.getJdbcUrl());
+        dataSource.setUser(container.getUsername());
+        dataSource.setPassword(container.getPassword());
+        return dataSource;
     }
 
     private void createSchemaForMigration(Connection connection, String schemaName) throws SQLException {
@@ -77,4 +88,3 @@ public class PostgresTestContainer extends PostgreSQLContainer<PostgresTestConta
         statement.close();
     }
 }
-*/
