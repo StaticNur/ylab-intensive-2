@@ -1,9 +1,7 @@
 package com.ylab.intensive.service.security.impl;
 
-import com.ylab.intensive.exception.AccessDeniedException;
 import com.ylab.intensive.exception.InvalidTokenException;
 import com.ylab.intensive.model.JwtProperties;
-import io.jsonwebtoken.MalformedJwtException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

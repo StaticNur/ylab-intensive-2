@@ -60,9 +60,6 @@ public class WorkoutInfoDaoImpl implements WorkoutInfoDao {
         String DELETE_WORKOUT = """
                 DELETE FROM internal.workout_info WHERE workout_id = ?
                 """;
-        int rowsAffected = jdbcTemplate.update(DELETE_WORKOUT, workoutId);
-        if (rowsAffected == 0) {
-            throw new DaoException("Deleting workout_info failed, no rows affected.");
-        }
+        jdbcTemplate.update(DELETE_WORKOUT, workoutId);
     }
 }

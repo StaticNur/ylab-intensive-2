@@ -66,11 +66,7 @@ public class WorkoutTypeDaoImpl implements WorkoutTypeDao {
         String UPDATE_TYPE = """
                 UPDATE internal.workout_type SET type = ? WHERE user_id = ? AND type = ?
                 """;
-        int affectedRows = jdbcTemplate.update(UPDATE_TYPE, newType, userId, oldType);
-
-        if (affectedRows == 0) {
-            throw new DaoException("Updating workout type failed, no rows affected.");
-        }
+        jdbcTemplate.update(UPDATE_TYPE, newType, userId, oldType);
     }
 
     @Override

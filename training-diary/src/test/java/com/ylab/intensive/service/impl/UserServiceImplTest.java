@@ -21,14 +21,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -104,7 +99,7 @@ class UserServiceImplTest {
 
         when(roleService.getIdByName(role)).thenReturn(1);
         when(converter.convert(uuid, UUID::fromString, "Invalid UUID")).thenReturn(UUID.randomUUID());
-        when(userDao.updateUserRole(UUID.fromString(uuid),1)).thenReturn(false);
+        when(userDao.updateUserRole(UUID.fromString(uuid), 1)).thenReturn(false);
 
         assertThatThrownBy(() -> userService.changeUserPermissions(uuid, new ChangeUserRightsDto(role)))
                 .isInstanceOf(DaoException.class)
@@ -127,49 +122,10 @@ class UserServiceImplTest {
         String email = "key";
         String password = "password";
         LoginDto loginDto = new LoginDto(email, password);
-        User user = new User();
-        user.setEmail(email);
-        user.setPassword(password);
-        user.setRole(Role.USER);
+        var userDetails = new org.springframework.security.core.userdetails.User(email, password, Collections.emptyList());
 
-        when(userDao.findByEmail(email)).thenReturn(Optional.of(user));
-        when(jwtUserDetailsService.loadUserByUsername(any())).thenReturn(new UserDetails() {
-            @Override
-            public Collection<? extends GrantedAuthority> getAuthorities() {
-                return List.of();
-            }
-
-            @Override
-            public String getPassword() {
-                return "password";
-            }
-
-            @Override
-            public String getUsername() {
-                return "key";
-            }
-
-            @Override
-            public boolean isAccountNonExpired() {
-                return false;
-            }
-
-            @Override
-            public boolean isAccountNonLocked() {
-                return false;
-            }
-
-            @Override
-            public boolean isCredentialsNonExpired() {
-                return false;
-            }
-
-            @Override
-            public boolean isEnabled() {
-                return false;
-            }
-        });
-        when(passwordEncoder.matches(any(),any())).thenReturn(true);
+        when(jwtUserDetailsService.loadUserByUsername(any())).thenReturn(userDetails);
+        when(passwordEncoder.matches(any(), any())).thenReturn(true);
         when(jwtTokenService.createAccessToken(any())).thenReturn("key");
         when(jwtTokenService.createRefreshToken(any())).thenReturn("key");
 
@@ -184,46 +140,11 @@ class UserServiceImplTest {
     void testLogin_WrongPassword() {
         String email = "test@email.com";
         String password = "password";
-        User user = new User();
-        user.setPassword(password);
+        var userDetails = new org.springframework.security.core.userdetails.User(email, password, Collections.emptyList());
 
-        when(jwtUserDetailsService.loadUserByUsername(email)).thenReturn(new UserDetails() {
-            @Override
-            public Collection<? extends GrantedAuthority> getAuthorities() {
-                return List.of();
-            }
 
-            @Override
-            public String getPassword() {
-                return "wrong password";
-            }
-
-            @Override
-            public String getUsername() {
-                return "test@email.com";
-            }
-
-            @Override
-            public boolean isAccountNonExpired() {
-                return false;
-            }
-
-            @Override
-            public boolean isAccountNonLocked() {
-                return false;
-            }
-
-            @Override
-            public boolean isCredentialsNonExpired() {
-                return false;
-            }
-
-            @Override
-            public boolean isEnabled() {
-                return false;
-            }
-        });
-        when(passwordEncoder.matches(any(),any())).thenReturn(false);
+        when(jwtUserDetailsService.loadUserByUsername(email)).thenReturn(userDetails);
+        when(passwordEncoder.matches(any(), any())).thenReturn(false);
 
         assertThatThrownBy(() -> userService.login(new LoginDto(email, password)))
                 .isInstanceOf(AuthorizeException.class)
@@ -289,7 +210,7 @@ class UserServiceImplTest {
     @DisplayName("Find by email")
     void testUpdateToken() {
         when(jwtTokenService.refreshUserToken(anyString()))
-                .thenReturn(new JwtResponse("login","token","token"));
+                .thenReturn(new JwtResponse("login", "token", "token"));
 
         assertDoesNotThrow(() -> userService.updateToken("token"));
     }

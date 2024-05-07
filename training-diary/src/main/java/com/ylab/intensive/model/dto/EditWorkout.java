@@ -8,7 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.lang.Nullable;
 
-import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.Min;
 import java.time.Duration;
 import java.util.Map;
 
@@ -39,7 +39,7 @@ public class EditWorkout {
     /**
      * The calorie count of the workout.
      */
-    @DecimalMin(value = "0.0", inclusive = false, message = "Число не должно быть отрицательным")
+    @Min(value = 0, message = "Число не должно быть отрицательным")
     private Float calorie;
 
     /**

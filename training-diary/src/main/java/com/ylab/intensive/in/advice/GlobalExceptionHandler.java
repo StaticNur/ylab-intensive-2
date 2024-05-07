@@ -4,6 +4,7 @@ import com.ylab.intensive.exception.*;
 import com.ylab.intensive.model.dto.ExceptionResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -61,17 +62,6 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(NotFoundException.class)
     ResponseEntity<ExceptionResponse> handleNotFoundExceptionException(NotFoundException exception) {
         return buildErrorResponse(HttpStatus.NOT_FOUND, exception.getMessage());
-    }
-
-    /**
-     * Handles generic exceptions and returns a response with HTTP status 500 (INTERNAL SERVER ERROR).
-     *
-     * @param exception Exception object representing the exception
-     * @return ResponseEntity containing an ExceptionResponse object with error details
-     */
-    @ExceptionHandler(Exception.class)
-    ResponseEntity<ExceptionResponse> handleException(Exception exception) {
-        return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, exception.getMessage());
     }
 
     /**

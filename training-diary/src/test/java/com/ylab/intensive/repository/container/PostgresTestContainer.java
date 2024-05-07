@@ -60,13 +60,15 @@ public class PostgresTestContainer extends PostgreSQLContainer<PostgresTestConta
 
     private void migration() {
         try {
-            Connection connection = DriverManager.getConnection(container.getJdbcUrl(), container.getUsername(), container.getPassword());
+            Connection connection = DriverManager.getConnection(container.getJdbcUrl(),
+                    container.getUsername(), container.getPassword());
             Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection));
 
             createSchemaForMigration(connection, "migration");
 
             database.setLiquibaseSchemaName("migration");
-            Liquibase liquibase = new Liquibase("db.changelog/changelog.xml", new ClassLoaderResourceAccessor(), database);
+            Liquibase liquibase = new Liquibase("db.changelog/changelog.xml",
+                    new ClassLoaderResourceAccessor(), database);
             liquibase.update();
         } catch (LiquibaseException | SQLException e) {
             throw new RuntimeException(e);

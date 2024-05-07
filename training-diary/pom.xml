@@ -13,7 +13,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <javax.version>3.1.0</javax.version>
         <javax.annotation.version>1.3.2</javax.annotation.version>
-        <hibernate-validator.version>8.0.1.Final</hibernate-validator.version>
+        <hibernate-validator.version>6.1.6.Final</hibernate-validator.version>
 
         <spring.version>5.3.32</spring.version>
         <spring.security.version>5.7.5</spring.security.version>
@@ -215,7 +215,6 @@
             <artifactId>liquibase-core</artifactId>
             <version>${liquibase-core.version}</version>
         </dependency>
-
 
         <dependency>
             <groupId>org.junit.jupiter</groupId>

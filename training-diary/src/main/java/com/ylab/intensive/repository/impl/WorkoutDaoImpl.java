@@ -105,10 +105,7 @@ public class WorkoutDaoImpl implements WorkoutDao {
         String UPDATE_CALORIE = """
                 UPDATE internal.workout SET calorie = ? WHERE id = ?
                 """;
-        int rowsAffected = jdbcTemplate.update(UPDATE_CALORIE, calorie, id);
-        if (rowsAffected == 0) {
-            throw new DaoException("Updating calorie failed, no rows affected.");
-        }
+        jdbcTemplate.update(UPDATE_CALORIE, calorie, id);
     }
 
     @Override
@@ -116,10 +113,7 @@ public class WorkoutDaoImpl implements WorkoutDao {
         String UPDATE_DURATION = """
                 UPDATE internal.workout SET duration = ? WHERE id = ?
                 """;
-        int rowsAffected = jdbcTemplate.update(UPDATE_DURATION, (int) duration.getSeconds(), id);
-        if (rowsAffected == 0) {
-            throw new DaoException("Updating duration failed, no rows affected.");
-        }
+        jdbcTemplate.update(UPDATE_DURATION, (int) duration.getSeconds(), id);
     }
 
     @Override
@@ -147,9 +141,6 @@ public class WorkoutDaoImpl implements WorkoutDao {
         String UPDATE_TYPE = """
                 UPDATE internal.workout SET workout_type = ? WHERE id = ?
                 """;
-        int rowsAffected = jdbcTemplate.update(UPDATE_TYPE, newType, workoutId);
-        if (rowsAffected == 0) {
-            throw new DaoException("Updating workout type failed, no rows affected.");
-        }
+        jdbcTemplate.update(UPDATE_TYPE, newType, workoutId);
     }
 }

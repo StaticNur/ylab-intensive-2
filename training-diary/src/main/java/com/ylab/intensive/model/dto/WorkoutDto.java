@@ -6,10 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.validation.constraints.DecimalMin;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
+import javax.validation.constraints.*;
 import java.time.Duration;
 import java.util.Map;
 import java.util.UUID;
@@ -52,7 +49,7 @@ public class WorkoutDto {
      * The calorie burned during the workout
      */
     @NotNull(message = "Значение не может быть пустым")
-    @DecimalMin(value = "0.0", inclusive = false, message = "Число не должно быть отрицательным")
+    @Min(value = 0, message = "Число не должно быть отрицательным")
     private Float calorie;
 
     /**

@@ -1,6 +1,5 @@
 package com.ylab.intensive.service;
 
-import com.ylab.intensive.exception.AccessDeniedException;
 import com.ylab.intensive.model.Pageable;
 import com.ylab.intensive.model.dto.*;
 import com.ylab.intensive.model.entity.User;

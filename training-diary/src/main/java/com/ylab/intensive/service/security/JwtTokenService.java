@@ -1,6 +1,5 @@
 package com.ylab.intensive.service.security;
 
-import com.ylab.intensive.exception.AccessDeniedException;
 import com.ylab.intensive.exception.InvalidTokenException;
 import com.ylab.intensive.model.dto.JwtResponse;
 import com.ylab.intensive.model.enums.Role;

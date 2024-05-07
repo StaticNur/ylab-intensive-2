@@ -1,6 +1,5 @@
 package com.ylab.intensive.service.security.impl;
 
-import com.ylab.intensive.exception.AccessDeniedException;
 import com.ylab.intensive.exception.InvalidTokenException;
 import com.ylab.intensive.model.JwtProperties;
 import com.ylab.intensive.service.security.JwtTokenService;
@@ -72,7 +71,7 @@ public class JwtTokenServiceImpl implements JwtTokenService {
     }
 
     @Override
-    public JwtResponse refreshUserToken(String refreshToken) throws AccessDeniedException {
+    public JwtResponse refreshUserToken(String refreshToken) {
         try {
             if (validateToken(refreshToken)) {
                 String email = extractEmail(refreshToken);
@@ -87,7 +86,7 @@ public class JwtTokenServiceImpl implements JwtTokenService {
             } else throw new IllegalArgumentException();
         } catch (ExpiredJwtException | UnsupportedJwtException
                  | MalformedJwtException | IllegalArgumentException e) {
-            throw new AccessDeniedException("Invalid or expired refresh token");
+            throw new InvalidTokenException("Invalid or expired refresh token");
         }
     }
 

@@ -96,7 +96,7 @@ public class WorkoutServiceImpl implements WorkoutService {
         UUID uuid = convertToUUID(uuidStr);
         Workout workout = getWorkoutByUUID(uuid);
         if (workout.getUserId() != userId) {
-            throw new AccessDeniedException("Дополнительную информацию можно добавлять только в свои тренировочные данные!");
+            throw new InvalidInputException("Дополнительную информацию можно добавлять только в свои тренировочные данные!");
         }
 
         WorkoutType workoutType = workoutTypeService.findByName(workout.getType());
@@ -137,7 +137,7 @@ public class WorkoutServiceImpl implements WorkoutService {
         Workout workout = getWorkoutByUUID(uuid);
         int userId = getAuthorizedUserId(email);
         if (workout.getUserId() != userId) {
-            throw new AccessDeniedException("Только свои тренировочные данные можно редактировать!");
+            throw new InvalidInputException("Только свои тренировочные данные можно редактировать!");
         }
         if (editWorkout.getCalorie() != null) {
             updateCalories(workout.getId(), editWorkout.getCalorie());
@@ -190,13 +190,19 @@ public class WorkoutServiceImpl implements WorkoutService {
         Optional<WorkoutInfo> infoByWorkoutId = workoutInfoService.getInfoByWorkoutId(workoutId);
         Map<String, String> workoutInfoMap = infoByWorkoutId.map(WorkoutInfo::getWorkoutInfo)
                 .orElse(new HashMap<>());
-
-        workoutInfo.forEach((key, value) -> {
-            if (workoutInfoMap.containsKey(key)) {
-                workoutInfoService.updateWorkoutInfo(workoutId, key, value);
+        int sizeBefore = 0;
+        for (Map.Entry<String, String> map: workoutInfo.entrySet()){
+            if (workoutInfoMap.containsKey(map.getKey())) {
+                workoutInfoService.updateWorkoutInfo(workoutId, map.getKey(), map.getValue());
+                workoutInfoMap.put(map.getKey(), map.getValue());
+                sizeBefore++;
             }
-            workoutInfoMap.put(key, value);
-        });
+        }
+        if (sizeBefore == 0) {
+            throw new InvalidInputException("Ни один из заголовков не был изменен." +
+                                            " Для внесения изменений введите существующий заголовок дополнительной " +
+                                            " информации для данной тренировки.");
+        }
         return workoutInfoMap;
     }
 

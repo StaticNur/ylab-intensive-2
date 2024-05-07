@@ -6,7 +6,6 @@ import com.ylab.intensive.model.dto.*;
 import com.ylab.intensive.model.entity.Workout;
 import com.ylab.intensive.service.WorkoutService;
 import com.ylab.intensive.util.validation.GeneratorResponseMessage;
-import com.ylab.intensive.util.validation.annotation.ValidUUID;
 import io.swagger.annotations.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -79,7 +78,7 @@ public class WorkoutController {
     @ApiResponse(code = 400, message = "Ошибка валидации. Подробности об ошибках содержатся в теле ответа.",
             response = CustomFieldError.class, responseContainer = "List")
     @Auditable(action = "Пользователь добавил дополнительную информацию о тренировке uuid которого равен @uuid")
-    public ResponseEntity<?> saveAdditionalInformation(@PathVariable("uuid") @ValidUUID String uuid,
+    public ResponseEntity<?> saveAdditionalInformation(@PathVariable("uuid") String uuid,
                                                        @RequestBody @Valid WorkoutInfoDto workoutInfoDto,
                                                        BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
@@ -150,7 +149,7 @@ public class WorkoutController {
     @ApiResponse(code = 400, message = "Ошибка валидации. Подробности об ошибках содержатся в теле ответа.",
             response = CustomFieldError.class, responseContainer = "List")
     @Auditable(action = "Пользователь редактировал тренировку по uuid=@uuid")
-    public ResponseEntity<?> editWorkout(@PathVariable("uuid") @ValidUUID String uuid,
+    public ResponseEntity<?> editWorkout(@PathVariable("uuid") String uuid,
                                          @RequestBody @Valid EditWorkout editWorkout, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             List<CustomFieldError> customFieldErrors = generatorResponseMessage.generateErrorMessage(bindingResult);
@@ -175,7 +174,7 @@ public class WorkoutController {
                     @Authorization(value="JWT")
             })
     @Auditable(action = "Пользователь удалил тренировку по uuid=@uuid")
-    public ResponseEntity<SuccessResponse> deleteWorkouts(@PathVariable("uuid") @ValidUUID String uuid) {
+    public ResponseEntity<SuccessResponse> deleteWorkouts(@PathVariable("uuid") String uuid) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         workoutService.deleteWorkout(authentication.getName(), uuid);
         return ResponseEntity.ok(new SuccessResponse("Данные успешно удалены!"));

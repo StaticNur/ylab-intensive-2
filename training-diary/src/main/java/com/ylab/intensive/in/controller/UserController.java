@@ -8,7 +8,6 @@ import com.ylab.intensive.model.entity.User;
 import com.ylab.intensive.service.UserService;
 import com.ylab.intensive.service.WorkoutService;
 import com.ylab.intensive.util.validation.GeneratorResponseMessage;
-import com.ylab.intensive.util.validation.annotation.ValidUUID;
 import io.swagger.annotations.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -86,7 +85,7 @@ public class UserController {
     @ApiResponse(code = 400, message = "Ошибка валидации. Подробности об ошибках содержатся в теле ответа.",
             response = CustomFieldError.class, responseContainer = "List")
     @Auditable(action = "Пользователь изменил права пользователя по uuid=@uuid")
-    public ResponseEntity<?> changeUserRights(@PathVariable("uuid") @ValidUUID String uuid,
+    public ResponseEntity<?> changeUserRights(@PathVariable("uuid") String uuid,
                                               @RequestBody @Valid ChangeUserRightsDto changeUserRightsDto,
                                               BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {

@@ -40,7 +40,6 @@ public class AuditAspect {
     private final AuditDao auditDao;
     private final UserService userService;
 
-
     @Pointcut(value = "@annotation(com.ylab.intensive.aspects.annotation.Auditable) && execution(* *(..))")
     public void callAuditableMethod() {
     }
@@ -50,11 +49,6 @@ public class AuditAspect {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         StringBuilder builder = new StringBuilder();
         String email = authentication.getName();
-
-        MethodSignature methodSignature = (MethodSignature) jp.getSignature();
-        Auditable audit = methodSignature.getMethod().getAnnotation(Auditable.class);
-        String action = audit.action();
-
         if (result instanceof ResponseEntity<?> responseEntity) {
             Object body = responseEntity.getBody();
             if (body instanceof JwtResponse jwtResponse) {
@@ -63,17 +57,24 @@ public class AuditAspect {
                 email = userDto.getEmail();
             }
         }
-        builder.append("User: ")
-                .append(email)
-                .append(", with role: ")
-                .append(authentication.getAuthorities().stream()
-                        .findAny().map(GrantedAuthority::toString).orElse("empty"))
-                .append(", execute: ").append(action);
-        String uuid = jp.getArgs().length > 0 ? jp.getArgs()[0].toString() : "";
-        action = builder.toString().replace("@uuid", uuid);
+        if (!email.equals("anonymousUser")) {
+            MethodSignature methodSignature = (MethodSignature) jp.getSignature();
+            Auditable audit = methodSignature.getMethod().getAnnotation(Auditable.class);
+            String action = audit.action();
 
-        User user = userService.findByEmail(email)
-                .orElseThrow(() -> new NotFoundException("User with email = " + authentication.getName() + " does not exist!"));
-        auditDao.insertUserAction(user.getId(), action);
+            builder.append("User: ")
+                    .append(email)
+                    .append(", with role: ")
+                    .append(authentication.getAuthorities().stream()
+                            .findAny().map(GrantedAuthority::toString).orElse("empty"))
+                    .append(", execute: ").append(action);
+            String uuid = jp.getArgs().length > 0 ? jp.getArgs()[0].toString() : "";
+            action = builder.toString().replace("@uuid", uuid);
+
+            User user = userService.findByEmail(email)
+                    .orElseThrow(() -> new NotFoundException("User with email = " + authentication.getName() + " does not exist!"));
+            auditDao.insertUserAction(user.getId(), action);
+        }
+
     }
 }
