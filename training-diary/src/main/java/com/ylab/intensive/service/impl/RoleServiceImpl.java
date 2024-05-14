@@ -1,30 +1,29 @@
 package com.ylab.intensive.service.impl;
 
-import com.ylab.intensive.dao.RoleDao;
+import com.ylab.intensive.repository.RoleDao;
+import com.ylab.intensive.exception.NotFoundException;
 import com.ylab.intensive.model.enums.Role;
 import com.ylab.intensive.service.RoleService;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
 /**
  * Implementation class for {@link RoleService}.
  */
-@ApplicationScoped
-@NoArgsConstructor
+@Service
+@RequiredArgsConstructor
 public class RoleServiceImpl implements RoleService {
     /**
      * This DAO is responsible for data access operations related to role.
      */
-    private RoleDao roleDao;
-
-    @Inject
-    public RoleServiceImpl(RoleDao roleDao) {
-        this.roleDao = roleDao;
-    }
+    private final RoleDao roleDao;
 
     @Override
     public int getIdByName(Role role) {
-        return roleDao.findByName(role);
+        Integer id = roleDao.findByName(role);
+        if (id == null) {
+            throw new NotFoundException("Такой роли нет в базе данных.");
+        }
+        return id;
     }
 }

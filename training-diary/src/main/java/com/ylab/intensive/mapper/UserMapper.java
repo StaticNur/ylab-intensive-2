@@ -8,7 +8,7 @@ import org.mapstruct.factory.Mappers;
 /**
  * Mapper class to convert User entity to UserDto.
  */
-@Mapper
+@Mapper(componentModel = "spring")
 public interface UserMapper {
 
     UserMapper INSTANCE = Mappers.getMapper(UserMapper.class);

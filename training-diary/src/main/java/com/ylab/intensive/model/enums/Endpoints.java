@@ -7,10 +7,11 @@ import lombok.Getter;
  */
 @Getter
 public enum Endpoints {
-    AUDIT("/training-diary/user/audit", "GET"),
+    AUDIT("/training-diary/user/audit?page={page}&count={count}", "GET"),
 
     REGISTRATION("/training-diary/auth/registration", "POST"),
-    LOGIN("/training-diary/auth/login", "POST"),
+    LOGIN("/training-diary/auth/email", "POST"),
+    REFRESH_TOKEN("/training-diary/auth/refresh-token", "POST"),
 
     VIEW_STATISTICS("/training-diary/statistics", "GET"),
 

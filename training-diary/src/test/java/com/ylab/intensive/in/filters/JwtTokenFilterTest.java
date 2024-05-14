@@ -1,99 +1,137 @@
 package com.ylab.intensive.in.filters;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ylab.intensive.exception.AuthorizeException;
+import com.ylab.intensive.exception.InvalidTokenException;
 import com.ylab.intensive.model.dto.ExceptionResponse;
 import com.ylab.intensive.model.enums.Role;
-import com.ylab.intensive.model.Authentication;
-import com.ylab.intensive.security.JwtTokenService;
-import com.ylab.intensive.util.Converter;
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import com.ylab.intensive.service.security.JwtTokenService;
+import io.jsonwebtoken.ExpiredJwtException;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.MockitoAnnotations;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.security.core.context.SecurityContextHolder;
 
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
+@DisplayName("Тест фильтра JWT токена")
 class JwtTokenFilterTest {
+
+    @InjectMocks
+    private JwtTokenFilter jwtTokenFilter;
 
     @Mock
     private JwtTokenService jwtTokenService;
 
     @Mock
-    private Converter converter;
-
-    @Mock
-    private ServletContext servletContext;
-
-    @Mock
-    private HttpServletRequest request;
-
-    @Mock
-    private HttpServletResponse response;
+    private ObjectMapper jacksonMapper;
 
     @Mock
     private FilterChain filterChain;
 
-    @InjectMocks
-    private JwtTokenFilter jwtTokenFilter;
-
-    private StringWriter stringWriter;
-
     @BeforeEach
-    void setUp() throws IOException {
-        stringWriter = new StringWriter();
-        lenient().when(response.getWriter()).thenReturn(new PrintWriter(stringWriter));
+    public void setup() throws Exception {
+        AutoCloseable closeable = MockitoAnnotations.openMocks(this);
+        closeable.close();
     }
 
     @Test
-    void testDoFilter_PublicPath() throws IOException, ServletException {
-        when(request.getRequestURI()).thenReturn("/training-diary/auth/login");
+    @DisplayName("Должен успешно установить аутентификацию при наличии действительного JWT токена")
+    void shouldSetAuthenticationWithValidJwtToken() throws ServletException, IOException {
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        String email = "test@example.com";
+        String validToken = "validToken";
+        request.addHeader("Authorization", "Bearer " + validToken);
 
-        jwtTokenFilter.doFilter(request, response, filterChain);
+        when(jwtTokenService.extractEmail(validToken)).thenReturn(email);
+        when(jwtTokenService.extractRoles(validToken)).thenReturn(Role.USER);
 
-        verify(filterChain).doFilter(request, response);
+        jwtTokenFilter.doFilterInternal(request, response, filterChain);
+
+        verify(filterChain).doFilter(any(MockHttpServletRequest.class), any(MockHttpServletResponse.class));
     }
 
     @Test
-    void testDoFilter_ValidToken() throws IOException, ServletException {
-        String token = "validToken";
-        Authentication authentication = new Authentication("user@example.com", Role.ADMIN, true);
+    @DisplayName("Должен отправить ответ с ошибкой при истекшем сроке действия JWT токена")
+    void shouldRespondWithErrorOnExpiredJwtToken() throws ServletException, IOException {
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        String expiredToken = "expiredToken";
+        request.addHeader("Authorization", "Bearer " + expiredToken);
 
-        when(request.getRequestURI()).thenReturn("/training-diary/other");
-        when(request.getHeader("Authorization")).thenReturn("Bearer " + token);
-        when(jwtTokenService.validateToken(token)).thenReturn(true);
-        when(jwtTokenService.authentication(token)).thenReturn(authentication);
+        when(jwtTokenService.extractEmail(expiredToken)).thenThrow(ExpiredJwtException.class);
+        when(jacksonMapper.writeValueAsString(any())).thenReturn("response");
 
-        jwtTokenFilter.doFilter(request, response, filterChain);
+        jwtTokenFilter.doFilterInternal(request, response, filterChain);
 
-        verify(servletContext).setAttribute("authentication", authentication);
-        verify(filterChain).doFilter(request, response);
+        assertThat(response.getStatus()).isEqualTo(401);
+        verify(filterChain, never()).doFilter(any(MockHttpServletRequest.class), any(MockHttpServletResponse.class));
+        verify(jacksonMapper).writeValueAsString(any(ExceptionResponse.class));
     }
 
     @Test
-    void testDoFilter_InvalidToken() throws IOException, ServletException {
-        String token = "invalidToken";
+    @DisplayName("Должен отправить ответ с ошибкой при недействительном JWT токене")
+    void shouldRespondWithErrorOnInvalidJwtToken() throws ServletException, IOException {
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        String invalidToken = "invalidToken";
 
-        when(request.getRequestURI()).thenReturn("/training-diary/other");
-        when(request.getHeader("Authorization")).thenReturn("Bearer " + token);
-        when(jwtTokenService.validateToken(token)).thenReturn(false);
-        when(converter.convertObjectToJson(any(ExceptionResponse.class)))
-                .thenReturn("{\"message\":\"Authentication was denied for this request.\"}");
+        request.addHeader("Authorization", "Bearer " + invalidToken);
 
-        jwtTokenFilter.doFilter(request, response, filterChain);
+        when(jwtTokenService.extractEmail(invalidToken)).thenThrow(InvalidTokenException.class);
+        when(jacksonMapper.writeValueAsString(any())).thenReturn("response");
 
-        verify(response).setStatus(HttpServletResponse.SC_BAD_REQUEST);
-        assertEquals("{\"message\":\"Authentication was denied for this request.\"}", stringWriter.toString());
+        jwtTokenFilter.doFilterInternal(request, response, filterChain);
+
+        assertThat(response.getStatus()).isEqualTo(401);
+        verify(filterChain, never()).doFilter(any(MockHttpServletRequest.class), any(MockHttpServletResponse.class));
+        verify(jacksonMapper).writeValueAsString(any(ExceptionResponse.class));
+    }
+
+    @Test
+    @DisplayName("Должен отправить ответ с ошибкой при отсутствии авторизации")
+    void shouldRespondWithErrorOnUnauthorizedAccess() throws ServletException, IOException {
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        String invalidToken = "invalidToken";
+        request.addHeader("Authorization", "Bearer " + invalidToken);
+
+        when(jwtTokenService.extractEmail(invalidToken)).thenThrow(AuthorizeException.class);
+        when(jacksonMapper.writeValueAsString(any())).thenReturn("response");
+
+        jwtTokenFilter.doFilterInternal(request, response, filterChain);
+
+        assertThat(response.getStatus()).isEqualTo(401);
+        verify(filterChain, never()).doFilter(any(MockHttpServletRequest.class), any(MockHttpServletResponse.class));
+        verify(jacksonMapper).writeValueAsString(any(ExceptionResponse.class));
+    }
+
+    @Test
+    @DisplayName("Должен пропустить фильтр, если токен отсутствует в заголовке")
+    void shouldPassThroughFilterWithoutToken() throws ServletException, IOException {
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        jwtTokenFilter.doFilterInternal(request, response, filterChain);
+
+        verify(filterChain).doFilter(any(MockHttpServletRequest.class), any(MockHttpServletResponse.class));
+    }
+
+    @AfterEach
+    public void tearDown() {
+        SecurityContextHolder.clearContext();
     }
 }

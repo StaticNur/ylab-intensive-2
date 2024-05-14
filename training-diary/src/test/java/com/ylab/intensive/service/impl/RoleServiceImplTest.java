@@ -1,7 +1,7 @@
 package com.ylab.intensive.service.impl;
 
-import com.ylab.intensive.dao.RoleDao;
 import com.ylab.intensive.model.enums.Role;
+import com.ylab.intensive.repository.RoleDao;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

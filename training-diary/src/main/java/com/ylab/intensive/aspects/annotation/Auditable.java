@@ -17,4 +17,10 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Retention(RUNTIME)
 @Target(METHOD)
 public @interface Auditable {
+    /**
+     * Perfect action
+     *
+     * @return The action.
+     */
+    String action() default "";
 }

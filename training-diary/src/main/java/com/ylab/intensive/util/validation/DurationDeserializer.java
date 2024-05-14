@@ -23,7 +23,7 @@ public class DurationDeserializer extends JsonDeserializer<Duration> {
      * @param jsonParser             The JSON parser.
      * @param deserializationContext The deserialization context.
      * @return A Duration object representing the parsed duration.
-     * @throws IOException            If an I/O error occurs while reading the JSON string.
+     * @throws IOException           If an I/O error occurs while reading the JSON string.
      * @throws InvalidInputException If the input JSON string does not match the expected format.
      */
     @Override

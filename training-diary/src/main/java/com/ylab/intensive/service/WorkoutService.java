@@ -15,7 +15,8 @@ import java.util.Map;
 /**
  * Service interface for managing workouts and related operations.
  * <p>
- * This interface defines methods to perform various operations related to workouts, including adding, updating, and deleting workouts,
+ * This interface defines methods to perform various operations related to workouts,
+ * including adding, updating, and deleting workouts,
  * retrieving workout statistics, and managing workout types.
  * </p>
  *
@@ -35,19 +36,19 @@ public interface WorkoutService {
     /**
      * Adds additional information to an existing workout.
      *
-     * @param uuidStr         The UUID of the workout to which the information is added.
-     * @param workoutInfoDto  The DTO containing additional information to be added.
+     * @param uuidStr        The UUID of the workout to which the information is added.
+     * @param workoutInfoDto The DTO containing additional information to be added.
      * @return The updated workout entity with additional information.
      */
-    Workout addWorkoutInfo(String uuidStr, WorkoutInfoDto workoutInfoDto);
+    Workout addWorkoutInfo(String email, String uuidStr, WorkoutInfoDto workoutInfoDto);
 
     /**
      * Retrieves all workouts associated with a specific user.
      *
-     * @param login The login (email) of the user whose workouts are to be retrieved.
+     * @param login The email (email) of the user whose workouts are to be retrieved.
      * @return A list of DTOs representing the user's workouts.
      */
-    List<WorkoutDto> getAllUserWorkouts(String login);
+    List<Workout> getAllWorkoutsByUser(String login);
 
     /**
      * Updates the type of a workout.
@@ -75,12 +76,17 @@ public interface WorkoutService {
     void updateCalories(int workoutId, Float calories);
 
     /**
-     * Updates additional information of a workout.
+     * Updates additional information for a workout specified by its ID.
      *
-     * @param workoutId   The ID of the workout to update.
-     * @param workoutInfo A map containing additional information to update.
+     * @param workoutId   The ID of the workout for which additional information is to be updated.
+     * @param workoutInfo A map containing the additional information to update,
+     *                    where the keys represent the names of the fields to update,
+     *                    and the values represent the new values for those fields.
+     * @return A map containing the updated additional information for the workout,
+     * where the keys represent the names of the fields, and
+     * the values represent the updated values for those fields.
      */
-    void updateAdditionalInfo(int workoutId, Map<String, String> workoutInfo);
+    Map<String, String> updateAdditionalInfo(int workoutId, Map<String, String> workoutInfo);
 
     /**
      * Deletes a workout for the specified user.
@@ -111,7 +117,7 @@ public interface WorkoutService {
     /**
      * Retrieves all workout types for a specific user.
      *
-     * @param login The login (email) of the user for whom to retrieve workout types.
+     * @param login The email (email) of the user for whom to retrieve workout types.
      * @return A list of workout types associated with the user.
      */
     List<WorkoutType> getAllType(String login);
@@ -119,7 +125,7 @@ public interface WorkoutService {
     /**
      * Saves a new workout type for the specified user.
      *
-     * @param login    The login (email) of the user for whom to save the workout type.
+     * @param login    The email (email) of the user for whom to save the workout type.
      * @param typeName The name of the workout type to save.
      * @return The saved workout type entity.
      */
@@ -128,8 +134,8 @@ public interface WorkoutService {
     /**
      * Updates an existing workout.
      *
-     * @param email     The email of the user who owns the workout.
-     * @param uuidStr   The UUID of the workout to update.
+     * @param email       The email of the user who owns the workout.
+     * @param uuidStr     The UUID of the workout to update.
      * @param editWorkout The DTO containing the updated workout information.
      * @return The updated workout entity.
      */

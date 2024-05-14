@@ -2,6 +2,8 @@ package com.ylab.intensive.service;
 
 import com.ylab.intensive.model.entity.WorkoutInfo;
 
+import java.util.Optional;
+
 /**
  * Service interface for workout information operations.
  */
@@ -31,7 +33,7 @@ public interface WorkoutInfoService {
      * @param workoutId the ID of the workout
      * @return a WorkoutInfo containing the workout information
      */
-    WorkoutInfo getInfoByWorkoutId(int workoutId);
+    Optional<WorkoutInfo> getInfoByWorkoutId(int workoutId);
 
     /**
      * Deletes workout information by workout ID.

@@ -1,15 +1,16 @@
 package com.ylab.intensive.model.dto;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+
 /**
- * Data transfer object (DTO) representing user login information.
+ * Data transfer object (DTO) representing user email information.
  * <p>
- * This class encapsulates the email address and password for user login.
+ * This class encapsulates the email address and password for user email.
  * </p>
  *
  * @since 1.0

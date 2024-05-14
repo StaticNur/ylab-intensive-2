@@ -8,7 +8,7 @@ import org.mapstruct.factory.Mappers;
 /**
  * Mapper class to convert Workout entity to WorkoutDto.
  */
-@Mapper
+@Mapper(componentModel = "spring")
 public interface WorkoutMapper {
 
     WorkoutMapper INSTANCE = Mappers.getMapper(WorkoutMapper.class);

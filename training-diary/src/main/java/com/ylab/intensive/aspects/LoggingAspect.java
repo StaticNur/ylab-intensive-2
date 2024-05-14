@@ -1,11 +1,11 @@
 package com.ylab.intensive.aspects;
 
 import lombok.extern.log4j.Log4j2;
-import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
+import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 
@@ -20,10 +20,11 @@ import java.util.Arrays;
  * execution and executes custom logging code before and after the method call.
  */
 @Aspect
+@Component
 @Log4j2
 public class LoggingAspect {
 
-    @Pointcut("@within(com.ylab.intensive.aspects.annotation.Loggable) && execution(* * (..))")
+    @Pointcut("@annotation(com.ylab.intensive.aspects.annotation.Loggable) && execution(* *(..))")
     public void callLoggableMethod() {
     }
 
@@ -37,7 +38,7 @@ public class LoggingAspect {
         log.info("before: {}", builder);
         Object retVal = joinPoint.proceed();
         log.info("after: {}", builder);
-        System.out.println(retVal.toString());
+        System.out.println("Loggable: " + builder);
         return retVal;
     }
 }

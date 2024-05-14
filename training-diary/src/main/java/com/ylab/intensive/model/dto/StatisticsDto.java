@@ -19,6 +19,6 @@ public class StatisticsDto {
     /**
      * The sum of calories burned during workouts.
      */
-    private int sumCalorie;
+    private float sumCalorie;
 }
 

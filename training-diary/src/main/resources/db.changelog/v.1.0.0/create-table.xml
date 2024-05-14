@@ -193,7 +193,7 @@
             <column name="date_of_action" type="timestamp">
                 <constraints nullable="false"/>
             </column>
-            <column name="action" type="VARCHAR(255)">
+            <column name="action" type="VARCHAR(1000)">
                 <constraints nullable="false"/>
             </column>
         </createTable>
