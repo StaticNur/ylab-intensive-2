@@ -145,7 +145,6 @@ public class WorkoutController {
 
         Workout workout = workoutService.updateWorkout(authentication.getName(), uuid, editWorkout);
         return ResponseEntity.ok(workoutMapper.toDto(workout));
-
     }
 
     /**

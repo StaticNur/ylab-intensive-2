@@ -6,6 +6,8 @@ import com.ylab.intensive.service.WorkoutInfoService;
 import io.ylab.loggingspringbootstarter.annotation.Loggable;
 import io.ylab.loggingspringbootstarter.annotation.Timed;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +28,7 @@ public class WorkoutInfoServiceImpl implements WorkoutInfoService {
     @Override
     @Loggable
     @Timed
+    @CacheEvict(value = "getInfoByWorkoutId", key = "#workoutId")
     @Transactional
     public void saveWorkoutInfo(int workoutId, String title, String info) {
         workoutInfoDao.saveWorkoutInfo(workoutId, title, info);
@@ -34,6 +37,7 @@ public class WorkoutInfoServiceImpl implements WorkoutInfoService {
     @Override
     @Loggable
     @Timed
+    @CacheEvict(value = "getInfoByWorkoutId", key = "#workoutId")
     @Transactional
     public void updateWorkoutInfo(int workoutId, String title, String info) {
         workoutInfoDao.updateWorkoutInfo(workoutId, title, info);
@@ -42,6 +46,7 @@ public class WorkoutInfoServiceImpl implements WorkoutInfoService {
     @Override
     @Loggable
     @Timed
+    @Cacheable(value = "getInfoByWorkoutId", key = "#workoutId", unless = "#result == null")
     public Optional<WorkoutInfo> getInfoByWorkoutId(int workoutId) {
         return workoutInfoDao.findByWorkoutId(workoutId);
     }
@@ -49,6 +54,7 @@ public class WorkoutInfoServiceImpl implements WorkoutInfoService {
     @Override
     @Loggable
     @Timed
+    @CacheEvict(value = "getInfoByWorkoutId", key = "#workoutId")
     public void delete(int workoutId) {
         workoutInfoDao.delete(workoutId);
     }

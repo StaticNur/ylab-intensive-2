@@ -17,6 +17,8 @@ import io.ylab.auditspringbootstarter.service.UserFinder;
 import io.ylab.loggingspringbootstarter.annotation.Loggable;
 import io.ylab.loggingspringbootstarter.annotation.Timed;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -70,6 +72,7 @@ public class UserServiceImpl implements UserService, UserFinder {
     @Override
     @Timed
     @Loggable
+    @CacheEvict(value = "AllUser")
     @Transactional
     public User registerUser(RegistrationDto registrationDto) {
         userDao.findByEmail(registrationDto.getEmail())
@@ -102,6 +105,7 @@ public class UserServiceImpl implements UserService, UserFinder {
     @Override
     @Loggable
     @Timed
+    @CacheEvict(value = "AllUser")
     @Transactional
     public User changeUserPermissions(String uuidStr, ChangeUserRightsDto changeUserRightsDto) {
         Role role = changeUserRightsDto.newRole();
@@ -140,6 +144,7 @@ public class UserServiceImpl implements UserService, UserFinder {
     @Override
     @Loggable
     @Timed
+    @Cacheable(value = "AllUser")
     public List<User> getAllUser() {
         return userDao.findAll();
     }

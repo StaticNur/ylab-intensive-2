@@ -108,9 +108,11 @@ class WorkoutServiceImplTest {
             List<Workout> mockWorkouts = List.of(workout);
             User user = new User();
             user.setId(1);
+            user.setEmail("test@email.com");
 
             when(workoutDao.findByUserId(1)).thenReturn(mockWorkouts);
             when(workoutInfoService.getInfoByWorkoutId(anyInt())).thenReturn(Optional.of(new WorkoutInfo()));
+            when(userService.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
 
             assertThat(workoutService.getAllUsersWorkouts(List.of(user)))
                     .hasSize(1);
@@ -218,6 +220,7 @@ class WorkoutServiceImplTest {
         void testGetAllUsersWorkouts_Success() {
             User user = new User();
             user.setId(1);
+            user.setEmail("test@email.com");
             List<User> mockUsers = List.of(user, user);
             Workout workout = getWorkout();
             workout.setId(1);
@@ -230,6 +233,7 @@ class WorkoutServiceImplTest {
 
             when(workoutDao.findByUserId(1)).thenReturn(mockWorkouts);
             when(workoutInfoService.getInfoByWorkoutId(1)).thenReturn(Optional.of(workoutInfo));
+            when(userService.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
 
             List<User> result = workoutService.getAllUsersWorkouts(mockUsers);
 

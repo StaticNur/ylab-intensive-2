@@ -68,8 +68,9 @@ public class UserController {
         List<User> userList = userService.getAllUser();
         List<User> userWithWorkouts = workoutService.getAllUsersWorkouts(userList);
 
-        List<UserDto> userDtolist = userWithWorkouts.stream().map(userMapper::toDto).toList();
-        return ResponseEntity.ok(userDtolist);
+        return ResponseEntity.ok(userWithWorkouts.stream()
+                .map(userMapper::toDto)
+                .toList());
     }
 
     /**
