@@ -2,8 +2,7 @@ package com.ylab.intensive.model.dto;
 
 import com.ylab.intensive.model.enums.Role;
 import com.ylab.intensive.util.validation.annotation.ValidRole;
-
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 /**
  * Data transfer object (DTO) representing the change of user rights request.

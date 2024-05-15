@@ -1,7 +1,5 @@
 package com.ylab.intensive.service.impl;
 
-import com.ylab.intensive.aspects.annotation.Loggable;
-import com.ylab.intensive.aspects.annotation.Timed;
 import com.ylab.intensive.repository.UserDao;
 import com.ylab.intensive.exception.*;
 import com.ylab.intensive.model.Pageable;
@@ -15,6 +13,9 @@ import com.ylab.intensive.service.AuditService;
 import com.ylab.intensive.service.RoleService;
 import com.ylab.intensive.service.UserService;
 import com.ylab.intensive.util.converter.Converter;
+import io.ylab.auditspringbootstarter.service.UserFinder;
+import io.ylab.loggingspringbootstarter.annotation.Loggable;
+import io.ylab.loggingspringbootstarter.annotation.Timed;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -30,7 +31,7 @@ import java.util.stream.Collectors;
  */
 @Service
 @RequiredArgsConstructor
-public class UserServiceImpl implements UserService {
+public class UserServiceImpl implements UserService, UserFinder {
     /**
      * This DAO is responsible for data access operations related to users.
      */
@@ -148,6 +149,13 @@ public class UserServiceImpl implements UserService {
     @Timed
     public Optional<User> findByEmail(String email) {
         return userDao.findByEmail(email);
+    }
+
+    @Override
+    public int findIdByEmail(String email) {
+        return findByEmail(email)
+                .map(User::getId)
+                .orElseThrow(() -> new NotFoundException("User with email = " + email + " does not exist!"));
     }
 
     @Override

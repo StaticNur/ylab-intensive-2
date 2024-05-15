@@ -5,6 +5,7 @@ import com.ylab.intensive.repository.extractor.ListExtractor;
 import com.ylab.intensive.repository.extractor.UserExtractor;
 import com.ylab.intensive.exception.DaoException;
 import com.ylab.intensive.model.entity.User;
+import io.ylab.auditspringbootstarter.service.UserFinder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.jdbc.core.JdbcTemplate;

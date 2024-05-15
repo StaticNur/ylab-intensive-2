@@ -8,12 +8,12 @@ import com.ylab.intensive.model.enums.Role;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 import javax.crypto.SecretKey;
 import java.util.*;
 
@@ -93,9 +93,11 @@ public class JwtTokenServiceImpl implements JwtTokenService {
     @Override
     public boolean validateToken(String token) {
         try {
-            Jws<Claims> claims = Jwts.parser()
-                    .verifyWith(key).build().parseSignedClaims(token);
-            return !claims.getPayload().getExpiration().before(new Date());
+            Jws<Claims> claims = Jwts.parserBuilder()
+                    .setSigningKey(key)
+                    .build()
+                    .parseClaimsJws(token);
+            return !claims.getBody().getExpiration().before(new Date());
         } catch (ExpiredJwtException | UnsupportedJwtException
                  | MalformedJwtException | IllegalArgumentException e) {
             return false;
@@ -139,10 +141,10 @@ public class JwtTokenServiceImpl implements JwtTokenService {
      */
     private String generateToken(Map<String, Object> claims, String username, long expirationTime) {
         return Jwts.builder()
-                .claims(claims)
-                .subject(username)
-                .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + expirationTime))
+                .setClaims(claims)
+                .setSubject(username)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + expirationTime))
                 .signWith(key)
                 .compact();
     }
@@ -155,10 +157,11 @@ public class JwtTokenServiceImpl implements JwtTokenService {
      */
     private Optional<Claims> extractAllClaims(String token) {
         try {
-            Jws<Claims> claimsJws = Jwts.parser()
-                    .verifyWith(key).build()
-                    .parseSignedClaims(token);
-            return Optional.ofNullable(claimsJws.getPayload());
+            Jws<Claims> claimsJws = Jwts.parserBuilder()
+                    .setSigningKey(key)
+                    .build()
+                    .parseClaimsJws(token);
+            return Optional.ofNullable(claimsJws.getBody());
         } catch (MalformedJwtException e) {
             throw new InvalidTokenException("Malformed JWT token." + e.getMessage());
         }

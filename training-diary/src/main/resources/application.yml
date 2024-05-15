@@ -1,17 +1,20 @@
-db:
-  uri: jdbc:postgresql://localhost:5435/training-diary
-  username: postgres_user
-  password: postgres_psw
-  driver-class-name: org.postgresql.Driver
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5435/training-diary
+    username: postgres_user
+    password: postgres_psw
+    driver-class-name: org.postgresql.Driver
 
-liquibase:
-  change-log: db.changelog/changelog.xml
-  liquibase-schema: migration
-  logLevel: DEBUG
-  hub:
-    mode: off
+  liquibase:
+    enabled: true
+    change-log: db.changelog/changelog.xml
+    liquibase-schema: migration
 
-jwt:
-  secret: c3VwZXJwdXBlcmR1cGVybWVnYWhhcmfwef43gt543r445hg43frerh4y56efreRvdmVydG9waGlnaHNlY3JldA==
-  access: 3600000
-  refresh: 2592000000
+  jwt:
+    secret: c3VwZXJwdXBlcmR1cGVybWVnYWhhcmfwef43gt543r445hg43frerh4y56efreRvdmVydG9waGlnaHNlY3JldA==
+    access: 3600000
+    refresh: 2592000000
+
+audit:
+  aspect:
+    enabled: true

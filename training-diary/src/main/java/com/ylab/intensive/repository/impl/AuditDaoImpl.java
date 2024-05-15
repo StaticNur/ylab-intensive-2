@@ -5,6 +5,7 @@ import com.ylab.intensive.repository.extractor.AuditExtractor;
 import com.ylab.intensive.repository.extractor.ListExtractor;
 import com.ylab.intensive.model.Pageable;
 import com.ylab.intensive.model.entity.Audit;
+import io.ylab.auditspringbootstarter.service.AuditRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -18,7 +19,7 @@ import java.util.List;
 @Log4j2
 @Repository
 @RequiredArgsConstructor
-public class AuditDaoImpl implements AuditDao {
+public class AuditDaoImpl implements AuditDao, AuditRepository {
     /**
      * The JDBC template used for executing SQL queries against the database.
      */

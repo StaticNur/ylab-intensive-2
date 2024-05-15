@@ -19,10 +19,10 @@ import org.springframework.stereotype.Component;
 @Data
 @PropertySource(value = "classpath:application.yml", factory = YamlPropertiesUtilFactory.class)
 public class JwtProperties {
-    @Value("${jwt.secret}")
+    @Value("${spring.jwt.secret}")
     private String secret;
-    @Value("${jwt.access}")
+    @Value("${spring.jwt.access}")
     private Long access;
-    @Value("${jwt.refresh}")
+    @Value("${spring.jwt.refresh}")
     private Long refresh;
 }

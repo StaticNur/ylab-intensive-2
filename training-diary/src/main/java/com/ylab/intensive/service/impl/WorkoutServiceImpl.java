@@ -1,7 +1,5 @@
 package com.ylab.intensive.service.impl;
 
-import com.ylab.intensive.aspects.annotation.Loggable;
-import com.ylab.intensive.aspects.annotation.Timed;
 import com.ylab.intensive.repository.WorkoutDao;
 import com.ylab.intensive.exception.*;
 import com.ylab.intensive.model.dto.*;
@@ -11,6 +9,8 @@ import com.ylab.intensive.model.entity.WorkoutInfo;
 import com.ylab.intensive.model.entity.WorkoutType;
 import com.ylab.intensive.service.*;
 import com.ylab.intensive.util.converter.Converter;
+import io.ylab.loggingspringbootstarter.annotation.Loggable;
+import io.ylab.loggingspringbootstarter.annotation.Timed;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
@@ -155,8 +155,9 @@ public class WorkoutServiceImpl implements WorkoutService {
             workout.setType(editWorkout.getType());
         }
         if (editWorkout.getDuration() != null) {
-            updateDuration(workout.getId(), editWorkout.getDuration());
-            workout.setDuration(editWorkout.getDuration());
+            Duration duration = convertToDuration(editWorkout.getDuration());
+            updateDuration(workout.getId(), duration);
+            workout.setDuration(duration);
         }
         return workout;
     }
@@ -317,9 +318,18 @@ public class WorkoutServiceImpl implements WorkoutService {
         workout.setUserId(userId);
         workout.setType(type.getType());
         workout.setDate(date);
-        workout.setDuration(workoutDto.getDuration());
+        workout.setDuration(convertToDuration(workoutDto.getDuration()));
         workout.setCalorie(workoutDto.getCalorie());
         return workout;
+    }
+
+    private Duration convertToDuration(String durationStr) {
+        return converter.convert(durationStr, d ->{
+            String[] durationHMS = d.split(":");
+            return Duration.ofHours(Integer.parseInt(durationHMS[0]))
+                    .plusMinutes(Integer.parseInt(durationHMS[1]))
+                    .plusSeconds(Integer.parseInt(durationHMS[2]));
+        }, "Invalid Duration");
     }
 
     /**

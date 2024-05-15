@@ -1,6 +1,5 @@
 package com.ylab.intensive.in.controller;
 
-import com.ylab.intensive.aspects.annotation.Auditable;
 import com.ylab.intensive.mapper.UserMapper;
 import com.ylab.intensive.model.Pageable;
 import com.ylab.intensive.model.dto.*;
@@ -8,7 +7,16 @@ import com.ylab.intensive.model.entity.User;
 import com.ylab.intensive.service.UserService;
 import com.ylab.intensive.service.WorkoutService;
 import com.ylab.intensive.util.validation.GeneratorResponseMessage;
-import io.swagger.annotations.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.ylab.auditspringbootstarter.annotation.Auditable;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -17,7 +25,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
 import java.util.List;
 
 /**
@@ -25,7 +32,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/training-diary")
-@Api(value = "UserController", tags = {"User Controller"})
+@Tag(name = "UserController", description = "User Controller")
 @RequiredArgsConstructor
 public class UserController {
     /**
@@ -55,10 +62,7 @@ public class UserController {
      */
     @GetMapping("/users/workouts")
     @PreAuthorize("hasAuthority('ADMIN')")
-    @ApiOperation(value = "view workouts of all users", response = WorkoutDto.class, responseContainer = "List",
-            authorizations = {
-                    @Authorization(value = "JWT")
-            })
+    @Operation(summary = "View workouts of all users", description = "Endpoint to view workouts of all users.")
     @Auditable(action = "Пользователь просмотрел тренировки всех пользователей.")
     public ResponseEntity<?> viewTrainingsForAllUsers() {
         List<User> userList = userService.getAllUser();
@@ -78,12 +82,7 @@ public class UserController {
      */
     @PatchMapping("/users/{uuid}/access")
     @PreAuthorize("hasAuthority('ADMIN')")
-    @ApiOperation(value = "change user rights", response = SuccessResponse.class,
-            authorizations = {
-                    @Authorization(value = "JWT")
-            })
-    @ApiResponse(code = 400, message = "Ошибка валидации. Подробности об ошибках содержатся в теле ответа.",
-            response = CustomFieldError.class, responseContainer = "List")
+    @Operation(summary = "Change user rights", description = "Endpoint to change user rights.")
     @Auditable(action = "Пользователь изменил права пользователя по uuid=@uuid")
     public ResponseEntity<?> changeUserRights(@PathVariable("uuid") String uuid,
                                               @RequestBody @Valid ChangeUserRightsDto changeUserRightsDto,
@@ -107,10 +106,7 @@ public class UserController {
      * @return ResponseEntity containing an AuditDto object
      */
     @GetMapping("/user/audit")
-    @ApiOperation(value = "view the audit in action", response = AuditDto.class,
-            authorizations = {
-                    @Authorization(value = "JWT")
-            })
+    @Operation(summary = "View the audit in action", description = "Endpoint to view the audit in action.")
     @Auditable(action = "Пользователь просмотрел свой аудит действий.")
     public ResponseEntity<AuditDto> viewAudit(@RequestParam(value = "page", defaultValue = "0") int page,
                                               @RequestParam(value = "count", defaultValue = "50") int count) {

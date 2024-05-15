@@ -2,7 +2,7 @@
 <Configuration status="INFO">
 
     <Appenders>
-        <File name="LogToFile" filename="logs/info.log">
+        <File name="LogToFile" filename="logs/info.log" fileCreate="true">
             <PatternLayout pattern="%d{HH:mm:ss.SSS} %-5level %logger{36} - %msg%n"/>
         </File>
     </Appenders>

@@ -1,10 +1,10 @@
 package com.ylab.intensive.service.impl;
 
-import com.ylab.intensive.aspects.annotation.Loggable;
-import com.ylab.intensive.aspects.annotation.Timed;
 import com.ylab.intensive.repository.WorkoutInfoDao;
 import com.ylab.intensive.model.entity.WorkoutInfo;
 import com.ylab.intensive.service.WorkoutInfoService;
+import io.ylab.loggingspringbootstarter.annotation.Loggable;
+import io.ylab.loggingspringbootstarter.annotation.Timed;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

@@ -1,12 +1,20 @@
 package com.ylab.intensive.in.controller;
 
-import com.ylab.intensive.aspects.annotation.Auditable;
 import com.ylab.intensive.mapper.WorkoutTypeMapper;
 import com.ylab.intensive.model.dto.*;
 import com.ylab.intensive.model.entity.WorkoutType;
 import com.ylab.intensive.service.WorkoutService;
 import com.ylab.intensive.util.validation.GeneratorResponseMessage;
-import io.swagger.annotations.*;
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.ylab.auditspringbootstarter.annotation.Auditable;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,8 +23,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
-
 import java.util.List;
 
 /**
@@ -24,10 +30,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/training-diary/workouts/type")
-@Api(value = "WorkoutTypeController", tags = {"Workout Type Controller"})
-@SwaggerDefinition(tags = {
-        @Tag(name = "Controller for saving and viewing workout types.")
-})
+@Tag(name = "WorkoutTypeController", description = "Workout Type Controller")
 @RequiredArgsConstructor
 public class WorkoutTypeController {
     /**
@@ -51,10 +54,7 @@ public class WorkoutTypeController {
      * @return ResponseEntity containing a list of WorkoutTypeDto objects representing the user's workout types
      */
     @GetMapping
-    @ApiOperation(value = "view user workout types", response = WorkoutTypeDto.class, responseContainer = "List",
-            authorizations = {
-                    @Authorization(value="JWT")
-            })
+    @Operation(summary = "View user workout types", description = "Endpoint to view user workout types.")
     @Auditable(action = "Пользователь просмотрел свои типы тренировок.")
     public ResponseEntity<List<WorkoutTypeDto>> viewTypes() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -72,12 +72,7 @@ public class WorkoutTypeController {
      * @return ResponseEntity containing the saved WorkoutTypeDto object
      */
     @PostMapping
-    @ApiOperation(value = "save user workout type", response = WorkoutType.class,
-            authorizations = {
-                    @Authorization(value="JWT")
-            })
-    @ApiResponse(code = 400, message = "Ошибка валидации. Подробности об ошибках содержатся в теле ответа.",
-            response = CustomFieldError.class, responseContainer = "List")
+    @Operation(summary = "Save user workout type", description = "Endpoint to save user workout type.")
     @Auditable(action = "Пользователь добавил новый тип тренировки.")
     public ResponseEntity<?> saveType(@RequestBody @Valid WorkoutTypeDto workoutTypeDto, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {

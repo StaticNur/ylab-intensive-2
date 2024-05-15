@@ -1,13 +1,13 @@
 package com.ylab.intensive.model.dto;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.ylab.intensive.util.validation.DurationDeserializer;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.validation.constraints.*;
-import java.time.Duration;
 import java.util.Map;
 import java.util.UUID;
 
@@ -42,8 +42,9 @@ public class WorkoutDto {
     /**
      * The duration of the workout
      */
-    @JsonDeserialize(using = DurationDeserializer.class)
-    private Duration duration;
+    @Pattern(regexp = "^([0-9]+):([0-5]?[0-9]):([0-5]?[0-9])$",
+            message = "Формат должен быть H:M:S где часы это любое натуральное число, а минуты и секунды - значения от 0 до 59")
+    private String duration;
 
     /**
      * The calorie burned during the workout
