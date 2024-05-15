@@ -1,4 +1,3 @@
-/*
 package com.ylab.intensive.in.filters;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -8,6 +7,8 @@ import com.ylab.intensive.model.dto.ExceptionResponse;
 import com.ylab.intensive.model.enums.Role;
 import com.ylab.intensive.service.security.JwtTokenService;
 import io.jsonwebtoken.ExpiredJwtException;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -19,8 +20,6 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
 import java.io.IOException;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -135,4 +134,4 @@ class JwtTokenFilterTest {
     public void tearDown() {
         SecurityContextHolder.clearContext();
     }
-}*/
+}

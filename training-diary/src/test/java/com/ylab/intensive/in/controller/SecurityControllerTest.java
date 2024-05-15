@@ -1,121 +1,127 @@
 package com.ylab.intensive.in.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ylab.intensive.mapper.UserMapper;
-import com.ylab.intensive.model.dto.JwtResponse;
-import com.ylab.intensive.model.dto.UserDto;
-import com.ylab.intensive.model.entity.User;
+import com.ylab.intensive.model.dto.*;
+import com.ylab.intensive.model.enums.Role;
 import com.ylab.intensive.service.UserService;
+import com.ylab.intensive.service.security.JwtTokenService;
+import com.ylab.intensive.tag.IntegrationTest;
 import com.ylab.intensive.util.validation.GeneratorResponseMessage;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvFileSource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import java.util.Collections;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+@WebMvcTest(value = SecurityController.class, excludeAutoConfiguration = SecurityAutoConfiguration.class)
+@IntegrationTest
 @DisplayName("Тест контроллера регистрации и авторизации")
 class SecurityControllerTest {
 
-    @InjectMocks
-    private SecurityController securityController;
-
-    @Mock
-    private UserService userService;
-
-    @Mock
-    private UserMapper userMapper;
-
-    @Mock
-    private GeneratorResponseMessage generatorResponseMessage;
-
+    @Autowired
     private MockMvc mockMvc;
 
-    @BeforeEach
-    public void setup() throws Exception {
-        try (AutoCloseable closeable = MockitoAnnotations.openMocks(this)) {
-            mockMvc = MockMvcBuilders.standaloneSetup(securityController).build();
+    @Autowired
+    private SecurityController securityController;
+
+    @MockBean
+    private UserService userService;
+
+    @MockBean
+    private JwtTokenService jwtTokenService;
+
+    @MockBean
+    private UserMapper userMapper;
+
+    @MockBean
+    private GeneratorResponseMessage generatorResponseMessage;
+
+    @Nested
+    @DisplayName("Positive testing")
+    class Positive {
+        @Test
+        @DisplayName("Должен успешно зарегистрировать нового пользователя")
+        void shouldRegisterNewUser() throws Exception {
+            RegistrationDto registrationDto = new RegistrationDto("tes@example.com", "psw", Role.ADMIN);
+
+            mockMvc.perform(post("/training-diary/auth/registration")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(new ObjectMapper().writeValueAsString(registrationDto)))
+                    .andExpect(status().isCreated());
+        }
+
+        @Test
+        @DisplayName("Должен успешно авторизовать пользователя")
+        void shouldAuthorizeUser() throws Exception {
+            LoginDto loginDto = new LoginDto("test@example.com", "psw");
+
+            mockMvc.perform(post("/training-diary/auth/login")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(new ObjectMapper().writeValueAsString(loginDto)))
+                    .andExpect(status().isOk());
         }
     }
 
-    @Test
-    @DisplayName("Должен успешно зарегистрировать нового пользователя")
-    void shouldRegisterNewUser() throws Exception {
-        User user = new User();
-        when(userService.registerUser(any())).thenReturn(user);
-        when(userMapper.toDto(user)).thenReturn(new UserDto());
 
-        mockMvc.perform(post("/training-diary/auth/registration")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\n" +
-                                 "  \"email\": \"tes@example.com\",\n" +
-                                 "  \"password\": \"psw\",\n" +
-                                 "  \"role\": \"ADMIN\"\n" +
-                                 "}"))
-                .andExpect(status().isCreated());
-    }
+    @Nested
+    @DisplayName("Negative testing")
+    class Negative {
 
-    @Test
-    @DisplayName("Должен возвращать ошибки валидации при регистрации нового пользователя")
-    void shouldReturnValidationErrorsOnRegistration() throws Exception {
-        when(generatorResponseMessage.generateErrorMessage(any())).thenReturn(Collections.emptyList());
+        @ParameterizedTest
+        @CsvFileSource(resources = {"/csv/authorizationNotValid.csv"}, delimiterString = ";", numLinesToSkip = 1)
+        @DisplayName("Должен возвращать ошибки валидации при авторизации пользователя")
+        void shouldReturnValidationErrorsOnAuthorization(String email,
+                                                         String password) throws Exception {
+            LoginDto loginDto = new LoginDto(email, password);
 
-        mockMvc.perform(post("/training-diary/auth/registration")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\n" +
-                                 "  \"password\": \"8\",\n" +
-                                 "  \"role\": \"AN\"\n" +
-                                 "}"))
-                .andExpect(status().isBadRequest());
-    }
+            mockMvc.perform(post("/training-diary/auth/login")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(new ObjectMapper().writeValueAsString(loginDto)))
+                    .andExpect(status().isBadRequest());
 
-    @Test
-    @DisplayName("Должен успешно авторизовать пользователя")
-    void shouldAuthorizeUser() throws Exception {
-        when(userService.login(any())).thenReturn(new JwtResponse("login", "token", "token"));
+            verify(userService, never()).login(loginDto);
+        }
 
-        mockMvc.perform(post("/training-diary/auth/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\n" +
-                                 "  \"email\": \"test@example.com\",\n" +
-                                 "  \"password\": \"psw\"\n" +
-                                 "}"))
-                .andExpect(status().isOk());
-    }
+        @ParameterizedTest
+        @CsvFileSource(resources = {"/csv/registrationNotValid.csv"}, delimiterString = ";", numLinesToSkip = 1)
+        @DisplayName("Должен возвращать ошибки валидации при регистрации нового пользователя")
+        void shouldReturnValidationErrorsOnRegistration(String email,
+                                                        String password,
+                                                        String roleStr) throws Exception {
+            RegistrationDto registrationDto = new RegistrationDto(email, password, Role.valueOf(roleStr));
 
-    @Test
-    @DisplayName("Должен возвращать ошибки валидации при авторизации пользователя")
-    void shouldReturnValidationErrorsOnAuthorization() throws Exception {
-        when(generatorResponseMessage.generateErrorMessage(any())).thenReturn(Collections.emptyList());
+            mockMvc.perform(post("/training-diary/auth/registration")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(new ObjectMapper().writeValueAsString(registrationDto)))
+                    .andExpect(status().isBadRequest());
 
-        mockMvc.perform(post("/training-diary/auth/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\n" +
-                                 "  \"email\": \"test@example.com\",\n" +
-                                 "}"))
-                .andExpect(status().isBadRequest());
-    }
+            verify(userService, never()).registerUser(registrationDto);
+        }
 
-    @Test
-    @DisplayName("Должен успешно продлить срок службы токена.")
-    void shouldSuccessfullyExtendTheLifeOfTheToken() throws Exception {
-        when(userService.updateToken(any())).thenReturn(new JwtResponse("login", "token", "token"));
+        @Test
+        @DisplayName("Должен возвращать ошибки валидации при продлении срока службы токена.")
+        void shouldSuccessfullyExtendTheLifeOfTheToken() throws Exception {
+            RefreshTokenDto tokenDto = new RefreshTokenDto("");
 
-        mockMvc.perform(post("/training-diary/auth/refresh-token")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\n" +
-                                 "  \"refreshToken\": \"token\",\n" +
-                                 "}"))
-                .andExpect(status().isBadRequest());
+            mockMvc.perform(post("/training-diary/auth/refresh-token")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(new ObjectMapper().writeValueAsString(tokenDto)))
+                    .andExpect(status().isBadRequest());
+
+            verify(userService, never()).updateToken(anyString());
+        }
     }
 }
-

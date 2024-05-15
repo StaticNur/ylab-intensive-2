@@ -1,0 +1,5 @@
+spring:
+  port: 8090
+  datasource:
+    driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
+    url: jdbc:tc:postgresql:15-alpine:///training-diary-fake

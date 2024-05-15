@@ -2,27 +2,25 @@ package com.ylab.intensive.repository.impl;
 
 import com.ylab.intensive.model.enums.Role;
 import com.ylab.intensive.repository.RoleDao;
-import com.ylab.intensive.repository.container.PostgresTestContainer;
-import com.ylab.intensive.repository.container.TestConfigurationEnvironment;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import com.ylab.intensive.repository.config.TestRepositories;
+import com.ylab.intensive.tag.IntegrationTest;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.data.jdbc.DataJdbcTest;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.test.context.ContextConfiguration;
 
-import static org.assertj.core.api.Assertions.assertThat;
+@DataJdbcTest
+@IntegrationTest
+@ContextConfiguration(classes = TestRepositories.class)
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@DisplayName("Тесты для реализации RoleDao")
+class RoleDaoImplTest {
 
-@DisplayName("Тесты для реализации RoleDaoImpl")
-public class RoleDaoImplTest extends TestConfigurationEnvironment {
-
-    private static RoleDao roleDao;
-
-    @BeforeAll
-    static void setUp() {
-        postgreSQLContainer = PostgresTestContainer.getInstance();
-        JdbcTemplate jdbcTemplate = PostgresTestContainer.getJdbcTemplate();
-        roleDao = new RoleDaoImpl(jdbcTemplate);
-    }
+    @Autowired
+    private RoleDao roleDao;
 
     @Test
     @DisplayName("Должен находить идентификатор роли по имени")
@@ -32,10 +30,6 @@ public class RoleDaoImplTest extends TestConfigurationEnvironment {
 
         Integer actualRoleId = roleDao.findByName(role);
 
-        assertThat(actualRoleId).isEqualTo(expectedRoleId);
-    }
-    @AfterAll
-    static void tearDown() {
-        postgreSQLContainer.stop();
+        Assertions.assertThat(actualRoleId).isEqualTo(expectedRoleId);
     }
 }
