@@ -3,6 +3,7 @@ package com.ylab.intensive.util.converter;
 import com.ylab.intensive.exception.InvalidInputException;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
 import java.util.function.Function;
 
 @Component
@@ -23,5 +24,13 @@ public class Converter {
         } catch (Exception e) {
             throw new InvalidInputException(errorMessage);
         }
+    }
+
+    public static String convertIso8601ToHMS(String iso8601Duration) {
+        Duration duration = Duration.parse(iso8601Duration);
+        long hours = duration.toHours();
+        long minutes = duration.toMinutesPart();
+        long seconds = duration.toSecondsPart();
+        return String.format("%02d:%02d:%02d", hours, minutes, seconds);
     }
 }

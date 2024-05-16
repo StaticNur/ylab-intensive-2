@@ -1,5 +1,6 @@
 package com.ylab.intensive.model.dto;
 
+import com.ylab.intensive.util.converter.Converter;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -8,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.Duration;
 import java.util.Map;
 import java.util.UUID;
 
@@ -57,4 +59,8 @@ public class WorkoutDto {
      * Additional information about the workout
      */
     private Map<String, String> workoutInfo;
+
+    public void setDuration(String durationStr){
+        this.duration = Converter.convertIso8601ToHMS(durationStr);
+    }
 }

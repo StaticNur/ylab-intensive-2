@@ -63,7 +63,7 @@ public class UserController {
     @GetMapping("/users/workouts")
     @PreAuthorize("hasAuthority('ADMIN')")
     @Operation(summary = "View workouts of all users", description = "Endpoint to view workouts of all users.")
-    @Auditable(action = "Пользователь просмотрел тренировки всех пользователей.")
+    @Auditable(action = "Администратор просмотрел тренировки всех пользователей.")
     public ResponseEntity<?> viewTrainingsForAllUsers() {
         List<User> userList = userService.getAllUser();
         List<User> userWithWorkouts = workoutService.getAllUsersWorkouts(userList);
