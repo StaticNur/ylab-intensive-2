@@ -1,6 +1,7 @@
 package com.ylab.intensive.model.dto;
 
 import com.ylab.intensive.util.validation.annotation.NullablePattern;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
@@ -25,12 +26,14 @@ public class EditWorkout {
     /**
      * The type of the workout.
      */
+    @Schema(example = "running")
     @NullablePattern(regexp = "^(?!\\d+$).+", message = "Не должен содержать одни цифры!")
     private String type;
 
     /**
      * The duration of the workout.
      */
+    @Schema(example = "1:25:0")
     @Pattern(regexp = "^([0-9]+):([0-5]?[0-9]):([0-5]?[0-9])$",
             message = "Формат должен быть H:M:S где часы это любое натуральное число, а минуты и секунды - значения от 0 до 59")
     private String duration;

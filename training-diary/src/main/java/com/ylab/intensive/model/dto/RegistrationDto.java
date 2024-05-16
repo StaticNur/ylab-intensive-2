@@ -2,6 +2,7 @@ package com.ylab.intensive.model.dto;
 
 import com.ylab.intensive.model.enums.Role;
 import com.ylab.intensive.util.validation.annotation.ValidRole;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -24,6 +25,7 @@ public class RegistrationDto {
     /**
      * The email address of the user.
      */
+    @Schema(example = "string@email.ru")
     @Pattern(regexp = "^(?!\\d+$).+", message = "Не должен содержать одни цифры!")
     @NotNull(message = "Обязательное поля!")
     @NotBlank(message = "Не должен быть пустым!")

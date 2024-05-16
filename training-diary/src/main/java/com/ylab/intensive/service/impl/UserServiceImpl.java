@@ -72,7 +72,7 @@ public class UserServiceImpl implements UserService, UserFinder {
     @Override
     @Timed
     @Loggable
-    @CacheEvict(value = "AllUser")
+    @CacheEvict(value = "AllUser", allEntries = true)
     @Transactional
     public User registerUser(RegistrationDto registrationDto) {
         userDao.findByEmail(registrationDto.getEmail())
@@ -105,7 +105,7 @@ public class UserServiceImpl implements UserService, UserFinder {
     @Override
     @Loggable
     @Timed
-    @CacheEvict(value = "AllUser")
+    @CacheEvict(value = "AllUser", allEntries = true)
     @Transactional
     public User changeUserPermissions(String uuidStr, ChangeUserRightsDto changeUserRightsDto) {
         Role role = changeUserRightsDto.newRole();

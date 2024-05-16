@@ -72,13 +72,14 @@ public class WorkoutServiceImpl implements WorkoutService {
                 .findFirst();
 
         if (typeOptional.isPresent()) {
+            WorkoutType typeInput = typeOptional.get();
             LocalDate date = convertToDate(workoutDto.getDate());
             Optional<Workout> byDate = workoutDao.findByDate(date, userId);
-            if (byDate.isPresent()) {
-                throw new WorkoutException("Тренировка типа " + typeOptional.get().getType()
+            if (byDate.isPresent() && typeInput.getType().equals(byDate.get().getType())) {
+                throw new WorkoutException("Тренировка типа " + typeInput.getType()
                                            + " в " + date + " уже была добавлена! Ее теперь можно только редактировать.");
             }
-            Workout workout = generateNewWorkout(workoutDto, userId, typeOptional.get(), date);
+            Workout workout = generateNewWorkout(workoutDto, userId, typeInput, date);
 
             Workout savedWorkout = workoutDao.saveWorkout(workout);
 
