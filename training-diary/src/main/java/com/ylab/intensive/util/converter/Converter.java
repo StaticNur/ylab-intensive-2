@@ -4,6 +4,7 @@ import com.ylab.intensive.exception.InvalidInputException;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
+import java.time.format.DateTimeParseException;
 import java.util.function.Function;
 
 @Component
@@ -27,10 +28,14 @@ public class Converter {
     }
 
     public static String convertIso8601ToHMS(String iso8601Duration) {
-        Duration duration = Duration.parse(iso8601Duration);
-        long hours = duration.toHours();
-        long minutes = duration.toMinutesPart();
-        long seconds = duration.toSecondsPart();
-        return String.format("%02d:%02d:%02d", hours, minutes, seconds);
+        try {
+            Duration duration = Duration.parse(iso8601Duration);
+            long hours = duration.toHours();
+            long minutes = duration.toMinutesPart();
+            long seconds = duration.toSecondsPart();
+            return String.format("%02d:%02d:%02d", hours, minutes, seconds);
+        }catch (DateTimeParseException e){
+            return iso8601Duration;
+        }
     }
 }

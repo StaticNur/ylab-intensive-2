@@ -6,6 +6,7 @@ import com.ylab.intensive.model.dto.WorkoutTypeDto;
 import com.ylab.intensive.service.WorkoutService;
 import com.ylab.intensive.service.security.JwtTokenService;
 import com.ylab.intensive.tag.IntegrationTest;
+import com.ylab.intensive.util.MetricService;
 import com.ylab.intensive.util.validation.GeneratorResponseMessage;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -46,6 +47,9 @@ class WorkoutTypeControllerTest {
 
     @MockBean
     private Authentication authentication;
+
+    @MockBean
+    private MetricService metricService;
 
     @MockBean
     private JwtTokenService jwtTokenService;

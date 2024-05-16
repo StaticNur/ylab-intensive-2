@@ -7,6 +7,7 @@ import com.ylab.intensive.service.UserService;
 import com.ylab.intensive.service.WorkoutService;
 import com.ylab.intensive.service.security.JwtTokenService;
 import com.ylab.intensive.tag.IntegrationTest;
+import com.ylab.intensive.util.MetricService;
 import com.ylab.intensive.util.validation.GeneratorResponseMessage;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +45,9 @@ class UserControllerTest {
 
     @MockBean
     private UserMapper userMapper;
+
+    @MockBean
+    private MetricService metricService;
 
     @MockBean
     private JwtTokenService jwtTokenService;

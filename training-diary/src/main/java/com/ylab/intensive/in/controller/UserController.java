@@ -6,6 +6,7 @@ import com.ylab.intensive.model.dto.*;
 import com.ylab.intensive.model.entity.User;
 import com.ylab.intensive.service.UserService;
 import com.ylab.intensive.service.WorkoutService;
+import com.ylab.intensive.util.MetricService;
 import com.ylab.intensive.util.validation.GeneratorResponseMessage;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -56,6 +57,11 @@ public class UserController {
     private final UserMapper userMapper;
 
     /**
+     * The MetricService instance used for managing and tracking metrics related to greetings.
+     */
+    private final MetricService metricService;
+
+    /**
      * Retrieves workouts for all users.
      *
      * @return ResponseEntity containing a list of UserDto objects with associated workouts
@@ -67,6 +73,7 @@ public class UserController {
     public ResponseEntity<?> viewTrainingsForAllUsers() {
         List<User> userList = userService.getAllUser();
         List<User> userWithWorkouts = workoutService.getAllUsersWorkouts(userList);
+        metricService.incrementGreetingCount();
 
         return ResponseEntity.ok(userWithWorkouts.stream()
                 .map(userMapper::toDto)
@@ -93,6 +100,7 @@ public class UserController {
             return ResponseEntity.badRequest().body(customFieldErrors);
         }
         User user = userService.changeUserPermissions(uuid, changeUserRightsDto);
+        metricService.incrementGreetingCount(user.getEmail());
 
         return ResponseEntity.ok(new SuccessResponse("Права доступа успешно изменена! " +
                                                      "Теперь для данного пользователя " + user.getEmail()
@@ -113,6 +121,7 @@ public class UserController {
                                               @RequestParam(value = "count", defaultValue = "50") int count) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         AuditDto audit = userService.getAudit(authentication.getName(), new Pageable(page, count));
+        metricService.incrementGreetingCount(authentication.getName());
         return ResponseEntity.ok(audit);
     }
 }

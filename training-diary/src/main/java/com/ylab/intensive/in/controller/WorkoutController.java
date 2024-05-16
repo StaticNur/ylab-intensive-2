@@ -4,6 +4,7 @@ import com.ylab.intensive.mapper.WorkoutMapper;
 import com.ylab.intensive.model.dto.*;
 import com.ylab.intensive.model.entity.Workout;
 import com.ylab.intensive.service.WorkoutService;
+import com.ylab.intensive.util.MetricService;
 import com.ylab.intensive.util.validation.GeneratorResponseMessage;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -48,6 +49,11 @@ public class WorkoutController {
     private final GeneratorResponseMessage generatorResponseMessage;
 
     /**
+     * The MetricService instance used for managing and tracking metrics related to greetings.
+     */
+    private final MetricService metricService;
+
+    /**
      * Retrieves training statistics (number of calories burned over time).
      *
      * @param begin Start date for the statistics (default: "1970-01-01")
@@ -62,6 +68,7 @@ public class WorkoutController {
                                                         @RequestParam(value = "end", defaultValue = "2030-01-01") String end) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         StatisticsDto statistics = workoutService.getWorkoutStatistics(authentication.getName(), begin, end);
+        metricService.incrementGreetingCount(authentication.getName());
         return ResponseEntity.ok(statistics);
     }
 
@@ -86,6 +93,7 @@ public class WorkoutController {
         }
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Workout workout = workoutService.addWorkoutInfo(authentication.getName(), uuid, workoutInfoDto);
+        metricService.incrementGreetingCount(authentication.getName());
         return ResponseEntity.status(HttpStatus.CREATED).body(workoutMapper.toDto(workout));
     }
 
@@ -100,6 +108,7 @@ public class WorkoutController {
     public ResponseEntity<List<WorkoutDto>> viewWorkouts() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         List<Workout> workouts = workoutService.getAllWorkoutsByUser(authentication.getName());
+        metricService.incrementGreetingCount(authentication.getName());
         return ResponseEntity.ok(workouts.stream().map(workoutMapper::toDto).toList());
     }
 
@@ -119,8 +128,8 @@ public class WorkoutController {
             return ResponseEntity.badRequest().body(customFieldErrors);
         }
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
         WorkoutDto workoutDtoSaved = workoutService.addWorkout(authentication.getName(), workoutDto);
+        metricService.incrementGreetingCount(authentication.getName());
         return ResponseEntity.status(HttpStatus.CREATED).body(workoutDtoSaved);
     }
 
@@ -144,6 +153,7 @@ public class WorkoutController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         Workout workout = workoutService.updateWorkout(authentication.getName(), uuid, editWorkout);
+        metricService.incrementGreetingCount(authentication.getName());
         return ResponseEntity.ok(workoutMapper.toDto(workout));
     }
 
@@ -159,6 +169,7 @@ public class WorkoutController {
     public ResponseEntity<SuccessResponse> deleteWorkouts(@PathVariable("uuid") String uuid) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         workoutService.deleteWorkout(authentication.getName(), uuid);
+        metricService.incrementGreetingCount(authentication.getName());
         return ResponseEntity.ok(new SuccessResponse("Данные успешно удалены!"));
     }
 }

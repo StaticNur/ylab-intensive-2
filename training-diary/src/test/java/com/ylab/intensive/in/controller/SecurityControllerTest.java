@@ -3,10 +3,12 @@ package com.ylab.intensive.in.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ylab.intensive.mapper.UserMapper;
 import com.ylab.intensive.model.dto.*;
+import com.ylab.intensive.model.entity.User;
 import com.ylab.intensive.model.enums.Role;
 import com.ylab.intensive.service.UserService;
 import com.ylab.intensive.service.security.JwtTokenService;
 import com.ylab.intensive.tag.IntegrationTest;
+import com.ylab.intensive.util.MetricService;
 import com.ylab.intensive.util.validation.GeneratorResponseMessage;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -21,8 +23,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -47,6 +48,9 @@ class SecurityControllerTest {
     private UserMapper userMapper;
 
     @MockBean
+    private MetricService metricService;
+
+    @MockBean
     private GeneratorResponseMessage generatorResponseMessage;
 
     @Nested
@@ -55,7 +59,10 @@ class SecurityControllerTest {
         @Test
         @DisplayName("Должен успешно зарегистрировать нового пользователя")
         void shouldRegisterNewUser() throws Exception {
-            RegistrationDto registrationDto = new RegistrationDto("tes@example.com", "psw", Role.ADMIN);
+            RegistrationDto registrationDto = new RegistrationDto("acom", "psw1", Role.ADMIN);
+            User user = new User();
+            user.setEmail("acom");
+            when(userService.registerUser(registrationDto)).thenReturn(user);
 
             mockMvc.perform(post("/training-diary/auth/registration")
                             .contentType(MediaType.APPLICATION_JSON)
@@ -66,7 +73,9 @@ class SecurityControllerTest {
         @Test
         @DisplayName("Должен успешно авторизовать пользователя")
         void shouldAuthorizeUser() throws Exception {
-            LoginDto loginDto = new LoginDto("test@example.com", "psw");
+            LoginDto loginDto = new LoginDto("token", "token");
+            JwtResponse jwtResponse = new JwtResponse("token","","");
+            when(userService.login(loginDto)).thenReturn(jwtResponse);
 
             mockMvc.perform(post("/training-diary/auth/login")
                             .contentType(MediaType.APPLICATION_JSON)

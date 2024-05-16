@@ -41,10 +41,9 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(c->c.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(c->c
-                        .requestMatchers("/v3/**",
-                                "/swagger-ui/**").permitAll()
-                        .requestMatchers("/training-diary/auth/**").permitAll()
-                        .anyRequest().authenticated())
+                                .requestMatchers("/training-diary/auth/**").permitAll()
+                                .requestMatchers("/training-diary/**").authenticated()
+                                .anyRequest().permitAll())
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }

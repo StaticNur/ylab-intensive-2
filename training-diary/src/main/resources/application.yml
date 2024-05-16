@@ -16,6 +16,23 @@ spring:
     access: 3600000
     refresh: 2592000000
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include:
+          - health
+          - prometheus
+          - info
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    distribution:
+      percentiles-histogram:
+        "[http.server.requests]": true
+    tags:
+      application: training-diary
 audit:
   aspect:
     enabled: true

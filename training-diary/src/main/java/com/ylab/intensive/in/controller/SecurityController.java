@@ -4,6 +4,7 @@ import com.ylab.intensive.mapper.UserMapper;
 import com.ylab.intensive.model.dto.*;
 import com.ylab.intensive.model.entity.User;
 import com.ylab.intensive.service.UserService;
+import com.ylab.intensive.util.MetricService;
 import com.ylab.intensive.util.validation.GeneratorResponseMessage;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -49,6 +50,11 @@ public class SecurityController {
     private final UserMapper userMapper;
 
     /**
+     * The MetricService instance used for managing and tracking metrics related to greetings.
+     */
+    private final MetricService metricService;
+
+    /**
      * Registers a new user.
      *
      * @param registrationDto The SecurityRequest object containing user registration information.
@@ -71,6 +77,7 @@ public class SecurityController {
             return ResponseEntity.badRequest().body(customFieldErrors);
         }
         User user = userService.registerUser(registrationDto);
+        metricService.incrementGreetingCount(user.getEmail());
         return ResponseEntity.status(HttpStatus.CREATED).body(userMapper.toDto(user));
     }
 
@@ -96,6 +103,7 @@ public class SecurityController {
             return ResponseEntity.badRequest().body(customFieldErrors);
         }
         JwtResponse response = userService.login(loginDto);
+        metricService.incrementGreetingCount(response.login());
         return ResponseEntity.ok(response);
     }
 
@@ -122,6 +130,7 @@ public class SecurityController {
             return ResponseEntity.badRequest().body(customFieldErrors);
         }
         JwtResponse response = userService.updateToken(refreshTokenDto.refreshToken().trim());
+        metricService.incrementGreetingCount(response.login());
         return ResponseEntity.ok(response);
     }
 }

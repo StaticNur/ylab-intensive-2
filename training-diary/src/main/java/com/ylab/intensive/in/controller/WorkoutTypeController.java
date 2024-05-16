@@ -4,6 +4,7 @@ import com.ylab.intensive.mapper.WorkoutTypeMapper;
 import com.ylab.intensive.model.dto.*;
 import com.ylab.intensive.model.entity.WorkoutType;
 import com.ylab.intensive.service.WorkoutService;
+import com.ylab.intensive.util.MetricService;
 import com.ylab.intensive.util.validation.GeneratorResponseMessage;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.Operation;
@@ -49,6 +50,11 @@ public class WorkoutTypeController {
     private final WorkoutTypeMapper workoutTypeMapper;
 
     /**
+     * The MetricService instance used for managing and tracking metrics related to greetings.
+     */
+    private final MetricService metricService;
+
+    /**
      * Retrieves workout types for the authenticated user.
      *
      * @return ResponseEntity containing a list of WorkoutTypeDto objects representing the user's workout types
@@ -59,6 +65,7 @@ public class WorkoutTypeController {
     public ResponseEntity<List<WorkoutTypeDto>> viewTypes() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         List<WorkoutType> workoutTypes = workoutService.getAllType(authentication.getName());
+        metricService.incrementGreetingCount(authentication.getName());
         return ResponseEntity.ok(workoutTypes.stream()
                 .map(workoutTypeMapper::toDto)
                 .toList());
@@ -82,6 +89,7 @@ public class WorkoutTypeController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         WorkoutType workoutType = workoutService.saveWorkoutType(authentication.getName(), workoutTypeDto.getType());
+        metricService.incrementGreetingCount(authentication.getName());
         return ResponseEntity.status(HttpStatus.CREATED).body(workoutTypeMapper.toDto(workoutType));
     }
 }
