@@ -2,7 +2,9 @@ package com.ylab.intensive.service.impl;
 
 import com.ylab.intensive.model.entity.WorkoutInfo;
 import com.ylab.intensive.repository.WorkoutInfoDao;
+import com.ylab.intensive.tag.UnitTest;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -11,14 +13,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
-import java.util.HashMap;
-import java.util.Optional;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
+@UnitTest
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 @DisplayName("Workout Info Service Tests")
@@ -42,40 +42,78 @@ public class WorkoutInfoServiceImplTest {
         verify(workoutInfoDao).saveWorkoutInfo(workoutId, title, info);
     }
 
-    @Test
-    @DisplayName("Update workout info - success")
-    void testUpdateWorkoutInfo_Success() {
-        int workoutId = 1;
-        String title = "Title";
-        String info = "Updated Info";
+    @Nested
+    @DisplayName("Positive testing")
+    class Positive {
+        @Test
+        @DisplayName("Update workout info - success")
+        void testUpdateWorkoutInfo_Success() {
+            int workoutId = 1;
+            String title = "Title";
+            String info = "Updated Info";
 
-        workoutInfoService.updateWorkoutInfo(workoutId, title, info);
+            workoutInfoService.updateWorkoutInfo(workoutId, title, info);
 
-        verify(workoutInfoDao).updateWorkoutInfo(workoutId, title, info);
+            verify(workoutInfoDao).updateWorkoutInfo(workoutId, title, info);
+        }
+
+        @Test
+        @DisplayName("Get info by workout ID - success")
+        void testGetInfoByWorkoutId_Success() {
+            int workoutId = 1;
+            WorkoutInfo expectedInfo = new WorkoutInfo(10, 2, new HashMap<>());
+            expectedInfo.getWorkoutInfo().put("Title", "Info");
+
+            when(workoutInfoDao.findByWorkoutId(workoutId)).thenReturn(Optional.of(expectedInfo));
+
+            assertThat(workoutInfoService.getInfoByWorkoutId(workoutId))
+                    .isPresent()
+                    .hasValueSatisfying(actualInfo -> assertThat(actualInfo).isEqualTo(expectedInfo));
+        }
+
+        @Test
+        @DisplayName("Delete workout info - success")
+        void testDelete_Success() {
+            int workoutId = 1;
+
+            workoutInfoService.delete(workoutId);
+
+            verify(workoutInfoDao).delete(workoutId);
+        }
     }
 
-    @Test
-    @DisplayName("Get info by workout ID - success")
-    void testGetInfoByWorkoutId_Success() {
-        int workoutId = 1;
-        WorkoutInfo expectedInfo = new WorkoutInfo(10, 2, new HashMap<>());
-        expectedInfo.getWorkoutInfo().put("Title", "Info");
+    @Nested
+    @DisplayName("Negative testing")
+    class Negative {
+        @Test
+        @DisplayName("Update workout info - failure")
+        void testUpdateWorkoutInfo_Failure() {
+            int workoutId = 2;
+            String title = "newTitle";
+            String info = "Updated Info";
 
-        when(workoutInfoDao.findByWorkoutId(workoutId)).thenReturn(Optional.of(expectedInfo));
+            doNothing().when(workoutInfoDao).updateWorkoutInfo(workoutId, title, info);
+            when(workoutInfoDao.findByWorkoutId(workoutId))
+                    .thenReturn(Optional.of(new WorkoutInfo(1, 1, new HashMap<>())));
 
-        Optional<WorkoutInfo> result = workoutInfoService.getInfoByWorkoutId(workoutId);
+            workoutInfoService.updateWorkoutInfo(workoutId, title, info);
 
-        assertTrue(result.isPresent());
-        assertThat(result.get()).isEqualTo(expectedInfo);
-    }
+            assertThat(workoutInfoService.getInfoByWorkoutId(workoutId))
+                    .isPresent()
+                    .hasValueSatisfying(found -> {
+                        assertThat(found.getWorkoutInfo()).doesNotContainKey(title);
+                    });
+        }
 
-    @Test
-    @DisplayName("Delete workout info - success")
-    void testDelete_Success() {
-        int workoutId = 1;
+        @Test
+        @DisplayName("Get info by workout ID - not found")
+        void testGetInfoByWorkoutId_NotFound() {
+            int workoutId = -1;
 
-        workoutInfoService.delete(workoutId);
+            when(workoutInfoDao.findByWorkoutId(workoutId)).thenReturn(Optional.empty());
 
-        verify(workoutInfoDao).delete(workoutId);
+            assertThat(workoutInfoService.getInfoByWorkoutId(workoutId))
+                    .isEmpty();
+        }
     }
 }

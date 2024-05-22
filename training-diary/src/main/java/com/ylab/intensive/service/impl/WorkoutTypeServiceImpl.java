@@ -1,14 +1,16 @@
 package com.ylab.intensive.service.impl;
 
-import com.ylab.intensive.aspects.annotation.Loggable;
-import com.ylab.intensive.aspects.annotation.Timed;
 import com.ylab.intensive.repository.WorkoutTypeDao;
 import com.ylab.intensive.exception.NotFoundException;
 import com.ylab.intensive.exception.WorkoutTypeException;
 import com.ylab.intensive.model.entity.WorkoutType;
 import com.ylab.intensive.service.WorkoutTypeService;
+import io.ylab.loggingspringbootstarter.annotation.Loggable;
+import io.ylab.loggingspringbootstarter.annotation.Timed;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,6 +34,7 @@ public class WorkoutTypeServiceImpl implements WorkoutTypeService {
     @Loggable
     @Timed
     @Transactional
+    @CacheEvict(value = "findWorkoutTypesByUserId", key = "#userId")
     public WorkoutType saveType(int userId, String typeName) {
         Optional<WorkoutType> workoutType = workoutTypeDao.findTypeByUserId(userId, typeName);
         if (workoutType.isPresent()) {
@@ -45,6 +48,7 @@ public class WorkoutTypeServiceImpl implements WorkoutTypeService {
     @Override
     @Loggable
     @Timed
+    @Cacheable(value = "findWorkoutTypesByUserId", key = "#userId")
     public List<WorkoutType> findByUserId(int userId) {
         return workoutTypeDao.findByUserId(userId);
     }
@@ -53,6 +57,7 @@ public class WorkoutTypeServiceImpl implements WorkoutTypeService {
     @Loggable
     @Timed
     @Transactional
+    @CacheEvict(value = "findWorkoutTypesByUserId", key = "#userId")
     public void updateType(int userId, String oldType, String newType) {
         workoutTypeDao.updateType(userId, oldType, newType);
     }

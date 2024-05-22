@@ -1,7 +1,5 @@
 package com.ylab.intensive.service.impl;
 
-import com.ylab.intensive.aspects.annotation.Loggable;
-import com.ylab.intensive.aspects.annotation.Timed;
 import com.ylab.intensive.repository.WorkoutDao;
 import com.ylab.intensive.exception.*;
 import com.ylab.intensive.model.dto.*;
@@ -11,14 +9,19 @@ import com.ylab.intensive.model.entity.WorkoutInfo;
 import com.ylab.intensive.model.entity.WorkoutType;
 import com.ylab.intensive.service.*;
 import com.ylab.intensive.util.converter.Converter;
+import io.ylab.loggingspringbootstarter.annotation.Loggable;
+import io.ylab.loggingspringbootstarter.annotation.Timed;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Implementation of the WorkoutService interface providing methods for managing workout-related operations.
@@ -58,6 +61,7 @@ public class WorkoutServiceImpl implements WorkoutService {
     @Override
     @Loggable
     @Timed
+    @CacheEvict(value = "viewHistoryWorkouts", key = "#email")
     @Transactional
     public WorkoutDto addWorkout(String email, WorkoutDto workoutDto) {
         int userId = getAuthorizedUserId(email);
@@ -68,13 +72,14 @@ public class WorkoutServiceImpl implements WorkoutService {
                 .findFirst();
 
         if (typeOptional.isPresent()) {
+            WorkoutType typeInput = typeOptional.get();
             LocalDate date = convertToDate(workoutDto.getDate());
             Optional<Workout> byDate = workoutDao.findByDate(date, userId);
-            if (byDate.isPresent()) {
-                throw new WorkoutException("Тренировка типа " + typeOptional.get().getType()
+            if (byDate.isPresent() && typeInput.getType().equals(byDate.get().getType())) {
+                throw new WorkoutException("Тренировка типа " + typeInput.getType()
                                            + " в " + date + " уже была добавлена! Ее теперь можно только редактировать.");
             }
-            Workout workout = generateNewWorkout(workoutDto, userId, typeOptional.get(), date);
+            Workout workout = generateNewWorkout(workoutDto, userId, typeInput, date);
 
             Workout savedWorkout = workoutDao.saveWorkout(workout);
 
@@ -90,6 +95,7 @@ public class WorkoutServiceImpl implements WorkoutService {
     @Override
     @Loggable
     @Timed
+    @CacheEvict(value = "viewHistoryWorkouts", key = "#email")
     @Transactional
     public Workout addWorkoutInfo(String email, String uuidStr, WorkoutInfoDto workoutInfoDto) {
         int userId = getAuthorizedUserId(email);
@@ -118,6 +124,7 @@ public class WorkoutServiceImpl implements WorkoutService {
     @Override
     @Loggable
     @Timed
+    @Cacheable(value = "viewHistoryWorkouts", key = "#login")
     public List<Workout> getAllWorkoutsByUser(String login) {
         int userId = getAuthorizedUserId(login);
         List<Workout> workoutList = workoutDao.findByUserId(userId);
@@ -132,6 +139,7 @@ public class WorkoutServiceImpl implements WorkoutService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "viewHistoryWorkouts", key = "#email")
     public Workout updateWorkout(String email, String uuidStr, EditWorkout editWorkout) {
         UUID uuid = convertToUUID(uuidStr);
         Workout workout = getWorkoutByUUID(uuid);
@@ -155,8 +163,9 @@ public class WorkoutServiceImpl implements WorkoutService {
             workout.setType(editWorkout.getType());
         }
         if (editWorkout.getDuration() != null) {
-            updateDuration(workout.getId(), editWorkout.getDuration());
-            workout.setDuration(editWorkout.getDuration());
+            Duration duration = convertToDuration(editWorkout.getDuration());
+            updateDuration(workout.getId(), duration);
+            workout.setDuration(duration);
         }
         return workout;
     }
@@ -209,6 +218,7 @@ public class WorkoutServiceImpl implements WorkoutService {
     @Override
     @Loggable
     @Timed
+    @CacheEvict(value = "viewHistoryWorkouts", key = "#email")
     @Transactional
     public void deleteWorkout(String email, String uuidStr) {
         UUID uuid = convertToUUID(uuidStr);
@@ -238,24 +248,19 @@ public class WorkoutServiceImpl implements WorkoutService {
     @Loggable
     @Timed
     public List<User> getAllUsersWorkouts(List<User> userList) {
-        for (User user : userList) {
-            List<Workout> workoutList = workoutDao.findByUserId(user.getId());
-            for (Workout workout : workoutList) {
-                workout.setType(workout.getType());
-
-                Optional<WorkoutInfo> workoutInfo = workoutInfoService.getInfoByWorkoutId(workout.getId());
-                workout.setWorkoutInfo(workoutInfo
-                        .map(WorkoutInfo::getWorkoutInfo)
-                        .orElseGet(Collections::emptyMap));
-            }
-            user.setWorkouts(workoutList);
-        }
-        return userList;
+        return userList.stream()
+                .map(user -> {
+                    List<Workout> workoutList = getAllWorkoutsByUser(user.getEmail());
+                    user.setWorkouts(workoutList);
+                    return user;
+                })
+                .collect(Collectors.toList());
     }
 
     @Override
     @Loggable
     @Timed
+    @Cacheable(value = "findWorkoutTypesByUserId", key = "#login")
     public List<WorkoutType> getAllType(String login) {
         int userId = getAuthorizedUserId(login);
         return workoutTypeService.findByUserId(userId);
@@ -264,6 +269,7 @@ public class WorkoutServiceImpl implements WorkoutService {
     @Override
     @Loggable
     @Timed
+    @CacheEvict(value = "findWorkoutTypesByUserId", key = "#login")
     @Transactional
     public WorkoutType saveWorkoutType(String login, String typeName) {
         int userId = getAuthorizedUserId(login);
@@ -317,9 +323,18 @@ public class WorkoutServiceImpl implements WorkoutService {
         workout.setUserId(userId);
         workout.setType(type.getType());
         workout.setDate(date);
-        workout.setDuration(workoutDto.getDuration());
+        workout.setDuration(convertToDuration(workoutDto.getDuration()));
         workout.setCalorie(workoutDto.getCalorie());
         return workout;
+    }
+
+    private Duration convertToDuration(String durationStr) {
+        return converter.convert(durationStr, d ->{
+            String[] durationHMS = d.split(":");
+            return Duration.ofHours(Integer.parseInt(durationHMS[0]))
+                    .plusMinutes(Integer.parseInt(durationHMS[1]))
+                    .plusSeconds(Integer.parseInt(durationHMS[2]));
+        }, "Invalid Duration");
     }
 
     /**

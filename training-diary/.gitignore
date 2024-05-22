@@ -4,7 +4,8 @@ target/
 !**/src/test/**/target/
 
 ### IntelliJ IDEA ###
-logs/
+logs/info.log
+logs/logging-timing.log
 javadoc/
 .idea/
 .idea/modules.xml

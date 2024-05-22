@@ -72,7 +72,6 @@ public interface UserService {
      *
      * @param refreshToken The refresh token to use for updating the tokens.
      * @return The updated JWT response containing the new access and refresh tokens.
-     * @throws AccessDeniedException If the refresh token is invalid or expired.
      */
     JwtResponse updateToken(String refreshToken);
 }

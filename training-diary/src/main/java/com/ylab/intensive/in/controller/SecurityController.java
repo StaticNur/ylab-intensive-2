@@ -1,12 +1,19 @@
 package com.ylab.intensive.in.controller;
 
-import com.ylab.intensive.aspects.annotation.Auditable;
 import com.ylab.intensive.mapper.UserMapper;
 import com.ylab.intensive.model.dto.*;
 import com.ylab.intensive.model.entity.User;
 import com.ylab.intensive.service.UserService;
+import com.ylab.intensive.util.MetricService;
 import com.ylab.intensive.util.validation.GeneratorResponseMessage;
-import io.swagger.annotations.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.ylab.auditspringbootstarter.annotation.Auditable;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,14 +23,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.validation.Valid;
 import java.util.List;
 
 /**
  * Controller class for handling authentication operations.
  */
 @RestController
-@Api(tags = "Authorization and Registration")
+@Tag(name = "SecurityController", description = "Authorization and Registration")
 @RequestMapping("/training-diary/auth")
 @RequiredArgsConstructor
 public class SecurityController {
@@ -44,15 +50,25 @@ public class SecurityController {
     private final UserMapper userMapper;
 
     /**
+     * The MetricService instance used for managing and tracking metrics related to greetings.
+     */
+    private final MetricService metricService;
+
+    /**
      * Registers a new user.
      *
      * @param registrationDto The SecurityRequest object containing user registration information.
      * @return ResponseEntity containing the registered User object.
      */
     @PostMapping("/registration")
-    @ApiOperation(value = "User registration", response = UserDto.class)
-    @ApiResponse(code = 400, message = "Ошибка валидации. Подробности об ошибках содержатся в теле ответа.",
-            response = CustomFieldError.class, responseContainer = "List")
+    @Operation(summary = "User registration",
+            description = "Endpoint for user registration.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Success",
+                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserDto.class))),
+                    @ApiResponse(responseCode = "400", description = "Validation Error. Details about errors are in the response body.",
+                            content = @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = CustomFieldError.class))))
+            })
     @Auditable(action = "Спортсмен зарегистрировался в системе.")
     public ResponseEntity<?> register(@RequestBody @Valid RegistrationDto registrationDto,
                                       BindingResult bindingResult) {
@@ -61,6 +77,7 @@ public class SecurityController {
             return ResponseEntity.badRequest().body(customFieldErrors);
         }
         User user = userService.registerUser(registrationDto);
+        metricService.incrementGreetingCount(user.getEmail());
         return ResponseEntity.status(HttpStatus.CREATED).body(userMapper.toDto(user));
     }
 
@@ -71,9 +88,14 @@ public class SecurityController {
      * @return ResponseEntity containing the authorization token.
      */
     @PostMapping("/login")
-    @ApiOperation(value = "User authorization", response = JwtResponse.class)
-    @ApiResponse(code = 400, message = "Ошибка валидации. Подробности об ошибках содержатся в теле ответа.",
-            response = CustomFieldError.class, responseContainer = "List")
+    @Operation(summary = "User authorization",
+            description = "Endpoint for user authorization.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Success",
+                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = JwtResponse.class))),
+                    @ApiResponse(responseCode = "400", description = "Validation Error. Details about errors are in the response body.",
+                            content = @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = CustomFieldError.class))))
+            })
     @Auditable(action = "Спортсмен авторизовался в системе.")
     public ResponseEntity<?> authorize(@RequestBody @Valid LoginDto loginDto, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
@@ -81,6 +103,7 @@ public class SecurityController {
             return ResponseEntity.badRequest().body(customFieldErrors);
         }
         JwtResponse response = userService.login(loginDto);
+        metricService.incrementGreetingCount(response.login());
         return ResponseEntity.ok(response);
     }
 
@@ -91,9 +114,14 @@ public class SecurityController {
      * @return ResponseEntity containing the authorization token.
      */
     @PostMapping("/refresh-token")
-    @ApiOperation(value = "User refresh token", response = JwtResponse.class)
-    @ApiResponse(code = 400, message = "Ошибка валидации. Подробности об ошибках содержатся в теле ответа.",
-            response = CustomFieldError.class, responseContainer = "List")
+    @Operation(summary = "User refresh token",
+            description = "Endpoint to refresh user token.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Success",
+                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = JwtResponse.class))),
+                    @ApiResponse(responseCode = "400", description = "Validation Error. Details about errors are in the response body.",
+                            content = @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = CustomFieldError.class))))
+            })
     @Auditable(action = "Спортсмен продлевает срок службы токена.")
     public ResponseEntity<?> extendTheLifeOfTheToken(@RequestBody @Valid RefreshTokenDto refreshTokenDto,
                                                      BindingResult bindingResult) {
@@ -102,6 +130,7 @@ public class SecurityController {
             return ResponseEntity.badRequest().body(customFieldErrors);
         }
         JwtResponse response = userService.updateToken(refreshTokenDto.refreshToken().trim());
+        metricService.incrementGreetingCount(response.login());
         return ResponseEntity.ok(response);
     }
 }

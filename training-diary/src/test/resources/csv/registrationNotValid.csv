@@ -1,0 +1,10 @@
+;;
+12345;psw;ADMIN
+;psw;ADMIN
+"  ";psw;ADMIN
+email;"  ";USER
+email;;ADMIN
+;;ADMIN
+"  ";"  ";ADMIN
+12345;  ;ADMIN
+

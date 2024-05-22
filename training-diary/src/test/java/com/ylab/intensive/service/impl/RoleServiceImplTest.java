@@ -2,6 +2,7 @@ package com.ylab.intensive.service.impl;
 
 import com.ylab.intensive.model.enums.Role;
 import com.ylab.intensive.repository.RoleDao;
+import com.ylab.intensive.tag.UnitTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,6 +15,7 @@ import org.mockito.quality.Strictness;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
+@UnitTest
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 @DisplayName("Role Service Tests")
@@ -33,8 +35,7 @@ public class RoleServiceImplTest {
 
         when(roleDao.findByName(role)).thenReturn(expectedId);
 
-        int result = roleService.getIdByName(role);
-
-        assertThat(result).isEqualTo(expectedId);
+        assertThat(roleService.getIdByName(role))
+                .isEqualTo(expectedId);
     }
 }

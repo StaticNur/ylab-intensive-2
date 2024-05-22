@@ -5,6 +5,7 @@ import com.ylab.intensive.exception.NotFoundException;
 import com.ylab.intensive.model.enums.Role;
 import com.ylab.intensive.service.RoleService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 /**
@@ -19,6 +20,7 @@ public class RoleServiceImpl implements RoleService {
     private final RoleDao roleDao;
 
     @Override
+    @Cacheable(value = "roleId", key = "#role")
     public int getIdByName(Role role) {
         Integer id = roleDao.findByName(role);
         if (id == null) {

@@ -1,9 +1,8 @@
 package com.ylab.intensive.util.validation;
 
 import com.ylab.intensive.util.validation.annotation.NullablePattern;
-
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 
 /**
  * Validator implementation for the {@link NullablePattern} annotation.
